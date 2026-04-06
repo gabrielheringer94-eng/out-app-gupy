@@ -385,6 +385,25 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);fon
 }
 .ticker-sep{opacity:.4;margin:0 4px;}
 
+
+/* PIN MODAL */
+.pin-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);}
+.pin-modal{background:var(--bg2);border-radius:24px 24px 0 0;padding:28px 24px 40px;width:100%;max-width:420px;animation:slideUp .25s ease;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.pin-modal-header{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:24px;}
+.pin-modal-photo{width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid var(--accent-light);}
+.pin-modal-name{font-size:17px;font-weight:700;color:var(--text);}
+.pin-modal-sub{font-size:12px;color:var(--text2);}
+.pin-dots{display:flex;justify-content:center;gap:16px;margin-bottom:24px;}
+.pin-dot{width:18px;height:18px;border-radius:50%;background:var(--bg3);border:2px solid var(--border2);transition:all .15s;}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent);}
+.pin-dot.error{background:var(--red);border-color:var(--red);animation:shake .3s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.pin-key{padding:16px 8px;border-radius:var(--radius-sm);background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:22px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif;text-align:center;transition:all .1s;}
+.pin-key:active{background:var(--accent-light);transform:scale(.94);}
+.pin-key-del{font-size:16px;color:var(--text2);}
+.pin-error-msg{font-size:12px;color:var(--red);text-align:center;min-height:18px;margin-top:6px;}
 .collapsible-header{cursor:pointer;user-select:none;}
 .collapsible-header:active{opacity:.8;}
 .collapse-icon{transition:transform .2s ease;display:inline-block;}
@@ -733,6 +752,85 @@ const USERS=[
 ];
 let currentUser=null;
 
+
+// ─── PIN MODAL ────────────────────────────────────────────────
+let pinModalUser=null;
+let pinBuffer='';
+
+function showPINModal(user){
+  pinModalUser=user;
+  pinBuffer='';
+  const overlay=document.createElement('div');
+  overlay.className='pin-modal-overlay';
+  overlay.id='pin-overlay';
+  const photoEl=user.photo
+    ?`<img src="${user.photo}" class="pin-modal-photo">`
+    :`<div class="pin-modal-photo" style="background:${user.bg};color:${user.color};display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700">${user.av}</div>`;
+  overlay.innerHTML=`
+    <div class="pin-modal">
+      <div class="pin-modal-header">
+        ${photoEl}
+        <div class="pin-modal-name">${user.name.split(' ')[0]}</div>
+        <div class="pin-modal-sub">Digite seu código de acesso</div>
+      </div>
+      <div class="pin-dots" id="pin-dots">
+        <div class="pin-dot" id="pdot-0"></div>
+        <div class="pin-dot" id="pdot-1"></div>
+      </div>
+      <div class="pin-error-msg" id="pin-err"></div>
+      <div class="pin-grid">
+        ${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="pin-key" onclick="pinPress('${n}')">${n}</button>`).join('')}
+        <button class="pin-key" onclick="closePINModal()">✕</button>
+        <button class="pin-key" onclick="pinPress('0')">0</button>
+        <button class="pin-key pin-key-del" onclick="pinBack()">⌫</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function closePINModal(){
+  const o=document.getElementById('pin-overlay');
+  if(o) o.remove();
+  pinBuffer='';pinModalUser=null;
+}
+
+function pinPress(n){
+  if(pinBuffer.length>=2) return;
+  pinBuffer+=n;
+  updatePinDots();
+  if(pinBuffer.length===2) setTimeout(checkPIN,200);
+}
+
+function pinBack(){
+  if(!pinBuffer.length) return;
+  pinBuffer=pinBuffer.slice(0,-1);
+  updatePinDots();
+  document.getElementById('pin-err').textContent='';
+}
+
+function updatePinDots(){
+  [0,1].forEach(i=>{
+    const d=document.getElementById(`pdot-${i}`);
+    if(d){d.className='pin-dot'+(i<pinBuffer.length?' filled':'');}
+  });
+}
+
+function checkPIN(){
+  if(!pinModalUser) return;
+  if(pinBuffer===pinModalUser.pin){
+    closePINModal();
+    currentUser=pinModalUser;
+    doLogin();
+  } else {
+    [0,1].forEach(i=>{const d=document.getElementById(`pdot-${i}`);if(d)d.className='pin-dot error';});
+    document.getElementById('pin-err').textContent='Código incorreto. Tente novamente.';
+    pinBuffer='';
+    setTimeout(()=>{
+      [0,1].forEach(i=>{const d=document.getElementById(`pdot-${i}`);if(d)d.className='pin-dot';});
+    },600);
+  }
+}
+
 // ─── LOGIN ────────────────────────────────────────────────────
 function buildLogin(){
   // Dynamic greeting
@@ -772,7 +870,7 @@ function buildLogin(){
       </div>`;
     card.addEventListener('touchstart',()=>{ card.style.transform='scale(.96)'; card.style.borderColor='var(--accent)'; },{passive:true});
     card.addEventListener('touchend',()=>{ card.style.transform=''; card.style.borderColor=''; },{passive:true});
-    card.onclick=()=>{ currentUser=u; doLogin(); };
+    card.onclick=()=>{ showPINModal(u); };
     grid.appendChild(card);
   });
   content.appendChild(grid);
@@ -810,13 +908,14 @@ function setupApp(){
   }
   document.getElementById('app-name').textContent=u.name.split(' ')[0];
   document.getElementById('app-role').textContent=u.isGestor?'Líder · Pre Vendas':'BDR · Pre Vendas';
-  // Update timestamp chip
+  // Update timestamp chip — show last data update
   const chip=document.getElementById('last-update-chip');
   if(chip){
-    const now=new Date();
-    const day=now.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','');
-    const time=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    chip.textContent=`${day} · ${time}`;
+    const ts=DATA.ultimaAtualizacao?new Date(DATA.ultimaAtualizacao):new Date();
+    const day=ts.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','');
+    const time=ts.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    chip.textContent=`Atualizado: ${day} ${time}`;
+    chip.title='Última atualização dos dados';
   }
   buildTicker(u);
   if(u.isGestor) buildGestorApp();
@@ -1246,7 +1345,7 @@ function buildTimeGestor(pane){
   }
 
   pane.innerHTML=`
-    <div style="font-size:11px;color:var(--text2);margin-bottom:14px">W30 › 03 · Semana 1 de 4 · Meta: ${META} opps/BDR</div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:14px">${DATA.semana||'W30 › 03'} · Semana ${DATA.semAtual} de ${DATA.semTotal} · Meta: ${META} opps/BDR</div>
 
     <!-- FORECAST CENTRALIZADO -->
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
@@ -2014,7 +2113,11 @@ function buildHoje(pane, bdr){
 
     <!-- PRIORIDADES -->
     <div class="card" style="margin-bottom:10px">
-      <div class="card-title">🎯 Prioridades da semana</div>
+      <div class="collapsible-header" onclick="toggleCard('body-prio-${bdr.id}',this)" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">
+        <div class="card-title" style="margin-bottom:0">Prioridades da semana</div>
+        <span class="collapse-icon" style="font-size:16px;color:var(--text3)">▾</span>
+      </div>
+      <div id="body-prio-${bdr.id}" style="margin-top:14px">
       ${prioridades.map((p,i)=>`
         <div style="display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);${i===prioridades.length-1?'border-bottom:none':''}">
           <div style="width:36px;height:36px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">${p.icon}</div>
@@ -2023,6 +2126,7 @@ function buildHoje(pane, bdr){
             <div style="font-size:12px;color:var(--text2);line-height:1.5">${p.desc}</div>
           </div>
         </div>`).join('')}
+      </div>
     </div>
 
     <!-- REUNIÕES TIMELINE - destaque -->
@@ -2072,10 +2176,11 @@ function buildHoje(pane, bdr){
         :`Você tem apenas ${conv} conversa(s) avaliada(s) esta semana — abaixo do mínimo. Peça ajuda ao seu líder ou ao par de referência do time.`;
 
       return `<div class="card" style="border-color:rgba(168,85,247,0.2);background:rgba(168,85,247,0.04)">
-        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
-          <span style="display:flex;align-items:center;gap:5px"><span>🎙</span> MeetRox — qualidade das ligações</span>
-          <span style="font-size:9px;color:var(--text3)">W30 › 03</span>
+        <div class="collapsible-header" onclick="toggleCard('body-meetrox-${bdr.id}',this)" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">
+          <span style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:5px"><span>🎙</span> MeetRox — qualidade</span>
+          <div style="display:flex;align-items:center;gap:8px"><span style="font-size:9px;color:var(--text3)">W30 › 03</span><span class="collapse-icon" style="font-size:16px;color:var(--text3)">▾</span></div>
         </div>
+        <div id="body-meetrox-${bdr.id}" style="margin-top:14px">
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
           <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center">
             <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Nota semana</div>
@@ -2101,6 +2206,7 @@ function buildHoje(pane, bdr){
           <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">✦ Análise da semana</div>
           <div style="font-size:12px;color:var(--text);line-height:1.6">${m.gap}</div>
         </div>`:''}
+        </div>
       </div>`;
     })()}
 
@@ -2526,6 +2632,7 @@ async function loadDataFromSupabase(){
   // Atualiza DATA com valores do Supabase (mantém fotos/cores estáticas)
   DATA.meta=sem.meta; DATA.metaBDR=sem.meta_bdr;
   DATA.semAtual=sem.sem_atual; DATA.semTotal=sem.sem_total;
+  DATA.semana=sem.semana||''; DATA.periodo=sem.periodo||''; DATA.mes=sem.mes||'';
   DATA.funil={
     novoLead:sem.novo_lead, abordagemIniciada:sem.abordagem_iniciada,
     leadConectado:sem.lead_conectado, reuniaoAgendada:sem.reuniao_agendada,
@@ -2550,6 +2657,7 @@ async function loadDataFromSupabase(){
   });
   DATA.raPendentes={};
   bdrsDB.forEach(row=>{ DATA.raPendentes[row.bdr_id]=row.ra_pendentes||0; });
+  DATA.ultimaAtualizacao=sem.created_at||new Date().toISOString();
   console.log('✓ Supabase — semana:',sem.semana);
 }
 
