@@ -385,6 +385,10 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);fon
 }
 .ticker-sep{opacity:.4;margin:0 4px;}
 
+.collapsible-header{cursor:pointer;user-select:none;}
+.collapsible-header:active{opacity:.8;}
+.collapse-icon{transition:transform .2s ease;display:inline-block;}
+
 .pin-btn{padding:18px 10px;border-radius:var(--radius-sm);background:var(--bg2);border:1px solid var(--border2);color:var(--text);font-size:20px;font-weight:500;cursor:pointer;font-family:'Poppins',sans-serif;transition:background .1s,transform .1s;}
 .pin-btn:active{background:var(--bg3);transform:scale(.94);}
 .pin-del{font-size:16px;color:var(--text2);}
@@ -426,7 +430,7 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);fon
       </div>
     </div>
     <div class="app-header-right">
-      <div class="update-chip">03 abr</div>
+      <div class="update-chip" id="last-update-chip">03 abr · 20:44</div>
       <div class="logout-btn" onclick="doLogout()" title="Sair">↩</div>
     </div>
   </div>
@@ -806,6 +810,14 @@ function setupApp(){
   }
   document.getElementById('app-name').textContent=u.name.split(' ')[0];
   document.getElementById('app-role').textContent=u.isGestor?'Líder · Pre Vendas':'BDR · Pre Vendas';
+  // Update timestamp chip
+  const chip=document.getElementById('last-update-chip');
+  if(chip){
+    const now=new Date();
+    const day=now.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}).replace('.','');
+    const time=now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    chip.textContent=`${day} · ${time}`;
+  }
   buildTicker(u);
   if(u.isGestor) buildGestorApp();
   else buildBDRApp(u);
@@ -2093,16 +2105,21 @@ function buildHoje(pane, bdr){
     })()}
 
     <!-- FORECAST DO BDR -->
-    <div class="card" id="forecast-card-${bdr.id}" style="margin-top:10px;border:1.5px solid var(--accent-light)">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <div style="width:32px;height:32px;border-radius:9px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">◈</div>
-        <div>
-          <div style="font-size:13px;font-weight:700;color:var(--text)">Meu forecast da semana</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:1px">Enviado 1x — não pode alterar após salvar</div>
+    <div class="card collapsible-card" id="forecast-card-${bdr.id}" style="margin-top:10px;border:1.5px solid var(--accent-light)">
+      <div onclick="toggleCard('forecast-body-${bdr.id}',this)" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:0">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:32px;height:32px;border-radius:9px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">◈</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">Meu forecast da semana</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:1px">Compromisso com você e com o time</div>
+          </div>
         </div>
+        <span class="collapse-icon" style="font-size:18px;color:var(--text3);transition:transform .2s">▾</span>
       </div>
-      <div id="forecast-content-${bdr.id}">
-        <div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Carregando...</div>
+      <div id="forecast-body-${bdr.id}" style="margin-top:14px">
+        <div id="forecast-content-${bdr.id}">
+          <div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Carregando...</div>
+        </div>
       </div>
     </div>`;
 
@@ -2121,16 +2138,20 @@ async function loadBDRForecast(bdr){
 
     // Check if already submitted
     const existing=await supaFetch('gp_forecast',`semana_id=eq.${semId}&bdr_id=eq.${bdr.id}`);
+    const isGestor=currentUser&&currentUser.isGestor;
     if(existing&&existing.length>0){
       const f=existing[0];
       const dt=new Date(f.enviado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
       el.innerHTML=`
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
-          <span style="color:var(--green);font-size:16px">✓</span>
-          <div>
-            <div style="font-size:12px;font-weight:600;color:var(--green)">Forecast enviado!</div>
-            <div style="font-size:10px;color:var(--text3)">${dt}</div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius-sm);padding:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="color:var(--green);font-size:18px">✓</span>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--green)">Forecast confirmado — ${dt}</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:1px">Obrigado pelo compromisso com o time.</div>
+            </div>
           </div>
+          ${isGestor?`<button onclick="editForecast('${bdr.id}','${bdr.name}',${semId},${f.id})" style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-family:'Poppins',sans-serif">Editar</button>`:''}
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
           ${[['LC',f.fcst_lc],['RA',f.fcst_ra],['OP',f.fcst_op]].map(([l,v])=>`
@@ -2144,7 +2165,10 @@ async function loadBDRForecast(bdr){
 
     // Show input form
     el.innerHTML=`
-      <div style="font-size:11px;color:var(--text2);margin-bottom:12px">Qual é sua projeção para esta semana? Seja realista — esse dado aparece no painel do seu gestor.</div>
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Este é o seu compromisso.</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6">Seu forecast é visível para o seu gestor e para o time. Seja honesto e realista — um bom forecast não é o número que você quer, é o número que você acredita que vai entregar. Você pode enviar apenas uma vez por semana.</div>
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
         ${[['LC','Leads Conectados','fcst-lc'],['RA','Reuniões Agendadas','fcst-ra'],['OP','Oportunidades','fcst-op']].map(([l,desc,id])=>`
           <div>
@@ -2156,7 +2180,7 @@ async function loadBDRForecast(bdr){
       </div>
       <button onclick="submitForecast('${bdr.id}','${bdr.name}',${semId})"
         style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif">
-        Enviar forecast ↗
+        Assumir meu forecast ↗
       </button>`;
   }catch(e){
     el.innerHTML=`<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Forecast indisponível offline.</div>`;
@@ -2167,29 +2191,88 @@ async function submitForecast(bdrId,bdrNome,semId){
   const lc=parseInt(document.getElementById(`fcst-lc-${bdrId}`)?.value)||0;
   const ra=parseInt(document.getElementById(`fcst-ra-${bdrId}`)?.value)||0;
   const op=parseInt(document.getElementById(`fcst-op-${bdrId}`)?.value)||0;
-
   const btn=event.target;
-  btn.textContent='Enviando...';
-  btn.disabled=true;
-
+  btn.textContent='Enviando...';btn.disabled=true;
   try{
     const r=await fetch(`${SUPA_URL}/rest/v1/gp_forecast`,{
       method:'POST',
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({semana_id:semId,bdr_id:bdrId,bdr_nome:bdrNome,fcst_lc:lc,fcst_ra:ra,fcst_op:op})
+    });
+    if(!r.ok) throw new Error(await r.text());
+    const bdr=DATA.bdrs.find(b=>b.id===bdrId);
+    if(bdr) loadBDRForecast(bdr);
+  }catch(e){
+    btn.textContent='Assumir meu forecast ↗';btn.disabled=false;
+    alert('Erro ao enviar. Verifique sua conexão.');
+  }
+}
+
+async function editForecast(bdrId,bdrNome,semId,forecastId){
+  const el=document.getElementById(`forecast-content-${bdrId}`);
+  if(!el) return;
+  // Fetch current values
+  const existing=await supaFetch('gp_forecast',`id=eq.${forecastId}`);
+  const f=existing&&existing[0]?existing[0]:{fcst_lc:0,fcst_ra:0,fcst_op:0};
+  el.innerHTML=`
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--amber);font-weight:600">
+      Modo gestor — editando forecast de ${bdrNome.split(' ')[0]}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+      ${[['LC','Leads Conectados','fcst-lc',f.fcst_lc],['RA','Reuniões Agendadas','fcst-ra',f.fcst_ra],['OP','Oportunidades','fcst-op',f.fcst_op]].map(([l,desc,id,val])=>`
+        <div>
+          <div style="font-size:9px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">${l}</div>
+          <input id="${id}-${bdrId}" type="number" min="0" max="99" value="${val}"
+            style="width:100%;padding:10px 8px;border:1.5px solid var(--amber);border-radius:var(--radius-sm);font-size:18px;font-weight:700;font-family:'DM Mono',monospace;text-align:center;background:var(--bg2);color:var(--text);outline:none">
+          <div style="font-size:9px;color:var(--text3);text-align:center;margin-top:3px">${desc}</div>
+        </div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button onclick="loadBDRForecast(DATA.bdrs.find(b=>b.id==='${bdrId}'))"
+        style="padding:12px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:'Poppins',sans-serif">
+        Cancelar
+      </button>
+      <button onclick="saveEditForecast('${bdrId}',${forecastId})"
+        style="padding:12px;background:var(--amber);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif">
+        Salvar edição
+      </button>
+    </div>`;
+}
+
+async function saveEditForecast(bdrId,forecastId){
+  const lc=parseInt(document.getElementById(`fcst-lc-${bdrId}`)?.value)||0;
+  const ra=parseInt(document.getElementById(`fcst-ra-${bdrId}`)?.value)||0;
+  const op=parseInt(document.getElementById(`fcst-op-${bdrId}`)?.value)||0;
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/gp_forecast?id=eq.${forecastId}`,{
+      method:'PATCH',
       headers:{
         'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,
         'Content-Type':'application/json','Prefer':'return=minimal'
       },
-      body:JSON.stringify({semana_id:semId,bdr_id:bdrId,bdr_nome:bdrNome,fcst_lc:lc,fcst_ra:ra,fcst_op:op})
+      body:JSON.stringify({fcst_lc:lc,fcst_ra:ra,fcst_op:op})
     });
     if(!r.ok) throw new Error(await r.text());
-    // Reload to show confirmation
     const bdr=DATA.bdrs.find(b=>b.id===bdrId);
     if(bdr) loadBDRForecast(bdr);
+    // Refresh gestor table if open
+    const tbody=document.getElementById('forecast-table-body');
+    if(tbody) loadGestorForecast();
   }catch(e){
-    btn.textContent='Enviar forecast ↗';
-    btn.disabled=false;
-    alert('Erro ao enviar. Verifique sua conexão.');
+    alert('Erro ao salvar edição.');
   }
+}
+
+// ─── COLLAPSIBLE CARDS ────────────────────────────────────────
+function toggleCard(bodyId,headerEl){
+  const body=document.getElementById(bodyId);
+  if(!body) return;
+  const icon=headerEl.querySelector('.collapse-icon');
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  if(icon) icon.style.transform=isOpen?'rotate(-90deg)':'rotate(0deg)';
+  if(isOpen) headerEl.style.marginBottom='0';
+  else headerEl.style.marginBottom='14px';
 }
 
 function buildBDRSemana(pane,bdr){
