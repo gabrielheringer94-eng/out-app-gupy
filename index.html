@@ -440,6 +440,27 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);fon
   <nav class="bottom-nav" id="bottom-nav"></nav>
 </div>
 
+<!-- LOADING SCREEN -->
+<div id="screen-loading" class="screen active" style="background:linear-gradient(135deg,#1a56db 0%,#1e3a8a 100%);align-items:center;justify-content:center;flex-direction:column;gap:20px">
+  <svg width="80" height="80" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="28" cy="30" r="26" fill="rgba(255,255,255,0.18)"/>
+    <path d="M38 30h-8v6h5c-1.5 3-4.5 5-8 5a10 10 0 1 1 0-20c2.5 0 4.8.9 6.5 2.4l4.2-4.2A16 16 0 1 0 28 46v-2h10v-14z" fill="white"/>
+    <text x="62" y="42" font-family="Poppins,sans-serif" font-weight="700" font-size="26" fill="white" letter-spacing="-0.5">Pulse</text>
+  </svg>
+  <div style="text-align:center">
+    <div id="loading-msg" style="font-size:14px;color:rgba(255,255,255,.8);font-family:'Poppins',sans-serif">Carregando dados...</div>
+    <div style="margin-top:16px;display:flex;gap:6px;justify-content:center">
+      <div style="width:8px;height:8px;border-radius:50%;background:white;animation:loadDot 1.2s infinite 0s"></div>
+      <div style="width:8px;height:8px;border-radius:50%;background:white;animation:loadDot 1.2s infinite .2s"></div>
+      <div style="width:8px;height:8px;border-radius:50%;background:white;animation:loadDot 1.2s infinite .4s"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes loadDot{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+</style>
+
 <script>
 // ─── DATA ────────────────────────────────────────────────────
 const DATA = {
@@ -1215,6 +1236,31 @@ function buildTimeGestor(pane){
   pane.innerHTML=`
     <div style="font-size:11px;color:var(--text2);margin-bottom:14px">W30 › 03 · Semana 1 de 4 · Meta: ${META} opps/BDR</div>
 
+    <!-- FORECAST CENTRALIZADO -->
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+      <div style="width:10px;height:10px;border-radius:50%;background:var(--accent)"></div>
+      <span style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em">Forecast do time — enviado pelos BDRs</span>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;min-width:480px">
+          <thead>
+            <tr style="background:var(--bg3);border-bottom:1px solid var(--border)">
+              <th style="padding:8px 12px;text-align:left;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">BDR</th>
+              <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">LC fcst</th>
+              <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">RA fcst</th>
+              <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">OP fcst</th>
+              <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">OP real</th>
+              <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Ating.</th>
+            </tr>
+          </thead>
+          <tbody id="forecast-table-body">
+            <tr><td colspan="6" style="padding:16px;text-align:center;font-size:12px;color:var(--text3)">Carregando forecasts...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
       <div style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div>
       <span style="font-size:11px;font-weight:500;color:var(--green);text-transform:uppercase;letter-spacing:.06em">Top performers</span>
@@ -1226,6 +1272,7 @@ function buildTimeGestor(pane){
       <span style="font-size:11px;font-weight:500;color:var(--red);text-transform:uppercase;letter-spacing:.06em">Precisam de atenção</span>
     </div>
     <div id="bot-cards"></div>
+
 
     <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--border)">
       Ranking completo — bata o olho
@@ -1297,6 +1344,80 @@ function buildTimeGestor(pane){
       </td>
     </tr>`;
   });
+
+  // Load forecast table async
+  loadGestorForecast();
+}
+
+async function loadGestorForecast(){
+  const tbody=document.getElementById('forecast-table-body');
+  if(!tbody) return;
+  try{
+    const semanas=await supaFetch('gp_semanas','order=id.desc&limit=1');
+    if(!semanas||!semanas[0]){tbody.innerHTML='<tr><td colspan="6" style="padding:12px;text-align:center;font-size:12px;color:var(--text3)">Sem semana ativa.</td></tr>';return;}
+    const semId=semanas[0].id;
+    const forecasts=await supaFetch('gp_forecast',`semana_id=eq.${semId}&order=bdr_nome.asc`);
+
+    if(!forecasts||forecasts.length===0){
+      tbody.innerHTML='<tr><td colspan="6" style="padding:16px;text-align:center;font-size:12px;color:var(--text3)">Nenhum BDR enviou o forecast ainda.</td></tr>';
+      return;
+    }
+
+    // Map real opps from DATA
+    tbody.innerHTML='';
+    let totalFcstOp=0, totalRealOp=0;
+    DATA.bdrs.forEach(bdr=>{
+      const f=forecasts.find(x=>x.bdr_id===bdr.id);
+      const realOp=bdr.opps||0;
+      if(f) totalFcstOp+=f.fcst_op||0;
+      totalRealOp+=realOp;
+      const ating=f&&f.fcst_op>0?Math.round((realOp/f.fcst_op)*100):null;
+      const atingColor=ating===null?'var(--text3)':ating>=100?'var(--green)':ating>=70?'var(--amber)':'var(--red)';
+      const photoHtml=bdr.photo
+        ?`<img src="${bdr.photo}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+        :`<div style="width:24px;height:24px;border-radius:50%;background:${bdr.bg};color:${bdr.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0">${bdr.id}</div>`;
+      tbody.innerHTML+=`<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px 12px">
+          <div style="display:flex;align-items:center;gap:8px">
+            ${photoHtml}
+            <span style="font-size:12px;font-weight:600;color:var(--text)">${bdr.name.split(' ')[0]}</span>
+            ${!f?`<span style="font-size:9px;color:var(--text3);background:var(--bg3);padding:1px 6px;border-radius:10px">pendente</span>`:''}
+          </div>
+        </td>
+        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:${f?'var(--text)':'var(--text3)'}">${f?f.fcst_lc:'—'}</td>
+        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:${f?'var(--text)':'var(--text3)'}">${f?f.fcst_ra:'—'}</td>
+        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:700;color:${f?'var(--accent)':'var(--text3)'}">${f?f.fcst_op:'—'}</td>
+        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:700;color:${realOp>0?'var(--green)':'var(--text3)'}">${realOp||'—'}</td>
+        <td style="padding:10px 10px;text-align:center">
+          ${ating!==null
+            ?`<span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace;color:${atingColor}">${ating}%</span>`
+            :'<span style="font-size:12px;color:var(--text3)">—</span>'}
+        </td>
+      </tr>`;
+    });
+
+    // Total row
+    const totalAting=totalFcstOp>0?Math.round((totalRealOp/totalFcstOp)*100):0;
+    tbody.innerHTML+=`<tr style="background:var(--bg3);border-top:2px solid var(--border)">
+      <td style="padding:10px 12px;font-size:11px;font-weight:700;color:var(--text)">TOTAL</td>
+      <td style="padding:10px 8px;text-align:center">—</td>
+      <td style="padding:10px 8px;text-align:center">—</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent)">${totalFcstOp}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green)">${totalRealOp}</td>
+      <td style="padding:10px 10px;text-align:center;font-size:12px;font-weight:700;font-family:'DM Mono',monospace;color:${totalAting>=100?'var(--green)':totalAting>=70?'var(--amber)':'var(--red)'}">${totalAting}%</td>
+    </tr>`;
+
+    // Show how many submitted
+    const pending=DATA.bdrs.length-forecasts.length;
+    if(pending>0){
+      const note=document.createElement('div');
+      note.style.cssText='font-size:11px;color:var(--amber);padding:8px 12px;background:#fffbeb;border-top:1px solid #fde68a;text-align:center';
+      note.textContent=`${pending} BDR(s) ainda não enviaram o forecast desta semana.`;
+      document.querySelector('#forecast-table-body')?.closest('.card')?.appendChild(note);
+    }
+  }catch(e){
+    tbody.innerHTML=`<tr><td colspan="6" style="padding:12px;text-align:center;font-size:12px;color:var(--text3)">Forecast indisponível offline.</td></tr>`;
+  }
 }
 
 // REUNIÕES
@@ -1969,7 +2090,106 @@ function buildHoje(pane, bdr){
           <div style="font-size:12px;color:var(--text);line-height:1.6">${m.gap}</div>
         </div>`:''}
       </div>`;
-    })()}`;
+    })()}
+
+    <!-- FORECAST DO BDR -->
+    <div class="card" id="forecast-card-${bdr.id}" style="margin-top:10px;border:1.5px solid var(--accent-light)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <div style="width:32px;height:32px;border-radius:9px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">◈</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)">Meu forecast da semana</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:1px">Enviado 1x — não pode alterar após salvar</div>
+        </div>
+      </div>
+      <div id="forecast-content-${bdr.id}">
+        <div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Carregando...</div>
+      </div>
+    </div>`;
+
+  // Load forecast async after pane renders
+  loadBDRForecast(bdr);
+}
+
+async function loadBDRForecast(bdr){
+  const el=document.getElementById(`forecast-content-${bdr.id}`);
+  if(!el) return;
+  try{
+    // Get current semana_id
+    const semanas=await supaFetch('gp_semanas','order=id.desc&limit=1');
+    if(!semanas||!semanas[0]){el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Sem semana ativa.</div>';return;}
+    const semId=semanas[0].id;
+
+    // Check if already submitted
+    const existing=await supaFetch('gp_forecast',`semana_id=eq.${semId}&bdr_id=eq.${bdr.id}`);
+    if(existing&&existing.length>0){
+      const f=existing[0];
+      const dt=new Date(f.enviado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      el.innerHTML=`
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:8px">
+          <span style="color:var(--green);font-size:16px">✓</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--green)">Forecast enviado!</div>
+            <div style="font-size:10px;color:var(--text3)">${dt}</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          ${[['LC',f.fcst_lc],['RA',f.fcst_ra],['OP',f.fcst_op]].map(([l,v])=>`
+            <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center">
+              <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent)">${v}</div>
+              <div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-top:3px">${l}</div>
+            </div>`).join('')}
+        </div>`;
+      return;
+    }
+
+    // Show input form
+    el.innerHTML=`
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px">Qual é sua projeção para esta semana? Seja realista — esse dado aparece no painel do seu gestor.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+        ${[['LC','Leads Conectados','fcst-lc'],['RA','Reuniões Agendadas','fcst-ra'],['OP','Oportunidades','fcst-op']].map(([l,desc,id])=>`
+          <div>
+            <div style="font-size:9px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">${l}</div>
+            <input id="${id}-${bdr.id}" type="number" min="0" max="99" placeholder="0"
+              style="width:100%;padding:10px 8px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:18px;font-weight:700;font-family:'DM Mono',monospace;text-align:center;background:var(--bg2);color:var(--text);outline:none">
+            <div style="font-size:9px;color:var(--text3);text-align:center;margin-top:3px">${desc}</div>
+          </div>`).join('')}
+      </div>
+      <button onclick="submitForecast('${bdr.id}','${bdr.name}',${semId})"
+        style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif">
+        Enviar forecast ↗
+      </button>`;
+  }catch(e){
+    el.innerHTML=`<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Forecast indisponível offline.</div>`;
+  }
+}
+
+async function submitForecast(bdrId,bdrNome,semId){
+  const lc=parseInt(document.getElementById(`fcst-lc-${bdrId}`)?.value)||0;
+  const ra=parseInt(document.getElementById(`fcst-ra-${bdrId}`)?.value)||0;
+  const op=parseInt(document.getElementById(`fcst-op-${bdrId}`)?.value)||0;
+
+  const btn=event.target;
+  btn.textContent='Enviando...';
+  btn.disabled=true;
+
+  try{
+    const r=await fetch(`${SUPA_URL}/rest/v1/gp_forecast`,{
+      method:'POST',
+      headers:{
+        'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,
+        'Content-Type':'application/json','Prefer':'return=minimal'
+      },
+      body:JSON.stringify({semana_id:semId,bdr_id:bdrId,bdr_nome:bdrNome,fcst_lc:lc,fcst_ra:ra,fcst_op:op})
+    });
+    if(!r.ok) throw new Error(await r.text());
+    // Reload to show confirmation
+    const bdr=DATA.bdrs.find(b=>b.id===bdrId);
+    if(bdr) loadBDRForecast(bdr);
+  }catch(e){
+    btn.textContent='Enviar forecast ↗';
+    btn.disabled=false;
+    alert('Erro ao enviar. Verifique sua conexão.');
+  }
 }
 
 function buildBDRSemana(pane,bdr){
@@ -2201,13 +2421,74 @@ function renderBars(id,data,maxVal){
   });
 }
 
+// ─── SUPABASE CONFIG ──────────────────────────────────────────
+const SUPA_URL='https://xhyamspiswwuryrtbmnc.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoeWFtc3Bpc3d3dXJ5cnRibW5jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NDEzNTUsImV4cCI6MjA5MTAxNzM1NX0.SMxM0SKfIxHFAdMcpyf59g16K4_O7nchBCtX8nltx6o';
+
+async function supaFetch(table,params=''){
+  const r=await fetch(`${SUPA_URL}/rest/v1/${table}?${params}`,{
+    headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json'}
+  });
+  if(!r.ok) throw new Error(`Supabase ${table}: ${r.status}`);
+  return r.json();
+}
+
+async function loadDataFromSupabase(){
+  const semanas=await supaFetch('gp_semanas','order=id.desc&limit=1');
+  if(!semanas||semanas.length===0) throw new Error('Sem dados');
+  const sem=semanas[0];
+  const bdrsDB=await supaFetch('gp_bdr_resultados',`semana_id=eq.${sem.id}&order=opps.desc`);
+  const meetroxDB=await supaFetch('gp_meetrox',`semana_id=eq.${sem.id}`);
+
+  // Atualiza DATA com valores do Supabase (mantém fotos/cores estáticas)
+  DATA.meta=sem.meta; DATA.metaBDR=sem.meta_bdr;
+  DATA.semAtual=sem.sem_atual; DATA.semTotal=sem.sem_total;
+  DATA.funil={
+    novoLead:sem.novo_lead, abordagemIniciada:sem.abordagem_iniciada,
+    leadConectado:sem.lead_conectado, reuniaoAgendada:sem.reuniao_agendada,
+    oportunidades:sem.oportunidades, desqualificados:sem.desqualificados,
+  };
+  DATA.conversoes={
+    aiLc:{real:sem.conv_ai_lc,meta:sem.conv_ai_lc_meta},
+    lcRa:{real:sem.conv_lc_ra,meta:sem.conv_lc_ra_meta},
+    raOp:{real:sem.conv_ra_op,meta:sem.conv_ra_op_meta},
+  };
+  bdrsDB.forEach(row=>{
+    const b=DATA.bdrs.find(b=>b.id===row.bdr_id);
+    if(!b) return;
+    b.opps=row.opps; b.ras=row.ras; b.lig=row.ligacoes;
+    b.ativ=row.atividades; b.desq=row.desqualificados;
+  });
+  meetroxDB.forEach(row=>{
+    const b=DATA.bdrs.find(b=>b.id===row.bdr_id);
+    if(!b) return;
+    b.meetrox={nota:parseFloat(row.nota_semana)||0,conversas:row.conversas_semana||0,
+      notaMes:parseFloat(row.nota_mes)||0,conversasMes:row.conversas_mes||0,gap:row.gap||''};
+  });
+  DATA.raPendentes={};
+  bdrsDB.forEach(row=>{ DATA.raPendentes[row.bdr_id]=row.ra_pendentes||0; });
+  console.log('✓ Supabase — semana:',sem.semana);
+}
+
 // ─── INIT ─────────────────────────────────────────────────────
-(function(){
+(async function(){
+  const loading=document.getElementById('screen-loading');
+  const msg=document.getElementById('loading-msg');
+  try{
+    msg.textContent='Buscando dados atualizados...';
+    await loadDataFromSupabase();
+    msg.textContent='Pronto!';
+    await new Promise(r=>setTimeout(r,350));
+  }catch(e){
+    console.warn('Supabase indisponível, usando dados locais:',e.message);
+    msg.textContent='Carregando dados locais...';
+    await new Promise(r=>setTimeout(r,500));
+  }
+  loading.classList.remove('active');
   try{
     const saved=localStorage.getItem('gupypulse_session');
     if(saved){
       const s=JSON.parse(saved);
-      // Auto-login persists indefinitely (not just same day)
       if(s.userId){
         const u=USERS.find(x=>x.id===s.userId);
         if(u){
