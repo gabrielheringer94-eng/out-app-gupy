@@ -1,7 +1,7 @@
 {
-  "name": "Gupy Pulse",
-  "short_name": "Pulse",
-  "description": "Pre Vendas OTB M — Dashboard de Performance",
+  "name": "LOBXS",
+  "short_name": "LOBXS",
+  "description": "Outbound Pre-Sales · A Alcateia que Vence",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#1a56db",
