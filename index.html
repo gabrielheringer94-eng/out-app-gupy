@@ -890,115 +890,234 @@ function buildGestorApp(){
   ],[buildResumo,buildTimeGestor,buildMRRGestor,buildReunioes,buildNoticias]);
 }
 
-// RESUMO = Visão Geral + Projeção + Insights
+// RESUMO = Nova Home — Diagnóstico Estratégico
 function buildResumo(pane){
   const d=DATA;
-  const proj=Math.round((d.funil.oportunidades/d.semAtual)*d.semTotal);
-  const semR=d.semTotal-d.semAtual;
-  const oppNec=Math.ceil((d.meta-d.funil.oportunidades)/semR);
-  const pct=Math.round((proj/d.meta)*100);
-  const paceEsperadoOpps=Math.round((d.meta/d.semTotal)*d.semAtual);
-  const paceEsperadoPct=Math.round((paceEsperadoOpps/d.meta)*100);
+
+  // ── Cálculos base ──
+  const diasPassados=7;          // semana 1 de 30 dias
+  const diasTotais=30;
+  const diasRestantes=diasTotais-diasPassados;
+  const diasUteisRestantes=21;   // estimativa dias úteis restantes
+  const mediaDiaria=d.funil.oportunidades/diasPassados;
+  const proj=Math.round(mediaDiaria*diasTotais);
+  const gap=d.funil.oportunidades-d.meta;
+  const gapProj=proj-d.meta;
+  const pctAtual=Math.min(Math.round((d.funil.oportunidades/d.meta)*100),100);
+  const pctProj=Math.min(Math.round((proj/d.meta)*100),100);
+  const paceEsp=Math.round((d.meta/diasTotais)*diasPassados);
+
+  // ── Conversões reais ──
+  const conv={
+    aiLc:{real:74,hist:74,meta:57},
+    lcRa:{real:26,hist:37,meta:37},  // hist = média histórica
+    raOp:{real:30,hist:75,meta:75},
+  };
+
+  // ── Alerta: conversão caiu >5pp vs histórico ──
+  const alertas=[];
+  if(conv.lcRa.hist-conv.lcRa.real>=5){
+    const impacto=Math.round((conv.lcRa.hist-conv.lcRa.real)/100*d.funil.leadConectado);
+    alertas.push({
+      tipo:'LC→RA',label:'Conversão LC → RA caiu',
+      antes:conv.lcRa.hist,agora:conv.lcRa.real,
+      delta:-(conv.lcRa.hist-conv.lcRa.real),
+      impacto:-impacto,
+      msg:`Impacto estimado: −${impacto} oportunidades no mês`
+    });
+  }
+  if(conv.raOp.hist-conv.raOp.real>=5){
+    const impacto=Math.round((conv.raOp.hist-conv.raOp.real)/100*d.funil.reuniaoAgendada);
+    alertas.push({
+      tipo:'RA→OP',label:'Conversão RA → OP caiu',
+      antes:conv.raOp.hist,agora:conv.raOp.real,
+      delta:-(conv.raOp.hist-conv.raOp.real),
+      impacto:-impacto,
+      msg:`Impacto estimado: −${impacto} oportunidades no mês`
+    });
+  }
+
+  // ── Diagnóstico: BDRs abaixo da média ──
+  const mediaConvLigRa=Math.round(d.bdrs.reduce((s,b)=>s+(b.lig>0?b.ras/b.lig:0),0)/d.bdrs.length*100);
+  const bdrsBaixos=[...d.bdrs]
+    .filter(b=>b.lig>3)
+    .map(b=>({...b,conv:b.lig>0?Math.round((b.ras/b.lig)*100):0}))
+    .filter(b=>b.conv<mediaConvLigRa-5)
+    .sort((a,b)=>a.conv-b.conv)
+    .slice(0,3);
+
+  // ── Alavancas ──
+  const alavancas=[
+    {label:'+10% LC→RA',opps:Math.round(d.funil.leadConectado*0.10*0.3),cor:'var(--green)'},
+    {label:'+15% volume lig.',opps:Math.round(d.bdrs.reduce((s,b)=>s+b.lig,0)*0.15*0.26*0.3),cor:'var(--accent)'},
+    {label:'−10% desqualif.',opps:Math.round(d.funil.desqualificados*0.10*0.15),cor:'var(--teal)'},
+  ].sort((a,b)=>b.opps-a.opps);
+
+  // ── Funil conversões ──
+  const funnelConvs=[
+    {de:'Abord.',para:'Conexão',pct:conv.aiLc.real,meta:conv.aiLc.meta},
+    {de:'Conexão',para:'Reunião',pct:conv.lcRa.real,meta:conv.lcRa.meta},
+    {de:'Reunião',para:'Oport.',pct:conv.raOp.real,meta:conv.raOp.meta},
+  ];
+  const piorEtapa=funnelConvs.reduce((w,c)=>((c.meta-c.pct)>(w.meta-w.pct)?c:w));
 
   pane.innerHTML=`
-    <div class="metrics-grid">
-      <div class="metric-card mc-red">
-        <div class="metric-label">Oportunidades</div>
-        <div class="metric-val">${d.funil.oportunidades}</div>
-        <div class="metric-sub"><span class="pill pill-red">7% da meta</span><span style="color:var(--text3)">/ 84</span></div>
+
+    <!-- ═══ BLOCO 1: META & STATUS HERO ═══ -->
+    <div style="background:linear-gradient(135deg,${gapProj>=0?'#16a34a':'#dc2626'} 0%,${gapProj>=0?'#15803d':'#b91c1c'} 100%);border-radius:var(--radius);padding:20px;margin-bottom:12px;box-shadow:var(--shadow-lg)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em">Meta do mês — Abril 2026</div>
+        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.9);background:rgba(255,255,255,.15);padding:3px 10px;border-radius:20px">${gapProj>=0?'No pace ▲':'Risco ▼'}</div>
       </div>
-      <div class="metric-card mc-amber">
-        <div class="metric-label">Reuniões Ag.</div>
-        <div class="metric-val">${d.funil.reuniaoAgendada}</div>
-        <div class="metric-sub"><span class="pill pill-amber">26% LC→RA</span><span style="color:var(--text3)">meta 37%</span></div>
+      <div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:16px">Meta: ${d.meta} oportunidades</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="text-align:center">
+          <div style="font-size:34px;font-weight:700;font-family:'DM Mono',monospace;color:white;line-height:1">${d.funil.oportunidades}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:3px">Atual</div>
+        </div>
+        <div style="text-align:center;border-left:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2)">
+          <div style="font-size:34px;font-weight:700;font-family:'DM Mono',monospace;color:white;line-height:1">${proj}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:3px">Projeção</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:34px;font-weight:700;font-family:'DM Mono',monospace;color:${gapProj>=0?'#bbf7d0':'#fecaca'};line-height:1">${gapProj>=0?'+':''}${gapProj}</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:3px">Gap proj.</div>
+        </div>
       </div>
-      <div class="metric-card mc-green">
-        <div class="metric-label">Lig. Conectadas</div>
-        <div class="metric-val">158</div>
-        <div class="metric-sub"><span class="pill pill-green">Volume forte</span></div>
+
+      <!-- Barra dupla -->
+      <div style="position:relative;height:10px;background:rgba(255,255,255,.2);border-radius:5px;overflow:hidden;margin-bottom:6px">
+        <div style="position:absolute;left:0;top:0;height:100%;width:${Math.round((paceEsp/d.meta)*100)}%;background:rgba(255,255,255,.3);border-radius:5px"></div>
+        <div style="position:absolute;left:0;top:0;height:100%;width:${pctAtual}%;background:white;border-radius:5px"></div>
       </div>
-      <div class="metric-card mc-blue">
-        <div class="metric-label">Lead Conectado</div>
-        <div class="metric-val">${d.funil.leadConectado}</div>
-        <div class="metric-sub"><span class="pill pill-green">74% AI→LC</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.6)">
+        <span>Atual: ${pctAtual}% · Pace esp.: ${Math.round((paceEsp/d.meta)*100)}%</span>
+        <span>Proj: ${pctProj}% de ${d.meta}</span>
       </div>
     </div>
 
+    <!-- ═══ BLOCO 2: ALERTAS CRÍTICOS ═══ -->
+    ${alertas.length>0?`
+    <div style="margin-bottom:12px">
+      <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:5px">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1.5s infinite"></div>
+        Alertas críticos
+      </div>
+      ${alertas.map(a=>`
+      <div style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:var(--radius-sm);padding:14px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:13px;font-weight:700;color:var(--red)">${a.label}</div>
+          <div style="font-size:11px;font-weight:700;color:var(--red);background:#fee2e2;padding:3px 8px;border-radius:20px">${a.delta}pp</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;text-align:center">
+          <div style="background:white;border-radius:8px;padding:8px">
+            <div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text2)">${a.antes}%</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px">Histórico</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--red)">→</div>
+          <div style="background:white;border-radius:8px;padding:8px">
+            <div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red)">${a.agora}%</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px">Agora</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--red);font-weight:600">${a.msg}</div>
+      </div>`).join('')}
+    </div>`:''}
+
+    <!-- ═══ BLOCO 3: DIAGNÓSTICO ═══ -->
+    <div class="card" style="margin-bottom:12px;border-left:3px solid var(--amber)">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber)"></div>
+        <div style="font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.08em">Diagnóstico</div>
+      </div>
+
+      <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:8px">BDRs abaixo da média (conv. Lig→RA)</div>
+      ${bdrsBaixos.length>0?bdrsBaixos.map(b=>{
+        const bdrData=d.bdrs.find(x=>x.id===b.id);
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:8px">
+            ${bdrData&&bdrData.photo?`<img src="${bdrData.photo}" style="width:26px;height:26px;border-radius:50%;object-fit:cover">`:`<div style="width:26px;height:26px;border-radius:50%;background:${b.bg};color:${b.color};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">${b.id}</div>`}
+            <span style="font-size:12px;font-weight:600">${b.name.split(' ')[0]}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;font-family:'DM Mono',monospace;font-weight:700;color:var(--red)">${b.conv}%</span>
+            <span style="font-size:10px;color:var(--text3)">média: ${mediaConvLigRa}%</span>
+          </div>
+        </div>`;
+      }).join(''):`<div style="font-size:12px;color:var(--green)">Todos acima da média de conversão.</div>`}
+
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">Pior etapa do funil</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;background:var(--red-bg);border-radius:8px;padding:10px 12px">
+          <div style="font-size:12px;font-weight:700;color:var(--red)">${piorEtapa.de} → ${piorEtapa.para}</div>
+          <div style="text-align:right">
+            <div style="font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red)">${piorEtapa.pct}%</div>
+            <div style="font-size:9px;color:var(--text3)">meta ${piorEtapa.meta}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ BLOCO 4: AÇÃO RECOMENDADA ═══ -->
+    <div class="card" style="margin-bottom:12px;border-left:3px solid var(--accent)">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--accent)"></div>
+        <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em">Ação recomendada</div>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px">Focar em melhoria de qualificação (LC → RA)</div>
+      ${[
+        {acao:`Revisar pitch com ${bdrsBaixos.slice(0,2).map(b=>b.name.split(' ')[0]).join(' e ') || 'BDRs abaixo da média'}`,impacto:'+4–6 opps'},
+        {acao:'Rodar 2 role plays focados em objeção esta semana',impacto:'+3–5 opps'},
+        {acao:`Aumentar volume de ligações — time com ${d.bdrs.reduce((s,b)=>s+b.lig,0)} lig. na S1`,impacto:'+2–4 opps'},
+      ].map((a,i)=>`
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="width:20px;height:20px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px">${i+1}</div>
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:500;color:var(--text)">${a.acao}</div>
+            <div style="font-size:10px;color:var(--green);font-weight:600;margin-top:2px">Impacto est.: ${a.impacto}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <!-- ═══ BLOCO 5: ALAVANCAS ═══ -->
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Alavancas de crescimento</div>
+      ${alavancas.map((a,i)=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:6px;height:6px;border-radius:50%;background:${a.cor}"></div>
+            <span style="font-size:12px;font-weight:500;color:var(--text)">${a.label}</span>
+          </div>
+          <span style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:${a.cor}">+${a.opps} opps</span>
+        </div>`).join('')}
+      <div style="padding-top:10px;font-size:11px;color:var(--text3);text-align:center">
+        Potencial total: +${alavancas.reduce((s,a)=>s+a.opps,0)} oportunidades adicionais
+      </div>
+    </div>
+
+    <!-- ═══ BLOCO 6: FUNIL RESUMIDO ═══ -->
     <div class="card">
-      <div class="card-title">Funil de conversão</div>
-      <div class="funnel" id="funnel-main"></div>
-      <div class="conv-list" style="margin-top:12px">
-        ${cRow('AI→LC','Abord.→Lead Conec.',74,'var(--green)',57,'+17pp',false)}
-        ${cRow('LC→RA','Lead Conec.→Reunião',26,'var(--red)',37,'−11pp',true)}
-        ${cRow('RA→OP','Reunião→Oportunidade',30,'var(--red)',75,'−45pp',true)}
-      </div>
-      <div class="insight-block">
-        <div class="insight-title"><span>✦</span> Análise da semana — W30 › 03</div>
-        ${d.gestorInsights.map(i=>insightItem(i)).join('')}
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:10px">
-      <div class="card-title">Projeção de fechamento — Abril</div>
-      <div class="proj-big" style="color:${pct>=paceEsperadoPct?'var(--green)':'var(--red)'}">${proj}</div>
-      <div style="font-size:11px;color:var(--text3);margin-top:3px">projetadas · meta: <strong>${d.meta}</strong></div>
-      <!-- Dual bar: realizado + pace esperado -->
-      <div style="position:relative;height:12px;background:var(--bg3);border-radius:6px;overflow:hidden;margin:10px 0 4px">
-        <!-- Pace esperado (fundo) -->
-        <div style="position:absolute;left:0;top:0;height:100%;width:${paceEsperadoPct}%;background:rgba(26,86,219,0.18);border-radius:6px"></div>
-        <!-- Realizado (frente) -->
-        <div style="position:absolute;left:0;top:0;height:100%;width:${pct}%;background:${pct>=paceEsperadoPct?'var(--green)':'var(--red)'};border-radius:6px;transition:width 1s ease"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:4px">
-        <span>Sem.1: <strong style="color:var(--text)">${d.funil.oportunidades} opps</strong></span>
-        <span>Meta: ${d.meta}</span>
-      </div>
-      <!-- Legend -->
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-        <div style="display:flex;align-items:center;gap:4px">
-          <div style="width:10px;height:4px;border-radius:2px;background:${pct>=paceEsperadoPct?'var(--green)':'var(--red)'}"></div>
-          <span style="font-size:10px;color:var(--text2)">Realizado (${pct}%)</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:4px">
-          <div style="width:10px;height:4px;border-radius:2px;background:rgba(26,86,219,0.4)"></div>
-          <span style="font-size:10px;color:var(--text2)">Pace esperado (${paceEsperadoPct}%)</span>
-        </div>
-      </div>
-      <div class="alert-banner ${pct>=paceEsperadoPct?'ab-green':'ab-red'}" style="margin-bottom:0">
-        <span>${pct>=paceEsperadoPct?'▲':'▼'}</span>
-        <div>${pct>=paceEsperadoPct
-          ?`No pace. Projeta <strong>${proj}</strong> opps — acima do esperado de <strong>${paceEsperadoOpps}</strong> para S1.`
-          :`Precisa de <strong>${oppNec} opps/semana</strong> nas próximas ${semR} semanas para bater a meta. Abaixo do pace.`
-        }</div>
-      </div>
-    </div>
-
-    <div class="hl-pair">
-      <div class="hl-box hl-green">
-        <div class="hl-title"><span class="hl-dot"></span>Highlights</div>
-        <div class="hl-item">▲ Mydoha lidera: 6 opps e 6 RAs</div>
-        <div class="hl-item">▲ 14 oportunidades na semana 1</div>
-        <div class="hl-item">▲ Jeanne e Pedro: 2 opps cada</div>
-        <div class="hl-item">▲ AI→LC em 74% vs meta 57%</div>
-      </div>
-      <div class="hl-box hl-red">
-        <div class="hl-title"><span class="hl-dot"></span>Lowlights</div>
-        <div class="hl-item">▼ 17% da meta (14 de 84)</div>
-        <div class="hl-item">▼ LC→RA: 26% vs meta 37%</div>
-        <div class="hl-item">▼ Victoria, Giovana: 0 opps</div>
-        <div class="hl-item">▼ 115 desqualificados na semana</div>
+      <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Funil — etapa crítica destacada</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px">
+        ${funnelConvs.map((c,i)=>{
+          const isPior=c.de===piorEtapa.de;
+          const cor=c.pct>=c.meta?'var(--green)':c.pct>=c.meta*0.8?'var(--amber)':'var(--red)';
+          return `
+          ${i>0?`<div style="font-size:16px;color:var(--text3)">→</div>`:''}
+          <div style="flex:1;text-align:center;padding:10px 6px;border-radius:var(--radius-sm);background:${isPior?'#fff5f5':'var(--bg3)'};border:${isPior?'1.5px solid #fecaca':'1px solid transparent'}">
+            <div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:${cor}">${c.pct}%</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px">${c.de}→${c.para}</div>
+            <div style="font-size:9px;color:${cor};font-weight:600">meta ${c.meta}%</div>
+            ${isPior?`<div style="font-size:8px;color:var(--red);font-weight:700;margin-top:3px">▼ CRÍTICO</div>`:''}
+          </div>`;
+        }).join('')}
       </div>
     </div>`;
 
-  buildFunnel('funnel-main',[
-    {name:'Novo Lead',val:114,max:114,color:'#1d4ed8'},
-    {name:'Abord. Iniciada',val:104,max:114,color:'#2563eb'},
-    {name:'Lead Conectado',val:77,max:114,color:'#0891b2'},
-    {name:'Reunião Ag.',val:20,max:114,color:'#f59e0b'},
-    {name:'Oportunidade',val:6,max:114,color:'#ef4444'},
-    {name:'Desqualif.',val:115,max:115,color:'#374151'},
-  ]);
+  // Remove old funnel build if any
 }
+
 
 // TIME = Top/Bottom performers + Ranking visual
 function buildTimeGestor(pane){
