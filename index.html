@@ -1273,7 +1273,7 @@ function buildResumo(pane){
           <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Projeção</div>
         </div>
         <div>
-          <div style="font-size:24px;font-weight:700;font-family:'DM Mono',monospace;color:${gapProj>=0?'#bbf7d0':'#fecaca'};line-height:1">${gapProj>=0?'+':''}${gapProj}</div>
+          <div style="font-size:24px;font-weight:700;font-family:\'DM Mono\',monospace;color:${gapProj>=0?'#bbf7d0':'#fecaca'};line-height:1">${gapProj>=0?'+':''}${gapProj}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Gap</div>
         </div>
       </div>
@@ -2069,41 +2069,310 @@ function buildReunioes(pane){
       </div>
     </div>
     <div class="card">
-      <div class="card-title">Atrasadas</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
-        <div style="border-right:1px solid var(--border);padding-right:12px">
-          <div style="font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">TA · ${r.atrasadasTA.length} reunião(ões)</div>
-          ${r.atrasadasTA.map(a=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-              <div style="display:flex;align-items:center;gap:6px">
-                <div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div>
-                <span style="font-size:12px;font-weight:500">${a.name.split(' ')[0]}</span>
-              </div>
-              <span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace">${a.data}</span>
-            </div>
-            <div style="font-size:12px;color:var(--text);padding-left:28px">${a.empresa}</div>
-            <div style="font-size:10px;color:var(--text3);padding-left:28px;margin-top:2px">AE: ${a.ae}</div>
-          </div>`).join('')}
-        </div>
-        <div style="padding-left:12px">
-          <div style="font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">TM · ${r.atrasadasTM.length} reunião(ões)</div>
-          ${r.atrasadasTM.map(a=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-              <div style="display:flex;align-items:center;gap:6px">
-                <div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div>
-                <span style="font-size:12px;font-weight:500">${a.name.split(' ')[0]}</span>
-              </div>
-              <span style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace">${a.data}</span>
-            </div>
-            <div style="font-size:12px;color:var(--text);padding-left:28px">${a.empresa}</div>
-            <div style="font-size:10px;color:var(--text3);padding-left:28px;margin-top:2px">AE: ${a.ae}</div>
-          </div>`).join('')}
-        </div>
+      <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+        Reuniões atrasadas — Lead Time
+        <span style="font-size:10px;color:var(--text3);font-weight:400">dias aguardando validação</span>
       </div>
-      <div class="alert-banner ab-amber" style="margin-top:10px">
-        <span>⏰</span><div>Juliana e Mydoha lideram em reuniões atrasadas (4 cada). Acionar todos os BDRs para reagendamento urgente.</div>
+
+      <!-- TA -->
+      <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px;display:flex;align-items:center;gap:5px">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block"></span>
+        TA · ${r.atrasadasTA.length} reunião(ões)
+      </div>
+      <div style="overflow-x:auto;margin-bottom:14px">
+        <table style="width:100%;border-collapse:collapse;min-width:380px">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">BDR</th>
+            <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Empresa</th>
+            <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">AE</th>
+            <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Data</th>
+            <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase">⏱ Dias</th>
+          </tr></thead>
+          <tbody>
+          ${r.atrasadasTA.map(a=>{
+            const pts=a.data.split('/');
+            const rd=new Date(2026,parseInt(pts[1])-1,parseInt(pts[0]));
+            const dias=Math.floor((new Date()-rd)/(1000*60*60*24));
+            const dc=dias>=14?'var(--red)':dias>=7?'var(--amber)':'var(--text2)';
+            return `<tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
+              <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
+              <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
+              <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)">${a.data}</td>
+              <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:${dc}">${dias}d</span></td>
+            </tr>`;
+          }).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TM -->
+      <div style="font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px;display:flex;align-items:center;gap:5px">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--teal);display:inline-block"></span>
+        TM · ${r.atrasadasTM.length} reunião(ões)
+      </div>
+      <div style="overflow-x:auto;margin-bottom:12px">
+        <table style="width:100%;border-collapse:collapse;min-width:380px">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">BDR</th>
+            <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Empresa</th>
+            <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">AE</th>
+            <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Data</th>
+            <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase">⏱ Dias</th>
+          </tr></thead>
+          <tbody>
+          ${r.atrasadasTM.map(a=>{
+            const pts=a.data.split('/');
+            const rd=new Date(2026,parseInt(pts[1])-1,parseInt(pts[0]));
+            const dias=Math.floor((new Date()-rd)/(1000*60*60*24));
+            const dc=dias>=14?'var(--red)':dias>=7?'var(--amber)':'var(--text2)';
+            return `<tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
+              <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
+              <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
+              <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)">${a.data}</td>
+              <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:${dc}">${dias}d</span></td>
+            </tr>`;
+          }).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="alert-banner ab-amber" style="margin-bottom:0">
+        <span>⏰</span><div>Cor: <strong style="color:var(--amber)">laranja ≥7 dias</strong> · <strong style="color:var(--red)">vermelho ≥14 dias</strong> aguardando AE.</div>
       </div>
     </div>`;
+
+  buildLeadTimePanel(pane);
+}
+
+
+// ─── LEAD TIME VALIDAÇÃO ──────────────────────────────────────
+
+
+function toggleAEList(aeId){
+  var list=document.getElementById('list-'+aeId);
+  var btn=document.getElementById(aeId);
+  if(!list||!btn) return;
+  var isOpen=list.style.display!=='none';
+  list.style.display=isOpen?'none':'block';
+  btn.style.background=isOpen?'transparent':'var(--accent-light)';
+  btn.style.color=isOpen?'var(--text)':'var(--accent)';
+  btn.style.borderColor=isOpen?'transparent':'var(--accent)';
+  btn.textContent=btn.textContent.replace(isOpen?'▴':'▾',isOpen?'▾':'▴');
+}
+
+function filterTimeline(bdrId){
+  // Update chip styles
+  document.querySelectorAll('[id^="chip-"]').forEach(function(btn){
+    var isActive=(btn.id==='chip-'+bdrId)||(bdrId==='todos'&&btn.id==='chip-todos');
+    btn.style.background=isActive?'var(--accent)':'var(--bg2)';
+    btn.style.color=isActive?'white':'var(--text)';
+    btn.style.borderColor=isActive?'var(--accent)':'var(--border2)';
+  });
+  // Filter rows
+  var rows=document.querySelectorAll('#timeline-rows [data-bdr]');
+  rows.forEach(function(row){
+    row.style.display=(bdrId==='todos'||row.dataset.bdr===bdrId)?'':'none';
+  });
+}
+
+function buildLeadTimePanel(pane){
+  const r=DATA.reunioes;
+  const today=new Date();
+
+  function diasAtraso(data){
+    const pts=data.split('/');
+    const d=new Date(2026,parseInt(pts[1])-1,parseInt(pts[0]));
+    return Math.floor((today-d)/(1000*60*60*24));
+  }
+
+  function statusInfo(dias){
+    if(dias<=1) return {label:'No SLA',col:'var(--green)',bg:'var(--green-bg)',icon:'✅'};
+    if(dias<=6) return {label:'Atenção',col:'var(--amber)',bg:'var(--amber-bg)',icon:'⚠️'};
+    if(dias<=13) return {label:'Crítico',col:'var(--red)',bg:'var(--red-bg)',icon:'🔴'};
+    return {label:'Grave',col:'#7c3aed',bg:'#ede9fe',icon:'💀'};
+  }
+
+  // Build unified list (deduplicate TA+TM by empresa+bdr)
+  var allMeetings=[];
+  var seen={};
+  [...r.atrasadasTA,...r.atrasadasTM].forEach(function(a){
+    var key=a.empresa+a.id;
+    if(!seen[key]){
+      seen[key]=true;
+      var dias=diasAtraso(a.data);
+      allMeetings.push({...a, dias, status:statusInfo(dias)});
+    }
+  });
+  allMeetings.sort(function(a,b){return b.dias-a.dias;});
+
+  // Metrics
+  var totalMeet=allMeetings.length;
+  var avgDias=totalMeet>0?Math.round(allMeetings.reduce(function(s,m){return s+m.dias;},0)/totalMeet):0;
+  var criticas=allMeetings.filter(function(m){return m.dias>=14;}).length;
+  var noSla=allMeetings.filter(function(m){return m.dias<=1;}).length;
+  var maxDias=allMeetings[0]?allMeetings[0].dias:1;
+
+  // Group by AE
+  var byAE={};
+  allMeetings.forEach(function(m){
+    var ae=m.ae.split(' ')[0]+' '+m.ae.split(' ')[1];
+    if(!byAE[ae]) byAE[ae]={name:ae,count:0,totalDias:0,items:[]};
+    byAE[ae].count++;
+    byAE[ae].totalDias+=m.dias;
+    byAE[ae].items.push(m);
+  });
+  var aeList=Object.values(byAE).sort(function(a,b){return (b.totalDias/b.count)-(a.totalDias/a.count);});
+
+  // Group by BDR
+  var byBDR={};
+  allMeetings.forEach(function(m){
+    if(!byBDR[m.id]) byBDR[m.id]={id:m.id,name:m.name,bg:m.bg,color:m.color,count:0,totalDias:0};
+    byBDR[m.id].count++;
+    byBDR[m.id].totalDias+=m.dias;
+  });
+  var bdrList=Object.values(byBDR).sort(function(a,b){return b.count-a.count;});
+
+  // Build HTML
+  var el=document.createElement('div');
+  el.style.cssText='margin-top:16px';
+
+  // Header
+  el.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;padding-bottom:7px;border-bottom:2px solid var(--red-bg);display:flex;align-items:center;gap:6px">'
+    +'<span>⏱</span> Lead Time de Validação — SLA: 24h'
+    +'</div>'
+
+    // ── Bloco 1: Cards resumo ──
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
+    +'<div class="metric-card" style="text-align:center;padding:12px 8px;border-top:3px solid var(--red)">'
+    +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Lead time médio</div>'
+    +'<div style="font-size:28px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--red);line-height:1">'+avgDias+'d</div>'
+    +'<div style="font-size:9px;color:var(--text3);margin-top:3px">SLA: 1 dia</div>'
+    +'</div>'
+    +'<div class="metric-card" style="text-align:center;padding:12px 8px;border-top:3px solid var(--red)">'
+    +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Reuniões pendentes</div>'
+    +'<div style="font-size:28px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text);line-height:1">'+totalMeet+'</div>'
+    +'<div style="font-size:9px;color:var(--text3);margin-top:3px">'+noSla+' no SLA</div>'
+    +'</div>'
+    +'<div class="metric-card" style="text-align:center;padding:12px 8px;border-top:3px solid #7c3aed">'
+    +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Graves (+14 dias)</div>'
+    +'<div style="font-size:28px;font-weight:700;font-family:\'DM Mono\',monospace;color:#7c3aed;line-height:1">'+criticas+'</div>'
+    +'<div style="font-size:9px;color:var(--text3);margin-top:3px">aguardando AE</div>'
+    +'</div>'
+    +'</div>'
+
+    // ── Bloco 2: Ranking por AE ──
+    +'<div class="card" style="margin-bottom:12px">'
+    +'<div class="card-title" style="display:flex;align-items:center;justify-content:space-between">'
+    +'Ranking AE — quem está segurando'
+    +'<span style="font-size:9px;color:var(--text3);font-weight:400">média de dias</span>'
+    +'</div>'
+    +aeList.map(function(ae){
+      var avg=Math.round(ae.totalDias/ae.count);
+      var s=statusInfo(avg);
+      var aeId='ae-'+ae.name.replace(/\s+/g,'-');
+      var empresasListHtml=ae.items.map(function(x){
+        var ds=Math.floor((new Date()-new Date(2026,parseInt(x.data.split('/')[1])-1,parseInt(x.data.split('/')[0])))/(1000*60*60*24));
+        var dc=ds>=14?'var(--red)':ds>=7?'var(--amber)':'var(--text2)';
+        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);background:var(--bg2)">'
+          +'<span style="font-size:11px;color:var(--text)">'+x.empresa.substring(0,32)+(x.empresa.length>32?'…':'')+'</span>'
+          +'<span style="font-size:11px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+dc+';margin-left:10px">'+ds+'d</span>'
+          +'</div>';
+      }).join('');
+      return '<div style="padding:10px 0;border-bottom:1px solid var(--border)">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between">'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="font-size:14px">'+s.icon+'</span>'
+        +'<div>'
+        +'<button id="'+aeId+'" onclick="toggleAEList(\''+aeId+'\')" '
+        +'onmouseenter="this.style.background=\'var(--accent-light)\';this.style.color=\'var(--accent)\';this.style.borderColor=\'var(--accent)\'" '
+        +'onmouseleave="if(!document.getElementById(\'list-'+aeId+'\').style.display||document.getElementById(\'list-'+aeId+'\').style.display===\'none\'){this.style.background=\'transparent\';this.style.color=\'var(--text)\';this.style.borderColor=\'transparent\';}" '
+        +'style="font-size:12px;font-weight:600;color:var(--text);background:transparent;border:1.5px solid transparent;border-radius:8px;padding:3px 8px;cursor:pointer;font-family:\'Poppins\',sans-serif;transition:all .15s">'
+        +ae.name+' ▾</button>'
+        +'<div id="list-'+aeId+'" style="display:none;margin-top:6px;padding:4px 0;background:var(--bg2)">'
+        +empresasListHtml
+        +'</div>'
+        +'<div style="font-size:10px;color:var(--text3);padding-left:4px">'+ae.count+' reunião(ões) pendente(s)</div>'
+        +'</div>'
+        +'</div>'
+        +'<div style="text-align:right">'
+        +'<div style="font-size:16px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+s.col+'">'+avg+'d</div>'
+        +'<div style="font-size:9px;color:var(--text3)">média</div>'
+        +'</div>'
+        +'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+
+    // ── Bloco 3: Timeline visual com filtro BDR ──
+    var uniqueBdrs=[...new Set(allMeetings.map(function(m){return m.id;}))]
+      .map(function(id){var m=allMeetings.find(function(x){return x.id===id;});return {id:id,name:m.name.split(' ')[0],bg:m.bg,color:m.color,photo:DATA.bdrs.find(function(b){return b.id===id;})&&DATA.bdrs.find(function(b){return b.id===id;}).photo};});
+    var filterChips='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">'
+      +'<button onclick="filterTimeline(\'todos\')" id="chip-todos" '
+      +'style="padding:4px 10px;border-radius:20px;border:1.5px solid var(--accent);background:var(--accent);color:white;font-size:11px;font-weight:600;cursor:pointer;font-family:\'Poppins\',sans-serif">Todos</button>'
+      +uniqueBdrs.map(function(b){
+        var ph=b.photo?'<img src="'+b.photo+'" style="width:16px;height:16px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px">':
+          '<div style="width:16px;height:16px;border-radius:50%;background:'+b.bg+';color:'+b.color+';display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;vertical-align:middle;margin-right:4px">'+b.id+'</div>';
+        return '<button onclick="filterTimeline(\''+b.id+'\')" id="chip-'+b.id+'" '
+          +'style="display:flex;align-items:center;padding:4px 10px;border-radius:20px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:11px;font-weight:500;cursor:pointer;font-family:\'Poppins\',sans-serif">'
+          +ph+b.name+'</button>';
+      }).join('')
+      +'</div>';
+    +'<div class="card" style="margin-bottom:12px">'
+    +'<div class="card-title">Timeline — por reunião (maior atraso primeiro)</div>'
+    +filterChips
+    +'<div id="timeline-rows">'
+    +allMeetings.map(function(m){
+      var pct=Math.round((m.dias/Math.max(maxDias,1))*100);
+      var bdrData=DATA.bdrs.find(function(b){return b.id===m.id;});
+      var photo=bdrData&&bdrData.photo
+        ?'<img src="'+bdrData.photo+'" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
+        :'<div style="width:20px;height:20px;border-radius:50%;background:'+m.bg+';color:'+m.color+';display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0">'+m.id+'</div>';
+      return '<div style="padding:7px 0;border-bottom:1px solid var(--border)" data-bdr="'+m.id+'">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
+        +'<div style="display:flex;align-items:center;gap:6px">'
+        +photo
+        +'<span style="font-size:10px;font-weight:600;color:var(--text)">'+m.empresa.substring(0,28)+(m.empresa.length>28?'…':'')+'</span>'
+        +'</div>'
+        +'<div style="display:flex;align-items:center;gap:8px">'
+        +'<span style="font-size:9px;color:var(--text3)">'+m.data+'</span>'
+        +'<span style="font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+m.status.col+';background:'+m.status.bg+';padding:2px 7px;border-radius:10px">'+m.dias+'d</span>'
+        +'</div>'
+        +'</div>'
+        +'<div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">'
+        +'<div style="width:'+pct+'%;height:100%;background:'+m.status.col+';border-radius:3px"></div>'
+        +'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+    +'</div>'
+
+    // ── Bloco 4: Por BDR ──
+    +'<div class="card">'
+    +'<div class="card-title">Por BDR — pipeline preso</div>'
+    +bdrList.map(function(b){
+      var avg=Math.round(b.totalDias/b.count);
+      var bdrData=DATA.bdrs.find(function(x){return x.id===b.id;});
+      var photo=bdrData&&bdrData.photo
+        ?'<img src="'+bdrData.photo+'" style="width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
+        :'<div style="width:26px;height:26px;border-radius:50%;background:'+b.bg+';color:'+b.color+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">'+b.id+'</div>';
+      var s=statusInfo(avg);
+      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">'
+        +photo
+        +'<div style="flex:1">'
+        +'<div style="font-size:12px;font-weight:600;color:var(--text)">'+b.name.split(' ')[0]+'</div>'
+        +'<div style="font-size:10px;color:var(--text3)">'+b.count+' reunião(ões) aguardando AE</div>'
+        +'</div>'
+        +'<div style="text-align:right">'
+        +'<div style="font-size:14px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+s.col+'">'+avg+'d</div>'
+        +'<div style="font-size:9px;color:var(--text3)">média</div>'
+        +'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>';
+
+  pane.appendChild(el);
 }
 
 // ANÁLISE = Desqualificados + Eventos
