@@ -3371,37 +3371,10 @@ function buildCalendarioBDR(body, bdr){
     +'<div style="padding:8px 0 0;font-size:10px;color:var(--text3);font-family:\'Poppins\',sans-serif;display:flex;align-items:center;gap:4px">'
     +'<span>←</span> arraste para ver mais <span>→</span>'
     +'</div>';
-}
 
+}
 // ─── HOJE ─────────────────────────────────────────────────────
 
-function buildHistChart(bdr){
-  var hd=DATA.hist3m&&DATA.hist3m.bdrs&&DATA.hist3m.bdrs[bdr.id];
-  if(!hd) return '';
-  var vals=[hd.m1_opps||0,hd.m2_opps||0,bdr.opps];
-  var mes=(DATA.hist3m&&DATA.hist3m.meses)||['Fev','Mar','Abr'];
-  var maxV=Math.max.apply(null,vals.concat([DATA.metaBDR,1]));
-  var bars='';
-  vals.forEach(function(v,i){
-    var isNow=i===2;
-    var col=v>=DATA.metaBDR?'var(--green)':v>=DATA.metaBDR*0.7?'var(--amber)':'var(--red)';
-    var pct=Math.max(Math.round((v/maxV)*100),5);
-    bars+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">'
-      +'<span style="font-size:11px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+col+'">'+v+'</span>'
-      +'<div style="width:100%;background:var(--bg3);border-radius:4px 4px 0 0;height:50px;display:flex;align-items:flex-end;overflow:hidden">'
-      +'<div style="width:100%;background:'+col+';opacity:'+(isNow?1:0.5)+';height:'+pct+'%"></div>'
-      +'</div>'
-      +'<span style="font-size:9px;color:'+(isNow?'var(--accent)':'var(--text3)')+';font-weight:'+(isNow?700:400)+'">'+mes[i]+(isNow?' ★':'')+'</span>'
-      +'</div>';
-  });
-  return '<div class="card" style="margin-bottom:10px;padding:12px 14px">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-    +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">📊 Opps — últimos 3 meses</div>'
-    +'<div style="font-size:10px;color:var(--text3)">meta/mês: '+DATA.metaBDR+'</div>'
-    +'</div>'
-    +'<div style="display:flex;align-items:flex-end;gap:8px;height:72px">'+bars+'</div>'
-    +'</div>';
-}
 function buildHoje(pane, bdr){
   const META=DATA.metaBDR, SEMR=DATA.semTotal-DATA.semAtual;
   const needed=SEMR>0?Math.ceil((META-bdr.opps)/SEMR):META-bdr.opps;
@@ -3461,8 +3434,7 @@ function buildHoje(pane, bdr){
     tm:d.tm.filter(r=>r.bdr===meuNome)
   })).filter(d=>d.ta.length>0||d.tm.length>0);
 
-  var histChartHtml=buildHistChart(bdr);
-  pane.innerHTML=histChartHtml+`
+  pane.innerHTML=`
     ${temAtrasadas?`<button onclick="(function(){
       // Navigate to 'resultado' pane by id
       var pane=document.getElementById('pane-resultado');
