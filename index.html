@@ -577,6 +577,58 @@ const DATA = {
       PS:{opps:14,ras:9, lig:45, ativ:480,convAiOp:4.8},
     }
   },
+  // ── Histórico 3 meses por BDR (Fev, Mar, Abr) ──
+  hist3m:{
+    meses:['Fev','Mar','Abr'],
+    meta:12, // meta mensal por BDR
+    bdrs:{
+      MY:{
+        m1:{opps:12,ras:8, lig:52,ativ:280,aiLc:71,lcRa:35,raOp:75,noshow:1},
+        m2:{opps:15,ras:9, lig:58,ativ:310,aiLc:74,lcRa:38,raOp:83,noshow:0},
+        m3:{opps:0,ras:0,lig:4, ativ:130,aiLc:31,lcRa:0, raOp:0, noshow:0},
+      },
+      JS:{
+        m1:{opps:7, ras:6, lig:32,ativ:240,aiLc:65,lcRa:33,raOp:58,noshow:2},
+        m2:{opps:9, ras:7, lig:38,ativ:255,aiLc:68,lcRa:36,raOp:64,noshow:1},
+        m3:{opps:0,ras:0,lig:6, ativ:102,aiLc:55,lcRa:0, raOp:0, noshow:0},
+      },
+      VE:{
+        m1:{opps:6, ras:5, lig:28,ativ:180,aiLc:60,lcRa:28,raOp:60,noshow:1},
+        m2:{opps:8, ras:6, lig:33,ativ:195,aiLc:64,lcRa:30,raOp:67,noshow:2},
+        m3:{opps:0,ras:0,lig:1, ativ:74, aiLc:25,lcRa:0, raOp:0, noshow:0},
+      },
+      GF:{
+        m1:{opps:5, ras:4, lig:22,ativ:420,aiLc:42,lcRa:22,raOp:62,noshow:1},
+        m2:{opps:7, ras:6, lig:28,ativ:445,aiLc:45,lcRa:26,raOp:58,noshow:2},
+        m3:{opps:0,ras:4,lig:19,ativ:79, aiLc:35,lcRa:21,raOp:0, noshow:0},
+      },
+      JR:{
+        m1:{opps:9, ras:6, lig:38,ativ:260,aiLc:68,lcRa:32,raOp:75,noshow:0},
+        m2:{opps:12,ras:7, lig:42,ativ:280,aiLc:71,lcRa:35,raOp:86,noshow:1},
+        m3:{opps:0,ras:0,lig:15,ativ:86, aiLc:68,lcRa:0, raOp:0, noshow:0},
+      },
+      AG:{
+        m1:{opps:4, ras:3, lig:20,ativ:310,aiLc:38,lcRa:20,raOp:67,noshow:1},
+        m2:{opps:6, ras:5, lig:26,ativ:335,aiLc:42,lcRa:24,raOp:60,noshow:2},
+        m3:{opps:0,ras:2,lig:5, ativ:162,aiLc:20,lcRa:22,raOp:0, noshow:0},
+      },
+      AM:{
+        m1:{opps:9, ras:5, lig:30,ativ:290,aiLc:65,lcRa:28,raOp:72,noshow:1},
+        m2:{opps:11,ras:7, lig:36,ativ:310,aiLc:69,lcRa:32,raOp:79,noshow:0},
+        m3:{opps:0,ras:0,lig:0, ativ:76, aiLc:0, lcRa:0, raOp:0, noshow:0},
+      },
+      PS:{
+        m1:{opps:4, ras:3, lig:14,ativ:160,aiLc:45,lcRa:21,raOp:67,noshow:2},
+        m2:{opps:5, ras:4, lig:18,ativ:175,aiLc:48,lcRa:22,raOp:63,noshow:1},
+        m3:{opps:0,ras:0,lig:1, ativ:107,aiLc:10,lcRa:0, raOp:0, noshow:0},
+      },
+    }
+  },
+  // Benchmarks do time (médias Q1)
+  benchmarks:{
+    aiLc:57, lcRa:37, raOp:75,
+    ligDia:10, ativSem:200, noshow:1.5
+  },
   // RA pendentes por BDR (reuniões agendadas ainda não realizadas)
   raPendentes:{
     MY:4, JS:4, VE:1, GF:2, JR:0, AG:1, AM:0, PS:0
@@ -935,7 +987,7 @@ const NAV_ICONS={
 };
 const NAV_LABELS={
   resumo:'Resumo',time:'Time',mrr:'MRR',reunioes:'Agenda',noticias:'Notícias',analise:'Análise',
-  hoje:'Início',resultado:'Meu Resultado',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI'
+  hoje:'Início',resultado:'Meu Resultado',performance:'Performance',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI'
 };
 
 
@@ -1430,11 +1482,11 @@ function buildResumo(pane){
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;text-align:center">
         <div>
-          <div style="font-size:24px;font-weight:700;font-family:'DM Mono',monospace;color:white;line-height:1">${d.funil.oportunidades}</div>
+          <div style="font-size:24px;font-weight:700;font-family:\'DM Mono\',monospace;color:white;line-height:1">${d.funil.oportunidades}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Atual</div>
         </div>
         <div style="border-left:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2)">
-          <div style="font-size:24px;font-weight:700;font-family:'DM Mono',monospace;color:white;line-height:1">${proj}</div>
+          <div style="font-size:24px;font-weight:700;font-family:\'DM Mono\',monospace;color:white;line-height:1">${proj}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Projeção</div>
         </div>
         <div>
@@ -1468,12 +1520,12 @@ function buildResumo(pane){
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;text-align:center">
           <div style="background:white;border-radius:8px;padding:8px">
-            <div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text2)">${a.antes}%</div>
+            <div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text2)">${a.antes}%</div>
             <div style="font-size:9px;color:var(--text3);margin-top:2px">Histórico</div>
           </div>
           <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--red)">→</div>
           <div style="background:white;border-radius:8px;padding:8px">
-            <div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red)">${a.agora}%</div>
+            <div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--red)">${a.agora}%</div>
             <div style="font-size:9px;color:var(--text3);margin-top:2px">Agora</div>
           </div>
         </div>
@@ -1497,7 +1549,7 @@ function buildResumo(pane){
             <span style="font-size:12px;font-weight:600">${b.name.split(' ')[0]}</span>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:12px;font-family:'DM Mono',monospace;font-weight:700;color:var(--red)">${b.conv}%</span>
+            <span style="font-size:12px;font-family:\'DM Mono\',monospace;font-weight:700;color:var(--red)">${b.conv}%</span>
             <span style="font-size:10px;color:var(--text3)">média: ${mediaConvLigRa}%</span>
           </div>
         </div>`;
@@ -1508,7 +1560,7 @@ function buildResumo(pane){
         <div style="display:flex;align-items:center;justify-content:space-between;background:var(--red-bg);border-radius:8px;padding:10px 12px">
           <div style="font-size:12px;font-weight:700;color:var(--red)">${piorEtapa.de} → ${piorEtapa.para}</div>
           <div style="text-align:right">
-            <div style="font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red)">${piorEtapa.pct}%</div>
+            <div style="font-size:14px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--red)">${piorEtapa.pct}%</div>
             <div style="font-size:9px;color:var(--text3)">meta ${piorEtapa.meta}%</div>
           </div>
         </div>
@@ -1545,7 +1597,7 @@ function buildResumo(pane){
             <div style="width:6px;height:6px;border-radius:50%;background:${a.cor}"></div>
             <span style="font-size:12px;font-weight:500;color:var(--text)">${a.label}</span>
           </div>
-          <span style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:${a.cor}">+${a.opps} opps</span>
+          <span style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:${a.cor}">+${a.opps} opps</span>
         </div>`).join('')}
       <div style="padding-top:10px;font-size:11px;color:var(--text3);text-align:center">
         Potencial total: +${alavancas.reduce((s,a)=>s+a.opps,0)} oportunidades adicionais
@@ -1562,7 +1614,7 @@ function buildResumo(pane){
           return `
           ${i>0?`<div style="font-size:16px;color:var(--text3)">→</div>`:''}
           <div style="flex:1;text-align:center;padding:10px 6px;border-radius:var(--radius-sm);background:${isPior?'#fff5f5':'var(--bg3)'};border:${isPior?'1.5px solid #fecaca':'1px solid transparent'}">
-            <div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:${cor}">${c.pct}%</div>
+            <div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:${cor}">${c.pct}%</div>
             <div style="font-size:9px;color:var(--text3);margin-top:2px">${c.de}→${c.para}</div>
             <div style="font-size:9px;color:${cor};font-weight:600">meta ${c.meta}%</div>
             ${isPior?`<div style="font-size:8px;color:var(--red);font-weight:700;margin-top:3px">▼ CRÍTICO</div>`:''}
@@ -1622,15 +1674,15 @@ function buildTimeGestor(pane){
       <div style="margin-bottom:8px"></div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px">
         <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px">
-          <div style="font-size:16px;font-weight:600;font-family:'DM Mono',monospace;color:${b.opps>0?'var(--green)':'var(--red)'}">${b.opps||'0'}</div>
+          <div style="font-size:16px;font-weight:600;font-family:\'DM Mono\',monospace;color:${b.opps>0?'var(--green)':'var(--red)'}">${b.opps||'0'}</div>
           <div style="font-size:9px;color:var(--text3);margin-top:1px">Opps</div>
         </div>
         <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px">
-          <div style="font-size:16px;font-weight:600;font-family:'DM Mono',monospace;color:${b.ras>=3?'var(--green)':b.ras>=1?'var(--amber)':'var(--red)'}">${b.ras}</div>
+          <div style="font-size:16px;font-weight:600;font-family:\'DM Mono\',monospace;color:${b.ras>=3?'var(--green)':b.ras>=1?'var(--amber)':'var(--red)'}">${b.ras}</div>
           <div style="font-size:9px;color:var(--text3);margin-top:1px">RAs</div>
         </div>
         <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px">
-          <div style="font-size:16px;font-weight:600;font-family:'DM Mono',monospace;color:${b.lig>=20?'var(--green)':b.lig>=10?'var(--amber)':'var(--red)'}">${b.lig}</div>
+          <div style="font-size:16px;font-weight:600;font-family:\'DM Mono\',monospace;color:${b.lig>=20?'var(--green)':b.lig>=10?'var(--amber)':'var(--red)'}">${b.lig}</div>
           <div style="font-size:9px;color:var(--text3);margin-top:1px">Lig.</div>
         </div>
         <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px">
@@ -1649,15 +1701,15 @@ function buildTimeGestor(pane){
         </div>
         <div style="display:flex;align-items:center;gap:10px">
           <div style="text-align:center">
-            <div style="font-size:13px;font-weight:600;font-family:'DM Mono',monospace;color:${b.meetrox.nota!==null?(b.meetrox.nota>=8?'var(--green)':b.meetrox.nota>=6?'var(--amber)':'var(--red)'):'var(--text3)'}">${b.meetrox.nota!==null?b.meetrox.nota:'—'}</div>
+            <div style="font-size:13px;font-weight:600;font-family:\'DM Mono\',monospace;color:${b.meetrox.nota!==null?(b.meetrox.nota>=8?'var(--green)':b.meetrox.nota>=6?'var(--amber)':'var(--red)'):'var(--text3)'}">${b.meetrox.nota!==null?b.meetrox.nota:'—'}</div>
             <div style="font-size:9px;color:var(--text3)">nota sem.</div>
           </div>
           <div style="text-align:center">
-            <div style="font-size:13px;font-weight:600;font-family:'DM Mono',monospace;color:${b.meetrox.notaMes>=8?'var(--green)':b.meetrox.notaMes>=6?'var(--amber)':'var(--red)'}">${b.meetrox.notaMes||'—'}</div>
+            <div style="font-size:13px;font-weight:600;font-family:\'DM Mono\',monospace;color:${b.meetrox.notaMes>=8?'var(--green)':b.meetrox.notaMes>=6?'var(--amber)':'var(--red)'}">${b.meetrox.notaMes||'—'}</div>
             <div style="font-size:9px;color:var(--text3)">nota M-1</div>
           </div>
           <div style="text-align:center">
-            <div style="font-size:13px;font-weight:600;font-family:'DM Mono',monospace;color:${b.meetrox.conversas>=5?'var(--green)':b.meetrox.conversas>=2?'var(--amber)':'var(--red)'}">${b.meetrox.conversas}</div>
+            <div style="font-size:13px;font-weight:600;font-family:\'DM Mono\',monospace;color:${b.meetrox.conversas>=5?'var(--green)':b.meetrox.conversas>=2?'var(--amber)':'var(--red)'}">${b.meetrox.conversas}</div>
             <div style="font-size:9px;color:var(--text3)">avaliadas</div>
           </div>
         </div>
@@ -1768,19 +1820,19 @@ function buildTimeGestor(pane){
           <span style="font-size:12px;font-weight:600;color:${isTop?'var(--green)':isBot?'var(--red)':'var(--text)'}">${b.name.split(' ')[0]}</span>
         </div>
       </td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:700;color:${b.opps>0?'var(--green)':'var(--text3)'}">${b.opps||'—'}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:700;color:${b.opps>0?'var(--green)':'var(--text3)'}">${b.opps||'—'}</td>
       <td style="padding:10px 8px;text-align:center" id="fcst-rank-${b.id}"><span style="font-size:10px;color:var(--text3)">…</span></td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:700;color:${b.ras>=3?'var(--green)':b.ras>=1?'var(--amber)':'var(--red)'}">${b.ras}</td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:700;color:${raPend>0?'var(--amber)':'var(--text3)'}">${raPend>0?raPend:'—'}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:700;color:${b.ras>=3?'var(--green)':b.ras>=1?'var(--amber)':'var(--red)'}">${b.ras}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:700;color:${raPend>0?'var(--amber)':'var(--text3)'}">${raPend>0?raPend:'—'}</td>
       <td style="padding:10px 8px;text-align:center;font-size:12px;font-family:\'DM Mono\',monospace;font-weight:600;color:${aiOp!=='—'&&parseFloat(aiOp)>=5?'var(--green)':aiOp!=='—'?'var(--amber)':'var(--text3)'}">${aiOp!=='—'?aiOp+'%':aiOp}</td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:700;color:${b.lig>=20?'var(--green)':b.lig>=10?'var(--amber)':'var(--red)'}">${b.lig}</td>
-      <td style="padding:10px 8px;text-align:center;font-size:12px;font-family:'DM Mono',monospace;color:var(--text2)">${b.ativ}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:700;color:${b.lig>=20?'var(--green)':b.lig>=10?'var(--amber)':'var(--red)'}">${b.lig}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:12px;font-family:\'DM Mono\',monospace;color:var(--text2)">${b.ativ}</td>
       <td style="padding:10px 10px">
         <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
           <div style="height:4px;width:44px;background:var(--bg3);border-radius:2px;overflow:hidden">
             <div style="width:${b.pacing}%;height:100%;background:${pc};border-radius:2px"></div>
           </div>
-          <span style="font-size:9px;font-family:'DM Mono',monospace;color:${pc};font-weight:700">${b.pacing}%</span>
+          <span style="font-size:9px;font-family:\'DM Mono\',monospace;color:${pc};font-weight:700">${b.pacing}%</span>
         </div>
       </td>
     </tr>`;
@@ -1825,16 +1877,16 @@ async function loadGestorForecast(){
             ${!f?`<span style="font-size:9px;color:var(--text3);background:var(--bg3);padding:1px 6px;border-radius:10px">pendente</span>`:''}
           </div>
         </td>
-        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:${f?'var(--text)':'var(--text3)'}">${f?f.fcst_lc:'—'}</td>
-        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:600;color:${f?'var(--text)':'var(--text3)'}">${f?f.fcst_ra:'—'}</td>
+        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:600;color:${f?'var(--text)':'var(--text3)'}">${f?f.fcst_lc:'—'}</td>
+        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:600;color:${f?'var(--text)':'var(--text3)'}">${f?f.fcst_ra:'—'}</td>
         <td style="padding:10px 8px;text-align:center">
-          <span style="font-size:13px;font-family:'DM Mono',monospace;font-weight:700;color:${f?'var(--accent)':'var(--text3)'}">${f?f.fcst_op:'—'}</span>
+          <span style="font-size:13px;font-family:\'DM Mono\',monospace;font-weight:700;color:${f?'var(--accent)':'var(--text3)'}">${f?f.fcst_op:'—'}</span>
           ${f&&f.editado_apos_planejamento?'<div style="font-size:8px;font-weight:700;color:var(--amber);margin-top:1px">✎ editado</div>':''}
         </td>
-        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:700;color:${realOp>0?'var(--green)':'var(--text3)'}">${realOp||'—'}</td>
+        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:700;color:${realOp>0?'var(--green)':'var(--text3)'}">${realOp||'—'}</td>
         <td style="padding:10px 10px;text-align:center">
           ${ating!==null
-            ?`<span style="font-size:12px;font-weight:700;font-family:'DM Mono',monospace;color:${atingColor}">${ating}%</span>`
+            ?`<span style="font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;color:${atingColor}">${ating}%</span>`
             :'<span style="font-size:12px;color:var(--text3)">—</span>'}
         </td>
       </tr>`;
@@ -1846,9 +1898,9 @@ async function loadGestorForecast(){
       <td style="padding:10px 12px;font-size:11px;font-weight:700;color:var(--text)">TOTAL</td>
       <td style="padding:10px 8px;text-align:center">—</td>
       <td style="padding:10px 8px;text-align:center">—</td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent)">${totalFcstOp}</td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green)">${totalRealOp}</td>
-      <td style="padding:10px 10px;text-align:center;font-size:12px;font-weight:700;font-family:'DM Mono',monospace;color:${totalAting>=100?'var(--green)':totalAting>=70?'var(--amber)':'var(--red)'}">${totalAting}%</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--accent)">${totalFcstOp}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--green)">${totalRealOp}</td>
+      <td style="padding:10px 10px;text-align:center;font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;color:${totalAting>=100?'var(--green)':totalAting>=70?'var(--amber)':'var(--red)'}">${totalAting}%</td>
     </tr>`;
 
     // Populate ranking fcst cells
@@ -1893,17 +1945,17 @@ function buildMRRGestor(pane){
   const maxOppsQ1=q1sorted[0]?q1sorted[0].opps||0:1;
 
   pane.innerHTML=`
-    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:'DM Mono',monospace">${m.periodo} · MRR gerado + Performance</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:\'DM Mono\',monospace">${m.periodo} · MRR gerado + Performance</div>
 
     <!-- MRR totals -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <div class="card" style="text-align:center;padding:14px 10px">
         <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600">Total TA</div>
-        <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent)">R$${(m.totalTA/1000).toFixed(0)}k</div>
+        <div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--accent)">R$${(m.totalTA/1000).toFixed(0)}k</div>
       </div>
       <div class="card" style="text-align:center;padding:14px 10px">
         <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600">Total TM</div>
-        <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:var(--teal)">R$${(m.totalTM/1000).toFixed(0)}k</div>
+        <div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--teal)">R$${(m.totalTM/1000).toFixed(0)}k</div>
       </div>
     </div>
 
@@ -1920,7 +1972,7 @@ function buildMRRGestor(pane){
             ?`<img src="${bdrData.photo}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">`
             :`<div style="width:20px;height:20px;border-radius:50%;background:${b.bg};color:${b.color};display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700">${b.id}</div>`;
           return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
-            <div style="font-size:9px;font-weight:700;color:${color};font-family:'DM Mono',monospace">${opps}</div>
+            <div style="font-size:9px;font-weight:700;color:${color};font-family:\'DM Mono\',monospace">${opps}</div>
             <div style="width:100%;height:${pct}%;background:${color};border-radius:3px 3px 0 0;min-height:4px;transition:height .4s ease"></div>
           </div>`;
         }).join('')}
@@ -1981,16 +2033,16 @@ function buildMRRGestor(pane){
                     </div>
                   </div>
                 </td>
-                <td style="padding:10px 8px;text-align:center;font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:${opps>=q.metaOpps?'var(--green)':opps>=q.metaOpps*0.7?'var(--amber)':'var(--red)'}">${opps}</td>
-                <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;color:var(--text)">${b.ras||'—'}</td>
-                <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;color:var(--text)">${b.lig||'—'}</td>
-                <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;color:var(--text2)">${b.ativ||'—'}</td>
+                <td style="padding:10px 8px;text-align:center;font-size:14px;font-weight:700;font-family:\'DM Mono\',monospace;color:${opps>=q.metaOpps?'var(--green)':opps>=q.metaOpps*0.7?'var(--amber)':'var(--red)'}">${opps}</td>
+                <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;color:var(--text)">${b.ras||'—'}</td>
+                <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;color:var(--text)">${b.lig||'—'}</td>
+                <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;color:var(--text2)">${b.ativ||'—'}</td>
                 <td style="padding:10px 12px">
                   <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
                     <div style="height:5px;width:50px;background:var(--bg3);border-radius:3px;overflow:hidden">
                       <div style="width:${Math.min(pct,100)}%;height:100%;background:${pc};border-radius:3px"></div>
                     </div>
-                    <span style="font-size:9px;font-weight:700;color:${pc};font-family:'DM Mono',monospace">${pct}%</span>
+                    <span style="font-size:9px;font-weight:700;color:${pc};font-family:\'DM Mono\',monospace">${pct}%</span>
                   </div>
                 </td>
               </tr>`;
@@ -2019,7 +2071,7 @@ function buildMRRGestor(pane){
               <span style="font-size:12px;font-weight:600">${b.name.split(' ')[0]}</span>
             </div>
             <div style="text-align:right">
-              <div style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:${total>0?barColor:'var(--text3)'}">${total>0?fmt(total):'—'}</div>
+              <div style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:${total>0?barColor:'var(--text3)'}">${total>0?fmt(total):'—'}</div>
               ${total>0?`<div style="font-size:9px;color:var(--text3)">TA ${fmt(b.ta)} · TM ${fmt(b.tm)}</div>`:''}
             </div>
           </div>
@@ -2043,7 +2095,7 @@ function buildMRRBDR(pane,bdr){
   const myPct=teamTotal>0?Math.round((total/teamTotal)*100):0;
 
   pane.innerHTML=`
-    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:'DM Mono',monospace">${m.periodo} · Seu MRR gerado</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:\'DM Mono\',monospace">${m.periodo} · Seu MRR gerado</div>
 
     <div class="card" style="text-align:center;padding:20px 16px;margin-bottom:10px">
       <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Seu MRR total — ${m.periodo}</div>
@@ -2051,11 +2103,11 @@ function buildMRRBDR(pane,bdr){
       ${total>0?`<div style="font-size:12px;color:var(--text2);margin-top:6px">${myPct}% do total do time</div>`:''}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
         <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px">
-          <div style="font-size:18px;font-weight:600;font-family:'DM Mono',monospace;color:var(--accent)">${fmt(myMrr.ta)}</div>
+          <div style="font-size:18px;font-weight:600;font-family:\'DM Mono\',monospace;color:var(--accent)">${fmt(myMrr.ta)}</div>
           <div style="font-size:9px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.04em">TA</div>
         </div>
         <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px">
-          <div style="font-size:18px;font-weight:600;font-family:'DM Mono',monospace;color:var(--teal)">${fmt(myMrr.tm)}</div>
+          <div style="font-size:18px;font-weight:600;font-family:\'DM Mono\',monospace;color:var(--teal)">${fmt(myMrr.tm)}</div>
           <div style="font-size:9px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.04em">TM</div>
         </div>
       </div>
@@ -2077,7 +2129,7 @@ function buildMRRBDR(pane,bdr){
         return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);${isMe?'background:rgba(59,130,246,0.04);border-radius:6px;padding:8px;':''}" >
           <span style="font-size:10px;color:${isMe?'var(--accent)':'var(--text3)'};width:14px;font-weight:${isMe?'700':'400'}">${i+1}</span>
           <span style="font-size:12px;font-weight:${isMe?'600':'400'};color:${isMe?'var(--accent)':'var(--text)'};flex:1">${b.name.split(' ')[0]}${isMe?' ★':''}</span>
-          <span style="font-size:12px;font-family:'DM Mono',monospace;font-weight:500;color:${tot>0?color:'var(--text3)'}">${tot>0?fmt(tot):'—'}</span>
+          <span style="font-size:12px;font-family:\'DM Mono\',monospace;font-weight:500;color:${tot>0?color:'var(--text3)'}">${tot>0?fmt(tot):'—'}</span>
         </div>`;
       }).join('')}
       <div style="padding-top:10px;font-size:11px;color:var(--text3);text-align:center">Total time: ${fmt(teamTotal)}</div>
@@ -2091,14 +2143,14 @@ function buildNoticias(pane){
   const nivelCor=n=>n>=9?'var(--green)':n>=8?'var(--teal)':n>=7?'var(--amber)':'var(--red)';
 
   pane.innerHTML=`
-    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;font-family:'DM Mono',monospace">Pulso do time · W30 › 03 · Abril 2026</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;font-family:\'DM Mono\',monospace">Pulso do time · W30 › 03 · Abril 2026</div>
 
     <!-- Score geral -->
     <div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,var(--accent) 0%,#1e40af 100%);border:none">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div>
           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.7);margin-bottom:6px">Score Geral · Gupy Pulses</div>
-          <div style="font-size:52px;font-weight:700;font-family:'DM Mono',monospace;color:white;line-height:1">${p.scoreGeral}</div>
+          <div style="font-size:52px;font-weight:700;font-family:\'DM Mono\',monospace;color:white;line-height:1">${p.scoreGeral}</div>
           <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:4px">/10 · ${p.semanas[p.semanas.length-1]}</div>
         </div>
         <!-- Mini sparkline -->
@@ -2133,7 +2185,7 @@ function buildNoticias(pane){
         return `<div style="margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
             <span style="font-size:12px;font-weight:500;color:var(--text)">${d.nome}</span>
-            <span style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:${cor}">${d.nota}</span>
+            <span style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:${cor}">${d.nota}</span>
           </div>
           <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
             <div style="width:${w}%;height:100%;background:${cor};border-radius:3px"></div>
@@ -2165,7 +2217,7 @@ function buildNoticias(pane){
 // ─── PDI (Juliana e Jeanne) ───────────────────────────────────
 function buildPDI(pane,bdr){
   pane.innerHTML=`
-    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;font-family:'DM Mono',monospace">PDI · ${bdr.name.split(' ')[0]} · Abril 2026</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;font-family:\'DM Mono\',monospace">PDI · ${bdr.name.split(' ')[0]} · Abril 2026</div>
 
     <div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,var(--accent) 0%,#1e40af 100%);border:none;text-align:center;padding:28px 20px">
       <div style="font-size:32px;margin-bottom:10px">📋</div>
@@ -2263,8 +2315,8 @@ function buildReunioes(pane){
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
               <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
-              <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)">${a.data}</td>
-              <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:${dc}">${dias}d</span></td>
+              <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'DM Mono\',monospace;color:var(--text3)">${a.data}</td>
+              <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:${dc}">${dias}d</span></td>
             </tr>`;
           }).join("")}
           </tbody>
@@ -2295,8 +2347,8 @@ function buildReunioes(pane){
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
               <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
-              <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)">${a.data}</td>
-              <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:${dc}">${dias}d</span></td>
+              <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'DM Mono\',monospace;color:var(--text3)">${a.data}</td>
+              <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:${dc}">${dias}d</span></td>
             </tr>`;
           }).join("")}
           </tbody>
@@ -2593,13 +2645,13 @@ function buildAnalise(pane){
       <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:0">
         <div style="border-right:1px solid var(--border);padding-right:10px">
           <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Outbound</div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">AI→LC</span><span style="font-family:'DM Mono',monospace;color:var(--green)">74%</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0"><span style="color:var(--text2)">LC→RA</span><span style="font-family:'DM Mono',monospace;color:var(--red)">26%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">AI→LC</span><span style="font-family:\'DM Mono\',monospace;color:var(--green)">74%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0"><span style="color:var(--text2)">LC→RA</span><span style="font-family:\'DM Mono\',monospace;color:var(--red)">26%</span></div>
         </div>
         <div style="padding-left:10px">
           <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">HR4Results</div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">AI→LC</span><span style="font-family:'DM Mono',monospace;color:var(--amber)">45%</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0"><span style="color:var(--text2)">LC→RA</span><span style="font-family:'DM Mono',monospace;color:var(--amber)">22%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">AI→LC</span><span style="font-family:\'DM Mono\',monospace;color:var(--amber)">45%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0"><span style="color:var(--text2)">LC→RA</span><span style="font-family:\'DM Mono\',monospace;color:var(--amber)">22%</span></div>
         </div>
       </div>
       <div class="alert-banner ab-red" style="margin-top:10px;margin-bottom:0">
@@ -2722,14 +2774,16 @@ function buildBDRApp(user){
   if(!bdr)return;
   const hasPDI=DATA.pdiUsers.includes(bdr.id);
   const tabs=[
-    {id:'hoje',      label:'Início'},
-    {id:'resultado', label:'Resultado'},
-    {id:'funil',     label:'Funil'},
-    {id:'time_bdr',  label:'Time'},
+    {id:'hoje',        label:'Início'},
+    {id:'resultado',   label:'Meu Resultado'},
+    {id:'performance', label:'Performance'},
+    {id:'funil',       label:'Funil'},
+    {id:'time_bdr',    label:'Time'},
   ];
   const builders=[
     p=>buildHoje(p,bdr),
     p=>buildMeuResultado(p,bdr),
+    p=>buildPerformanceBDR(p,bdr),
     p=>buildBDRFunil(p,bdr),
     p=>buildTimeView(p,bdr),
   ];
@@ -3445,13 +3499,13 @@ function buildHoje(pane, bdr){
       <span>🚨</span><div><strong>Semana crítica.</strong> ${bdr.lig<=5?`Apenas ${bdr.lig} ligação(ões) conectada(s).`:''} ${bdr.ras===0?'Nenhuma reunião agendada ainda.':''} Fale com seu gestor.</div>
     </div>`:''}
 
-    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:'DM Mono',monospace">Ter, 07 abr 2026 · W32 › 07</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:\'DM Mono\',monospace">Ter, 07 abr 2026 · W32 › 07</div>
 
     <!-- HERO: ATINGIMENTO -->
     <div style="margin-bottom:10px;background:linear-gradient(135deg,${pctMetaBDR>=70?'#16a34a,#15803d':pctMetaBDR>=30?'#d97706,#b45309':'#dc2626,#b91c1c'});border-radius:var(--radius);padding:20px 18px;box-shadow:0 4px 20px rgba(0,0,0,0.12)">
       <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Atingimento da meta · Abril 2026</div>
       <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:12px">
-        <div style="font-size:64px;font-weight:700;font-family:'DM Mono',monospace;color:#fff;line-height:1">${pctMetaBDR}%</div>
+        <div style="font-size:64px;font-weight:700;font-family:\'DM Mono\',monospace;color:#fff;line-height:1">${pctMetaBDR}%</div>
         <div style="margin-bottom:8px">
           <div style="font-size:13px;color:rgba(255,255,255,.75)">${bdr.opps} de ${DATA.metaBDR} opps</div>
           <div style="font-size:11px;color:rgba(255,255,255,.5)">meta do mês</div>
@@ -3462,15 +3516,15 @@ function buildHoje(pane, bdr){
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
         <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px 8px;text-align:center">
-          <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:#fff">${bdr.opps||'0'}</div>
+          <div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:#fff">${bdr.opps||'0'}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Opps</div>
         </div>
         <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px 8px;text-align:center">
-          <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:#fff">${bdr.ras}</div>
+          <div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:#fff">${bdr.ras}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Reuniões</div>
         </div>
         <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px 8px;text-align:center">
-          <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:#fff">${bdr.lig}</div>
+          <div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:#fff">${bdr.lig}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Ligações</div>
         </div>
       </div>
@@ -3552,17 +3606,17 @@ function buildHoje(pane, bdr){
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
           <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center">
             <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Nota semana</div>
-            <div style="font-size:24px;font-weight:600;font-family:'DM Mono',monospace;color:${notaColor}">${temNota?m.nota:'—'}</div>
+            <div style="font-size:24px;font-weight:600;font-family:\'DM Mono\',monospace;color:${notaColor}">${temNota?m.nota:'—'}</div>
             ${diffMes!==null?`<div style="font-size:10px;font-family:\'DM Mono\',monospace;color:${diffMes>=0?'var(--green)':'var(--red)'};margin-top:2px">${diffMes>=0?'+':''}${diffMes} vs M-1</div>`:''}
           </div>
           <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center">
             <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Nota M-1</div>
-            <div style="font-size:24px;font-weight:600;font-family:'DM Mono',monospace;color:${m&&m.notaMes>=8?'var(--green)':m&&m.notaMes>=6?'var(--amber)':'var(--text3)'}">${m&&m.notaMes?m.notaMes:'—'}</div>
+            <div style="font-size:24px;font-weight:600;font-family:\'DM Mono\',monospace;color:${m&&m.notaMes>=8?'var(--green)':m&&m.notaMes>=6?'var(--amber)':'var(--text3)'}">${m&&m.notaMes?m.notaMes:'—'}</div>
             <div style="font-size:9px;color:var(--text3);margin-top:2px">Mar 2026</div>
           </div>
           <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center">
             <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Avaliadas</div>
-            <div style="font-size:24px;font-weight:600;font-family:'DM Mono',monospace;color:${flagColor}">${conv}</div>
+            <div style="font-size:24px;font-weight:600;font-family:\'DM Mono\',monospace;color:${flagColor}">${conv}</div>
             <div style="font-size:9px;color:var(--text3);margin-top:2px">de ${bdr.lig} lig.</div>
           </div>
         </div>
@@ -3630,7 +3684,7 @@ async function loadBDRForecast(bdr){
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
           ${[['LC',f.fcst_lc],['RA',f.fcst_ra],['OP',f.fcst_op]].map(([l,v])=>`
             <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center">
-              <div style="font-size:22px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent)">${v}</div>
+              <div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--accent)">${v}</div>
               <div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-top:3px">${l}</div>
             </div>`).join('')}
         </div>`;
@@ -3648,7 +3702,7 @@ async function loadBDRForecast(bdr){
           <div>
             <div style="font-size:9px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">${l}</div>
             <input id="${id}-${bdr.id}" type="number" min="0" max="99" placeholder="0"
-              style="width:100%;padding:10px 8px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:18px;font-weight:700;font-family:'DM Mono',monospace;text-align:center;background:var(--bg2);color:var(--text);outline:none">
+              style="width:100%;padding:10px 8px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;text-align:center;background:var(--bg2);color:var(--text);outline:none">
             <div style="font-size:9px;color:var(--text3);text-align:center;margin-top:3px">${desc}</div>
           </div>`).join('')}
       </div>
@@ -3697,7 +3751,7 @@ async function editForecast(bdrId,bdrNome,semId,forecastId){
         <div>
           <div style="font-size:9px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">${l}</div>
           <input id="${id}-${bdrId}" type="number" min="0" max="99" value="${val}"
-            style="width:100%;padding:10px 8px;border:1.5px solid var(--amber);border-radius:var(--radius-sm);font-size:18px;font-weight:700;font-family:'DM Mono',monospace;text-align:center;background:var(--bg2);color:var(--text);outline:none">
+            style="width:100%;padding:10px 8px;border:1.5px solid var(--amber);border-radius:var(--radius-sm);font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;text-align:center;background:var(--bg2);color:var(--text);outline:none">
           <div style="font-size:9px;color:var(--text3);text-align:center;margin-top:3px">${desc}</div>
         </div>`).join('')}
     </div>
@@ -3760,19 +3814,19 @@ function buildBDRSemana(pane,bdr){
       const diffStr=(diff>=0?'+':'')+diff;
       return `<div style="flex:1;min-width:0">
         <!-- Label -->
-        <div style="font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;text-align:center;font-family:'Poppins',sans-serif">${label}</div>
+        <div style="font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;text-align:center;font-family:\'Poppins\',sans-serif">${label}</div>
         <!-- Forecast mini square -->
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 4px;text-align:center;margin-bottom:4px">
-          <div style="font-size:8px;color:var(--text3);margin-bottom:2px;font-family:'Poppins',sans-serif">Fcst</div>
-          <div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text)">${fcst}</div>
+          <div style="font-size:8px;color:var(--text3);margin-bottom:2px;font-family:\'Poppins\',sans-serif">Fcst</div>
+          <div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text)">${fcst}</div>
         </div>
         <!-- Realizado square same size -->
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:7px 4px;text-align:center;margin-bottom:4px">
-          <div style="font-size:8px;color:var(--text3);margin-bottom:2px;font-family:'Poppins',sans-serif">Real</div>
-          <div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text)">${real}</div>
+          <div style="font-size:8px;color:var(--text3);margin-bottom:2px;font-family:\'Poppins\',sans-serif">Real</div>
+          <div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text)">${real}</div>
         </div>
         <!-- Delta -->
-        <div style="text-align:center;font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:${diffCol}">${diffStr}</div>
+        <div style="text-align:center;font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:${diffCol}">${diffStr}</div>
       </div>`;
     }
     return `<div style="display:flex;gap:8px">`
@@ -3783,7 +3837,7 @@ function buildBDRSemana(pane,bdr){
   }
 
   pane.innerHTML=`
-    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:'DM Mono',monospace">Resultado S-1 · W30 › 03</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:\'DM Mono\',monospace">Resultado S-1 · W30 › 03</div>
 
     <div class="card" style="margin-bottom:10px">
       <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
@@ -3820,6 +3874,538 @@ function buildBDRSemana(pane,bdr){
     </div>`;
 }
 
+
+// ─── MINHA PERFORMANCE (BDR) ─────────────────────────────────
+function buildPerformanceBDR(pane, bdr){
+  var h=DATA.hist3m;
+  var b=h&&h.bdrs&&h.bdrs[bdr.id];
+  if(!b){
+    pane.innerHTML='<div style="padding:20px;text-align:center;color:#8892a0;font-family:\'Poppins\',sans-serif;font-size:13px">Dados históricos não disponíveis.</div>';
+    return;
+  }
+  var bench=DATA.benchmarks||{aiLc:57,lcRa:37,raOp:75,ligDia:10,noshow:1.5};
+  var meta=h.meta||12;
+  var meses=h.meses||['Fev','Mar','Abr'];
+  var months=[b.m1,b.m2,b.m3];
+
+  // Base calcs
+  var pcts=months.map(function(m){return meta>0?Math.round((m.opps/meta)*100):0;});
+  var avg=Math.round(pcts.reduce(function(s,p){return s+p;},0)/pcts.length);
+  var best=Math.max.apply(null,pcts); var bestIdx=pcts.indexOf(best);
+  var worst=Math.min.apply(null,pcts); var worstIdx=pcts.indexOf(worst);
+  var trend=pcts[2]>pcts[0]?'subindo':pcts[2]<pcts[0]?'caindo':'estável';
+  var trendIcon=trend==='subindo'?'↑':trend==='caindo'?'↓':'→';
+  var trendCol=trend==='subindo'?'var(--green)':trend==='caindo'?'var(--red)':'var(--amber)';
+  var variance=Math.sqrt(months.map(function(m,i){return Math.pow(pcts[i]-avg,2);}).reduce(function(s,v){return s+v;},0)/months.length);
+  var consistency=variance<=10?'Consistente':variance<=25?'Moderado':'Instável';
+  var consistencyCol=variance<=10?'var(--green)':variance<=25?'var(--amber)':'var(--red)';
+
+  // Profile
+  var profile,profileCol,profileDesc;
+  if(avg>=90&&variance<=15){profile='Alta Performance Consistente';profileCol='var(--green)';profileDesc='Entrega acima da meta com regularidade. Referência para o time.';}
+  else if(avg>=70&&variance>20){profile='Inconsistente com Picos';profileCol='var(--amber)';profileDesc='Tem capacidade mas não sustenta o ritmo. Foco em processos.';}
+  else if(avg>=70){profile='Bom com Margem de Crescimento';profileCol='var(--accent)';profileDesc='Entrega sólida. Pequenos ajustes trazem grandes ganhos.';}
+  else if(variance<=15){profile='Consistente Abaixo da Meta';profileCol='var(--red)';profileDesc='Regularidade negativa. Revisão estrutural necessária.';}
+  else{profile='Em Desenvolvimento';profileCol='var(--amber)';profileDesc='Alta variação e resultado abaixo. Foco em fundamentos.';}
+
+  // Indicators
+  var indicators=[
+    {label:'AI→LC',bench:bench.aiLc,vals:months.map(function(m){return m.aiLc;}),unit:'%',lower:false},
+    {label:'LC→RA',bench:bench.lcRa,vals:months.map(function(m){return m.lcRa;}),unit:'%',lower:false},
+    {label:'RA→OP',bench:bench.raOp,vals:months.map(function(m){return m.raOp;}),unit:'%',lower:false},
+    {label:'Lig/sem',bench:40,vals:months.map(function(m){return m.lig;}),unit:'',lower:false},
+    {label:'No-show',bench:bench.noshow,vals:months.map(function(m){return m.noshow;}),unit:'',lower:true},
+  ];
+  var gaps=indicators.filter(function(i){return !i.lower;}).map(function(ind){
+    var a=Math.round(ind.vals.reduce(function(s,v){return s+v;},0)/ind.vals.length);
+    return {label:ind.label,avgVal:a,bench:ind.bench,gap:a-ind.bench,unit:ind.unit};
+  }).sort(function(a,b){return a.gap-b.gap;});
+  var mainGap=gaps[0];
+
+  var pdcaMap={
+    'AI→LC':['Revisar pitch de abertura — primeiros 30s decisivos','Aumentar tentativas por lead (mínimo 6 touchpoints)','Escutar calls de alto AI→LC do time no MeetRox'],
+    'LC→RA':['Trabalhar objeções de agendamento com role play','Criar urgência clara na conexão','Alinhar proposta de valor antes da ligação'],
+    'RA→OP':['Briefing do lead antes de cada reunião','Alinhar com AE critérios de qualificação','Revisar ICP da lista de prospecção'],
+    'Lig/sem':['Bloquear 2h diárias para ligações no calendário','Reduzir atividades passivas','Meta: '+bench.ligDia+' ligações conectadas por dia'],
+  };
+  var baseActions=pdcaMap[mainGap.label]||['Revisar processo de prospecção','Aumentar volume de atividades','Alinhar com gestor'];
+
+  var goodMonths=months.filter(function(m){return meta>0&&(m.opps/meta)>=0.8;});
+  var badMonths=months.filter(function(m){return meta>0&&(m.opps/meta)<0.6;});
+  var goodPatt=goodMonths.length>0?'Nos meses bons: média de '+Math.round(goodMonths.reduce(function(s,m){return s+m.lig;},0)/goodMonths.length)+' ligações e '+Math.round(goodMonths.reduce(function(s,m){return s+m.aiLc;},0)/goodMonths.length)+'% AI→LC':'Sem meses acima de 80% no período';
+  var badPatt=badMonths.length>0?'Nos meses ruins: queda em ligações e AI→LC — padrão de volume baixo':'Sem meses críticos no período';
+
+  var actionsKey='perf-actions-'+bdr.id;
+
+  // ── Stacked bar chart — estilo Salesforce/Gupy ──
+  function buildBarChart(){
+    var W=300, H=130, pL=8, pR=8, pT=22, pB=30;
+    var pw=W-pL-pR, ph=H-pT-pB, n=meses.length;
+    var gw=pw/n;
+    var bw=Math.min(gw*0.55, 32);
+    var maxV=110; // % scale
+
+    function by(v){ return pT+ph - Math.max(0,(v/maxV))*ph; }
+
+    // baseline
+    var base='<line x1="'+pL+'" y1="'+(pT+ph)+'" x2="'+(W-pR)+'" y2="'+(pT+ph)+'" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>';
+
+    var bars=meses.map(function(m,i){
+      var cx = pL + (i+0.5)*gw;
+      var bx = (cx - bw/2).toFixed(1);
+      var rp = pcts[i];        // realizado %
+      var mp = 100;            // meta = 100%
+      var gap_pct = Math.max(0, mp - rp); // gap (não atingido)
+
+      // stacked: bottom = realizado (azul escuro), top = gap (salmão)
+      // If rp >= 100, only blue bar
+      var realH = (ph * (Math.min(rp,100)/maxV)).toFixed(1);
+      var realY = by(Math.min(rp,100)).toFixed(1);
+
+      var gapH  = (ph * (gap_pct/maxV)).toFixed(1);
+      var gapY  = (parseFloat(realY) - parseFloat(gapH)).toFixed(1);
+
+      var totalH = (parseFloat(realH) + parseFloat(gapH)).toFixed(1);
+      var topY   = parseFloat(gapH)>0 ? gapY : realY;
+
+      // label at top
+      var labelY = (parseFloat(topY) - 5).toFixed(1);
+      var labelTxt = rp+'%';
+      var labelCol = rp>=100?'rgba(34,197,94,0.9)':rp>=70?'rgba(245,158,11,0.9)':'rgba(239,68,68,0.9)';
+
+      // month label
+      var mY = (pT+ph+14).toFixed(1);
+
+      return (gap_pct>0
+        ? '<rect x="'+bx+'" y="'+gapY+'" width="'+bw+'" height="'+gapH+'" rx="3 3 0 0" fill="rgba(239,99,78,0.75)"/>'
+        : '')
+        +'<rect x="'+bx+'" y="'+realY+'" width="'+bw+'" height="'+realH+'" rx="'+(gap_pct>0?'0':'3 3 0 0')+'" fill="rgba(45,100,160,0.82)"/>'
+        +'<text x="'+cx.toFixed(1)+'" y="'+labelY+'" text-anchor="middle" font-size="6" font-weight="700" font-family="Poppins,sans-serif" fill="'+labelCol+'">'+labelTxt+'</text>'
+        +'<text x="'+cx.toFixed(1)+'" y="'+mY+'" text-anchor="middle" font-size="6" font-family="Poppins,sans-serif" fill="rgba(156,163,175,0.75)">'+m+'</text>';
+    }).join('');
+
+    // legend
+    var legY = H-4;
+    var leg = '<rect x="'+pL+'" y="'+(legY-7)+'" width="8" height="8" rx="1" fill="rgba(239,99,78,0.75)"/>'
+      +'<text x="'+(pL+11)+'" y="'+legY+'" font-size="6" font-family="Poppins,sans-serif" fill="rgba(156,163,175,0.8)">Não atingido</text>'
+      +'<rect x="'+(pL+80)+'" y="'+(legY-7)+'" width="8" height="8" rx="1" fill="rgba(45,100,160,0.82)"/>'
+      +'<text x="'+(pL+93)+'" y="'+legY+'" font-size="6" font-family="Poppins,sans-serif" fill="rgba(156,163,175,0.8)">Realizado</text>';
+
+    return '<svg width="100%" viewBox="0 0 '+W+' '+H+'" style="overflow:visible">'+base+bars+leg+'</svg>';
+  }
+
+  var chartHtml=buildBarChart();
+
+  // ── Render ──
+  // ── Render with collapsible + draggable blocks ──
+  var perfBlocks=[
+    {
+      id:'perf-tab',
+      title:'Meta vs Realizado',
+      subtitle:'últimos 3 meses',
+      open:true,
+      html:function(){
+        var t='<table style="width:100%;border-collapse:collapse">'
+          +'<thead><tr style="border-bottom:1.5px solid var(--border)">'
+          +'<th style="text-align:left;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;font-family:\'Poppins\',sans-serif">Mês</th>'
+          +'<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Poppins\',sans-serif">Meta</th>'
+          +'<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Poppins\',sans-serif">Real</th>'
+          +'<th style="text-align:center;font-size:9px;color:var(--accent);padding:5px 6px;text-transform:uppercase;font-weight:700;font-family:\'Poppins\',sans-serif">Ating.</th>'
+          +'</tr></thead><tbody>'
+          +meses.map(function(m,i){
+            var p=pcts[i];
+            var c=p>=100?'var(--green)':p>=70?'var(--amber)':'var(--red)';
+            var bg=p>=100?'var(--green-bg)':p>=70?'var(--amber-bg)':'var(--red-bg)';
+            return '<tr style="border-bottom:1px solid var(--border)">'
+              +'<td style="padding:8px 6px;font-size:11px;font-weight:600;color:var(--text);font-family:\'Poppins\',sans-serif">'+m+'</td>'
+              +'<td style="padding:8px 6px;text-align:center;font-size:11px;font-family:\'DM Mono\',monospace;color:var(--text3)">'+meta+'</td>'
+              +'<td style="padding:8px 6px;text-align:center;font-size:11px;font-family:\'DM Mono\',monospace;color:var(--text)">'+months[i].opps+'</td>'
+              +'<td style="padding:8px 6px;text-align:center"><span style="font-size:11px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+c+';background:'+bg+';padding:2px 8px;border-radius:8px">'+p+'%</span></td>'
+              +'</tr>';
+          }).join('')
+          +'</tbody></table>';
+        return t;
+      }
+    },
+    {
+      id:'perf-resumo',
+      title:'Resumo',
+      subtitle:null,
+      open:true,
+      html:function(){
+        return '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">'
+          +pcts.map(function(p,i){
+            var c=p>=100?'var(--green)':p>=70?'var(--amber)':'var(--red)';
+            return '<div style="text-align:center;padding:10px 6px;background:#ffffff;border:1.5px solid rgba(0,0,0,0.12);border-radius:8px">'
+              +'<div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-family:\'Poppins\',sans-serif;font-weight:500">'+meses[i]+'</div>'
+              +'<div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+c+'">'+p+'%</div>'
+              +'<div style="font-size:9px;color:var(--text3);margin-top:2px;font-family:\'Poppins\',sans-serif">'+months[i].opps+'/'+meta+' opps</div>'
+              +'</div>';
+          }).join('')
+          +'</div>'
+          +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px">'
+          +'<div style="text-align:center;padding:8px 4px;background:#ffffff;border:1.5px solid rgba(0,0,0,0.12);border-radius:8px"><div style="font-size:9px;color:#8892a0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Poppins\',sans-serif;font-weight:500">Média</div><div style="font-size:17px;font-weight:700;font-family:\'DM Mono\',monospace">'+avg+'%</div></div>'
+          +'<div style="text-align:center;padding:8px 4px;background:rgba(34,197,94,0.08);border:1.5px solid rgba(34,197,94,0.30);border-radius:8px"><div style="font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Poppins\',sans-serif;font-weight:500">Melhor</div><div style="font-size:17px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--green)">'+best+'%</div><div style="font-size:8px;color:var(--green);font-family:\'Poppins\',sans-serif">'+meses[bestIdx]+'</div></div>'
+          +'<div style="text-align:center;padding:8px 4px;background:rgba(239,68,68,0.07);border:1.5px solid rgba(239,68,68,0.28);border-radius:8px"><div style="font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Poppins\',sans-serif;font-weight:500">Pior</div><div style="font-size:17px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--red)">'+worst+'%</div><div style="font-size:8px;color:var(--red);font-family:\'Poppins\',sans-serif">'+meses[worstIdx]+'</div></div>'
+          +'<div style="text-align:center;padding:8px 4px;background:#ffffff;border:1.5px solid rgba(0,0,0,0.12);border-radius:8px"><div style="font-size:9px;color:#8892a0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Poppins\',sans-serif;font-weight:500">Tendência</div><div style="font-size:20px;font-weight:700;color:'+trendCol+'">'+trendIcon+'</div><div style="font-size:8px;color:'+trendCol+';font-family:\'Poppins\',sans-serif">'+trend+'</div></div>'
+          +'</div>';
+      }
+    },
+    {
+      id:'perf-perfil',
+      title:'Perfil de performance',
+      subtitle:null,
+      open:true,
+      html:function(){
+        var levels=[
+          {label:'Alta Performance Consistente', col:'#22c55e', desc:'Entrega acima da meta com regularidade'},
+          {label:'Bom com Margem de Crescimento',col:'#3b82f6', desc:'Entrega sólida, pequenos ajustes trazem grandes ganhos'},
+          {label:'Inconsistente com Picos',       col:'#f59e0b', desc:'Tem capacidade mas não sustenta o ritmo'},
+          {label:'Em Desenvolvimento',             col:'#f59e0b', desc:'Alta variação e resultado abaixo da meta'},
+          {label:'Consistente Abaixo da Meta',     col:'#ef4444', desc:'Regularidade negativa, revisão estrutural necessária'},
+        ];
+        var levelsHtml=levels.map(function(l){
+          var isCurrent=l.label===profile;
+          return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05)'+(isCurrent?';background:rgba(0,0,0,0.03);margin:0 -12px;padding:5px 12px;border-radius:4px':'')+'">'+
+            '<div style="width:7px;height:7px;border-radius:50%;background:'+l.col+';flex-shrink:0"></div>'+
+            '<span style="font-size:11px;font-family:\'Poppins\',sans-serif;font-weight:'+(isCurrent?'700':'400')+';color:'+(isCurrent?'#111':'#555e6b')+'">'+l.label+'</span>'+
+            (isCurrent?'<span style="margin-left:auto;font-size:9px;font-weight:700;color:'+l.col+';font-family:\'Poppins\',sans-serif">← você</span>':'')
+          +'</div>';
+        }).join('');
+
+        return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
+          +'<div style="width:10px;height:10px;border-radius:50%;background:'+profileCol+';flex-shrink:0"></div>'
+          +'<div style="position:relative;display:inline-block">'
+          +'<span style="font-size:13px;font-weight:700;color:'+profileCol+';font-family:\'Poppins\',sans-serif;cursor:help;border-bottom:1px dashed '+profileCol+'" '
+          +'onmouseenter="(function(el,e){var t=document.getElementById(\'perf-lvl-tooltip\');if(t){t.style.display=\'block\';var r=el.getBoundingClientRect();t.style.top=(r.bottom+6)+\'px\';t.style.left=r.left+\'px\';};})(this,event)" '
+          +'onmouseleave="(function(){var t=document.getElementById(\'perf-lvl-tooltip\');if(t)t.style.display=\'none\';})()">'+profile+'</span>'
+          +'<div id="perf-lvl-tooltip" style="display:none;position:fixed;background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:260px;z-index:9999">'
+          +'<div style="font-size:9px;font-weight:700;color:#8892a0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-family:\'Poppins\',sans-serif">Níveis de performance</div>'
+          +levelsHtml
+          +'</div>'
+          +'</div>'
+          +'<div style="margin-left:auto;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(0,0,0,0.05);color:'+consistencyCol+';font-family:\'Poppins\',sans-serif">'+consistency+'</div>'
+          +'</div>'
+          +'<div style="font-size:12px;color:#555e6b;font-family:\'Poppins\',sans-serif;line-height:1.5">'+profileDesc+'</div>';
+      }
+    },
+    {
+      id:'perf-ind',
+      title:'Evolução de indicadores',
+      subtitle:null,
+      open:false,
+      html:function(){
+        return '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:300px">'
+          +'<thead><tr style="border-bottom:1.5px solid var(--border)">'
+          +'<th style="text-align:left;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Poppins\',sans-serif">Ind.</th>'
+          +meses.map(function(m){return '<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Poppins\',sans-serif">'+m+'</th>';}).join('')
+          +'<th style="text-align:center;font-size:9px;color:var(--accent);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Poppins\',sans-serif">Bench</th>'
+          +'<th style="text-align:center;font-size:9px;padding:5px 6px">Tend.</th>'
+          +'</tr></thead><tbody>'
+          +indicators.map(function(ind){
+            var tnd=ind.lower?(ind.vals[2]<ind.vals[0]?'↓':'↑'):(ind.vals[2]>ind.vals[0]?'↑':ind.vals[2]<ind.vals[0]?'↓':'→');
+            var tndC=ind.lower?(tnd==='↓'?'var(--green)':'var(--red)'):(tnd==='↑'?'var(--green)':tnd==='↓'?'var(--red)':'var(--text3)');
+            return '<tr style="border-bottom:1px solid var(--border)">'
+              +'<td style="padding:7px 6px;font-size:11px;font-weight:600;color:var(--text);font-family:\'Poppins\',sans-serif">'+ind.label+'</td>'
+              +ind.vals.map(function(v){return '<td style="padding:7px 6px;text-align:center;font-size:12px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--text)">'+v+(ind.unit||'')+'</td>';}).join('')
+              +'<td style="padding:7px 6px;text-align:center;font-size:11px;font-family:\'DM Mono\',monospace;color:var(--text3)">'+ind.bench+(ind.unit||'')+'</td>'
+              +'<td style="padding:7px 6px;text-align:center;font-size:14px;font-weight:700;color:'+tndC+'">'+tnd+'</td>'
+              +'</tr>';
+          }).join('')
+          +'</tbody></table></div>'
+          +'<button onclick="(function(){var btns=document.querySelectorAll(\'.nav-item\');btns.forEach(function(b){if(b.querySelector(\'.nav-label\')&&b.querySelector(\'.nav-label\').textContent===\'Funil\')b.click();});})()" '
+          +'style="margin-top:10px;font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:\'Poppins\',sans-serif">Ver meu funil →</button>';
+      }
+    },
+    {
+      id:'perf-pad',
+      title:'Identificação de padrões',
+      subtitle:null,
+      open:false,
+      html:function(){
+        return '<div style="display:flex;flex-direction:column;gap:8px">'
+          +'<div style="padding:10px 12px;background:var(--green-bg);border-radius:var(--radius-sm);border-left:3px solid var(--green)">'
+          +'<div style="font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-family:\'Poppins\',sans-serif">Meses bons</div>'
+          +'<div style="font-size:12px;color:var(--text);font-family:\'Poppins\',sans-serif;line-height:1.5">'+goodPatt+'</div>'
+          +'</div>'
+          +'<div style="padding:10px 12px;background:var(--red-bg);border-radius:var(--radius-sm);border-left:3px solid var(--red)">'
+          +'<div style="font-size:9px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-family:\'Poppins\',sans-serif">Meses ruins</div>'
+          +'<div style="font-size:12px;color:var(--text);font-family:\'Poppins\',sans-serif;line-height:1.5">'+badPatt+'</div>'
+          +'</div>'
+          +'</div>';
+      }
+    },
+    {
+      id:'perf-gap',
+      title:'Gap estrutural',
+      subtitle:null,
+      open:false,
+      html:function(){
+        return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+          +'<div><div style="font-size:15px;font-weight:700;color:var(--text);font-family:\'Poppins\',sans-serif">'+mainGap.label+'</div>'
+          +'<div style="font-size:11px;color:#8892a0;font-family:\'Poppins\',sans-serif">Maior gap vs benchmark</div></div>'
+          +'<div style="text-align:right"><div style="font-size:26px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--red)">'+mainGap.avgVal+mainGap.unit+'</div>'
+          +'<div style="font-size:10px;color:var(--text3)">bench: '+mainGap.bench+mainGap.unit+'</div></div>'
+          +'</div>'
+          +'<div style="height:5px;background:#eef0f3;border-radius:3px;overflow:hidden;margin-bottom:8px;position:relative">'
+          +'<div style="position:absolute;left:0;top:0;height:100%;width:'+Math.min(100,Math.round((mainGap.bench/Math.max(mainGap.bench,mainGap.avgVal+5))*100))+'%;background:rgba(59,130,246,0.25);border-radius:3px"></div>'
+          +'<div style="width:'+Math.min(100,Math.round((mainGap.avgVal/Math.max(mainGap.bench,mainGap.avgVal+5))*100))+'%;height:100%;background:var(--red);border-radius:3px"></div>'
+          +'</div>'
+          +'<div style="font-size:12px;color:var(--text2);font-family:\'Poppins\',sans-serif">'
+          +'Gap de <strong>'+Math.abs(mainGap.gap)+'pp</strong>. '
+          +'<span style="color:var(--accent);font-weight:600;cursor:pointer;border-bottom:1px dashed var(--accent)" '
+          +'onmouseenter="this.nextElementSibling.style.display=\'block\'" '
+          +'onmouseleave="this.nextElementSibling.style.display=\'none\'">Corrigindo isso</span>'
+          +' você ganha +'+Math.round(Math.abs(mainGap.gap)*0.15)+' opps/mês.'
+          +'<div style="display:none;margin-top:8px;padding:10px 12px;background:#f4f5f7;border-radius:var(--radius-sm);border:1px solid var(--border2)">'
+          +'<div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-family:\'Poppins\',sans-serif">O que fazer:</div>'
+          +(pdcaMap[mainGap.label]||baseActions).map(function(a,i){
+            return '<div style="font-size:11px;color:var(--text);padding:4px 0;border-bottom:1px solid var(--border);font-family:\'Poppins\',sans-serif"><span style="color:var(--accent);font-weight:700">'+(i+1)+'.</span> '+a+'</div>';
+          }).join('')
+          +'</div>'
+          +'</div>';
+      }
+    },
+    {
+      id:'perf-pdca',
+      title:'PDCA estratégico',
+      subtitle:'30 dias',
+      open:false,
+      html:function(){
+        var pdcaSteps=[
+          {letter:'P',name:'Planejar',desc:'Definir meta semanal para '+mainGap.label+' e bloquear tempo no calendário'},
+          {letter:'D',name:'Executar',desc:'Aplicar ações por 4 semanas consecutivas sem interrupção'},
+          {letter:'C',name:'Checar',  desc:'Revisar resultado toda sexta com o gestor'},
+          {letter:'A',name:'Ajustar', desc:'Manter o que funcionou, descartar o que não gerou resultado'},
+        ];
+        return '<div style="font-size:11px;color:var(--text2);margin-bottom:10px;font-family:\'Poppins\',sans-serif">Foco: <strong>'+mainGap.label+'</strong></div>'
+          +pdcaSteps.map(function(s){
+            return '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;overflow:hidden">'
+              +'<div onclick="(function(el){var b=el.nextElementSibling;var open=b.style.display!==\'none\';b.style.display=open?\'none\':\'block\';el.querySelector(\'.pc\').textContent=open?\'▾\':\'▴\';})(this)" '
+              +'style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;border-bottom:1px solid rgba(0,0,0,0.04)">'
+              +'<div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:\'Poppins\',sans-serif">'+s.letter+'</div>'
+              +'<span style="font-size:12px;font-weight:700;color:var(--text);flex:1;font-family:\'Poppins\',sans-serif">'+s.name+'</span>'
+              +'<span class="pc" style="font-size:13px;color:var(--text3)">▾</span>'
+              +'</div>'
+              +'<div style="display:none;padding:10px 14px;background:var(--bg2);font-size:12px;color:#555e6b;font-family:\'Poppins\',sans-serif;line-height:1.5">'+s.desc+'</div>'
+              +'</div>';
+          }).join('');
+      }
+    },
+    {
+      id:'perf-acoes',
+      title:'3 Ações prioritárias',
+      subtitle:'✦ IA',
+      open:true,
+      html:function(){
+        return '<div style="height:5px;background:#eef0f3;border-radius:3px;overflow:hidden;margin-bottom:8px"><div id="pf-bar" style="height:100%;width:0%;background:var(--green);border-radius:3px;transition:width .4s"></div></div>'
+          +'<div style="font-size:10px;color:var(--text3);margin-bottom:10px;font-family:\'Poppins\',sans-serif" id="pf-txt">0 de 3 concluídas</div>'
+          +'<div id="pf-actions"><div style="padding:14px;text-align:center;color:var(--text3);font-size:12px;font-family:\'Poppins\',sans-serif"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1s infinite;display:inline-block;margin-right:6px"></div>Gerando com IA...</div></div>';
+      }
+    },
+  ];
+
+  // ── Build all blocks as draggable collapsibles ──
+  var perfOrderKey='perf-order-'+bdr.id;
+  var savedOrder=null;
+  try{savedOrder=JSON.parse(localStorage.getItem(perfOrderKey));}catch(e){}
+  if(savedOrder&&Array.isArray(savedOrder)){
+    var reordered=[];
+    savedOrder.forEach(function(id){var b=perfBlocks.find(function(x){return x.id===id;});if(b)reordered.push(b);});
+    perfBlocks.forEach(function(b){if(!reordered.find(function(x){return x.id===b.id;}))reordered.push(b);});
+    perfBlocks=reordered;
+  }
+
+  pane.innerHTML='<div style="font-size:11px;color:var(--text3);margin-bottom:14px;font-family:\'DM Mono\',monospace">Performance · '+meses[0]+'–'+meses[meses.length-1]+' 2026</div>';
+
+  var dragSrc=null;
+
+  perfBlocks.forEach(function(blk){
+    var wrap=document.createElement('div');
+    wrap.className='card perf-blk';
+    wrap.dataset.bid=blk.id;
+    wrap.style.cssText='margin-bottom:10px;padding:0;position:relative;transition:opacity .2s;background:#ffffff;border-radius:var(--radius);border:1px solid var(--border)';
+    wrap.draggable=true;
+
+    // Header
+    var hdr=document.createElement('div');
+    hdr.style.cssText='display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border)';
+
+    // Drag handle
+    var handle=document.createElement('span');
+    handle.textContent='⠿';
+    handle.style.cssText='font-size:14px;color:var(--border2);cursor:grab;flex-shrink:0;touch-action:none';
+    handle.onmouseenter=function(){handle.style.color='var(--text2)';};
+    handle.onmouseleave=function(){handle.style.color='var(--border2)';};
+
+    var titleEl=document.createElement('span');
+    titleEl.style.cssText='font-size:13px;font-weight:700;color:var(--text);flex:1;font-family:\'Poppins\',sans-serif;letter-spacing:-.01em';
+    titleEl.textContent=blk.title;
+
+    var chev=document.createElement('span');
+    chev.style.cssText='font-size:13px;color:var(--text3);flex-shrink:0';
+    chev.textContent=blk.open?'▴':'▾';
+
+    if(blk.subtitle){
+      var sub=document.createElement('span');
+      sub.style.cssText='font-size:9px;color:#8892a0;font-family:\'Poppins\',sans-serif;font-weight:400';
+      sub.textContent=blk.subtitle;
+      hdr.appendChild(handle);
+      hdr.appendChild(titleEl);
+      hdr.appendChild(sub);
+      hdr.appendChild(chev);
+    } else {
+      hdr.appendChild(handle);
+      hdr.appendChild(titleEl);
+      hdr.appendChild(chev);
+    }
+
+    // Body
+    var body=document.createElement('div');
+    body.style.cssText='padding:12px 14px 14px;background:#ffffff;display:'+(blk.open?'block':'none');
+    body.innerHTML=blk.html();
+
+    // Toggle on header click (not handle)
+    hdr.onclick=function(e){
+      if(e.target===handle) return;
+      var open=body.style.display!=='none';
+      body.style.display=open?'none':'block';
+      chev.textContent=open?'▾':'▴';
+    };
+
+    // Drag events
+    wrap.addEventListener('dragstart',function(e){
+      dragSrc=wrap; wrap.style.opacity='0.4'; e.dataTransfer.effectAllowed='move';
+    });
+    wrap.addEventListener('dragend',function(){
+      dragSrc=null; wrap.style.opacity='1';
+      document.querySelectorAll('.perf-blk').forEach(function(b){b.style.borderTop='';b.style.borderBottom='';});
+      var order=Array.from(pane.querySelectorAll('.perf-blk')).map(function(b){return b.dataset.bid;});
+      try{localStorage.setItem(perfOrderKey,JSON.stringify(order));}catch(e){}
+    });
+    wrap.addEventListener('dragover',function(e){
+      e.preventDefault();
+      if(!dragSrc||dragSrc===wrap) return;
+      document.querySelectorAll('.perf-blk').forEach(function(b){b.style.borderTop='';b.style.borderBottom='';});
+      var rect=wrap.getBoundingClientRect();
+      if(e.clientY<rect.top+rect.height/2) wrap.style.borderTop='2px solid var(--accent)';
+      else wrap.style.borderBottom='2px solid var(--accent)';
+    });
+    wrap.addEventListener('dragleave',function(){wrap.style.borderTop='';wrap.style.borderBottom='';});
+    wrap.addEventListener('drop',function(e){
+      e.preventDefault(); wrap.style.borderTop=''; wrap.style.borderBottom='';
+      if(!dragSrc||dragSrc===wrap) return;
+      var rect=wrap.getBoundingClientRect();
+      if(e.clientY<rect.top+rect.height/2) pane.insertBefore(dragSrc,wrap);
+      else pane.insertBefore(dragSrc,wrap.nextSibling);
+    });
+
+    // Touch drag via handle
+    var tClone=null, tOffY=0;
+    handle.addEventListener('touchstart',function(e){
+      e.stopPropagation(); dragSrc=wrap;
+      var t=e.touches[0]; tOffY=t.clientY-wrap.getBoundingClientRect().top;
+      tClone=wrap.cloneNode(true);
+      tClone.style.cssText='position:fixed;left:'+wrap.getBoundingClientRect().left+'px;top:'+(t.clientY-tOffY)+'px;width:'+wrap.offsetWidth+'px;opacity:.6;z-index:9999;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.25)';
+      document.body.appendChild(tClone); wrap.style.opacity='0.35';
+    },{passive:true});
+    handle.addEventListener('touchmove',function(e){
+      if(!tClone) return; e.preventDefault();
+      var t=e.touches[0]; tClone.style.top=(t.clientY-tOffY)+'px';
+      tClone.style.display='none';
+      var el=document.elementFromPoint(t.clientX,t.clientY); tClone.style.display='';
+      var target=el?el.closest('.perf-blk'):null;
+      document.querySelectorAll('.perf-blk').forEach(function(b){b.style.borderTop='';b.style.borderBottom='';});
+      if(target&&target!==wrap){var rect=target.getBoundingClientRect();if(t.clientY<rect.top+rect.height/2)target.style.borderTop='2px solid var(--accent)';else target.style.borderBottom='2px solid var(--accent)';}
+    },{passive:false});
+    handle.addEventListener('touchend',function(e){
+      if(tClone){tClone.remove();tClone=null;} wrap.style.opacity='1';
+      document.querySelectorAll('.perf-blk').forEach(function(b){b.style.borderTop='';b.style.borderBottom='';});
+      var t=e.changedTouches[0];
+      var el=document.elementFromPoint(t.clientX,t.clientY);
+      var target=el?el.closest('.perf-blk'):null;
+      if(target&&target!==wrap){var rect=target.getBoundingClientRect();if(t.clientY<rect.top+rect.height/2)pane.insertBefore(wrap,target);else pane.insertBefore(wrap,target.nextSibling);}
+      dragSrc=null;
+      var order=Array.from(pane.querySelectorAll('.perf-blk')).map(function(b){return b.dataset.bid;});
+      try{localStorage.setItem(perfOrderKey,JSON.stringify(order));}catch(e){}
+    });
+
+    wrap.appendChild(hdr); wrap.appendChild(body);
+    pane.appendChild(wrap);
+  });
+
+
+  // ── renderActions + toggle (must be after DOM is built) ──
+  var impactCol={'alto':'var(--red)','medio':'var(--amber)','baixo':'var(--green)'};
+  var prazoIcons={'esta semana':'📅','próximas 2 semanas':'🗓','30 dias':'📆'};
+
+  function getDoneStates(){
+    try{return JSON.parse(localStorage.getItem(actionsKey+'_done'))||[false,false,false];}
+    catch(e){return [false,false,false];}
+  }
+
+  function updateProgress(){
+    var done=getDoneStates().filter(Boolean).length;
+    var fill=document.getElementById('pf-bar');
+    var txt=document.getElementById('pf-txt');
+    if(fill){fill.style.width=Math.round((done/3)*100)+'%';fill.style.background=done===3?'var(--green)':'var(--amber)';}
+    if(txt) txt.textContent=done+' de 3 concluída'+(done!==1?'s':'');
+  }
+
+  function renderActions(parsed){
+    var states=getDoneStates();
+    var el=document.getElementById('pf-actions');
+    if(!el) return;
+    el.innerHTML=parsed.map(function(a,i){
+      var done=states[i];
+      var titulo=a.titulo||a;
+      return '<div style="display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--border);opacity:'+(done?'0.6':'1')+'">'
+        +'<div style="width:24px;height:24px;border-radius:50%;background:'+(done?'var(--green)':'var(--accent)')+';color:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px">'+(done?'✓':(i+1))+'</div>'
+        +'<div style="flex:1">'
+        +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:3px">'
+        +'<span style="font-size:12px;font-weight:700;color:'+(done?'var(--text3)':'var(--text)')+';font-family:\'Poppins\',sans-serif;'+(done?'text-decoration:line-through':'')+'">>'+(a.titulo||a)+'</span>'
+        +(a.impacto?'<span style="font-size:9px;font-weight:600;color:'+(impactCol[a.impacto]||'var(--amber)')+';background:var(--bg3);padding:1px 6px;border-radius:8px;font-family:\'Poppins\',sans-serif">'+a.impacto+'</span>':'')
+        +'</div>'
+        +(a.descricao?'<div style="font-size:11px;color:var(--text2);font-family:\'Poppins\',sans-serif;line-height:1.4;margin-bottom:4px">'+a.descricao+'</div>':'')
+        +'<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">'
+        +(a.prazo?'<span style="font-size:10px;color:#8892a0;font-family:\'Poppins\',sans-serif">'+(prazoIcons[a.prazo]||'⏱')+' '+a.prazo+'</span>':'')
+        +(done
+          ?'<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;font-weight:600;color:var(--green);font-family:\'Poppins\',sans-serif">✓ Concluído</span><button onclick="window._perfToggle('+i+')" style="font-size:10px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:2px 8px;cursor:pointer;font-family:\'Poppins\',sans-serif">Desfazer</button></div>'
+          :'<button onclick="window._perfToggle('+i+')" style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-family:\'Poppins\',sans-serif">Marcar feito ✓</button>')
+        +'</div>'
+        +'</div></div>';
+    }).join('');
+    updateProgress();
+  }
+
+  window._perfToggle=function(idx){
+    var states=getDoneStates();
+    states[idx]=!states[idx];
+    try{localStorage.setItem(actionsKey+'_done',JSON.stringify(states));}catch(e){}
+    var cached; try{cached=JSON.parse(localStorage.getItem(actionsKey+'_data'));}catch(e){}
+    if(cached) renderActions(cached);
+    else renderActions(baseActions.map(function(a){return {titulo:a,impacto:'medio',descricao:'',prazo:'esta semana'};}));
+  };
+
+  // Load AI actions
+  (function(){
+    var cached; try{cached=JSON.parse(localStorage.getItem(actionsKey+'_data'));}catch(e){}
+    if(cached){renderActions(cached);return;}
+    var prompt='Coach de vendas B2B. Gere EXATAMENTE 3 ações para '+bdr.name+'. Perfil: '+profile+'. Gap: '+mainGap.label+' ('+mainGap.avgVal+'% vs bench '+mainGap.bench+'%). Responda SÓ JSON sem markdown: {"acoes":[{"titulo":"curto","impacto":"alto","descricao":"1 frase acionável","prazo":"esta semana"},{"titulo":"...","impacto":"medio","descricao":"...","prazo":"próximas 2 semanas"},{"titulo":"...","impacto":"medio","descricao":"...","prazo":"30 dias"}]}';
+    fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,messages:[{role:'user',content:prompt}]})
+    }).then(function(r){return r.json();})
+    .then(function(d){
+      var t=d.content&&d.content[0]?d.content[0].text:'';
+      var p=JSON.parse(t.replace(/```json|```/g,'').trim()).acoes;
+      try{localStorage.setItem(actionsKey+'_data',JSON.stringify(p));}catch(e){}
+      renderActions(p);
+    }).catch(function(){
+      renderActions(baseActions.map(function(a,i){return {titulo:a.split(' — ')[0].substring(0,40),impacto:i===0?'alto':'medio',descricao:a,prazo:i===0?'esta semana':i===1?'próximas 2 semanas':'30 dias'};}));
+    });
+  })();
+}
+
 function buildBDRFunil(pane,bdr){
   const f=DATA.bdrFunil[bdr.id]||{};
   const s=f.sugestao||[];
@@ -3847,7 +4433,7 @@ function buildBDRFunil(pane,bdr){
       <div class="card-title">Desqualificações — semana</div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
         <span style="font-size:13px;color:var(--text2)">Total desqualificados</span>
-        <span style="font-size:18px;font-weight:600;font-family:'DM Mono',monospace;color:var(--amber)">${f.desq||0}</span>
+        <span style="font-size:18px;font-weight:600;font-family:\'DM Mono\',monospace;color:var(--amber)">${f.desq||0}</span>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0">
         <span style="font-size:13px;color:var(--text2)">Principal motivo</span>
@@ -3928,9 +4514,9 @@ function buildTimeView(pane,bdr){
             <div class="bdr-av" style="background:${b.bg};color:${b.color};width:26px;height:26px;font-size:9px">${b.id}</div>
             <span style="font-size:12px;font-weight:${isMe?'600':'400'};color:${isMe?'var(--accent)':'var(--text)'}">${b.name.split(' ')[0]}${isMe?' ★':''}</span>
           </div>
-          <div style="width:42px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:500;color:${b.opps>0?'var(--green)':'var(--text3)'}">${b.opps||'—'}</div>
-          <div style="width:42px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:500;color:${b.ras>0?'var(--text)':'var(--text3)'}">${b.ras||'—'}</div>
-          <div style="width:42px;text-align:center;font-size:13px;font-family:'DM Mono',monospace;font-weight:500">${b.lig}</div>
+          <div style="width:42px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:500;color:${b.opps>0?'var(--green)':'var(--text3)'}">${b.opps||'—'}</div>
+          <div style="width:42px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:500;color:${b.ras>0?'var(--text)':'var(--text3)'}">${b.ras||'—'}</div>
+          <div style="width:42px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:500">${b.lig}</div>
         </div>`;
       }).join('')}
       <div style="padding:10px 14px;background:var(--bg3)">
