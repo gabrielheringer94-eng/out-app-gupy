@@ -9,32 +9,44 @@
 <meta name="theme-color" content="#ffffff">
 <link rel="manifest" href="manifest.json">
 <title>Gupy Pulse · Pre Vendas</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  /* Light theme */
-  --bg:#f4f6fb;
+  /* ── Gupy Brand System ── */
+  /* Backgrounds */
+  --bg:#f5f7fa;
   --bg2:#ffffff;
-  --bg3:#eef1f7;
-  --border:rgba(0,0,0,0.07);
-  --border2:rgba(0,0,0,0.12);
-  --text:#111827;
-  --text2:#6b7280;
-  --text3:#9ca3af;
-  /* Gupy brand */
-  --accent:#1a56db;
-  --accent-light:#e8effd;
-  --accent-mid:rgba(26,86,219,0.12);
-  /* Status */
-  --green:#16a34a; --green-bg:#dcfce7;
-  --amber:#d97706; --amber-bg:#fef3c7;
-  --red:#dc2626;   --red-bg:#fee2e2;
-  --purple:#7c3aed; --purple-bg:#ede9fe;
+  --bg3:#f0f2f6;
+  --bg4:#e8ecf2;
+  /* Borders */
+  --border:rgba(0,18,47,0.08);
+  --border2:rgba(0,18,47,0.14);
+  /* Text — Gupy Navy scale */
+  --text:#00122f;
+  --text2:#3d5077;
+  --text3:#7a8eaa;
+  /* Accent — Azul Impulso */
+  --accent:#003cfd;
+  --accent-light:rgba(0,60,253,0.08);
+  --accent-mid:rgba(0,60,253,0.14);
+  --accent-dim:rgba(0,60,253,0.06);
+  /* Gupy Navy */
+  --navy:#00122f;
+  --navy-light:rgba(0,18,47,0.06);
+  /* Status — refined palette */
+  --green:#16a34a;  --green-bg:rgba(22,163,74,0.08);
+  --amber:#d97706;  --amber-bg:rgba(217,119,6,0.08);
+  --red:#dc2626;    --red-bg:rgba(220,38,38,0.08);
+  --purple:#7c3aed; --purple-bg:rgba(124,58,237,0.08);
   --teal:#0d9488;
-  /* Shadow */
-  --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 16px rgba(0,0,0,0.05);
-  --shadow-sm:0 1px 2px rgba(0,0,0,0.06);
-  --shadow-lg:0 4px 24px rgba(26,86,219,0.14);
+  /* Gupy Brand Accents */
+  --gupy-green:#cdff82;
+  --gupy-lilac:#9e88ff;
+  --gupy-orange:#ff5c1d;
+  /* Shadows — clean, modern */
+  --shadow:0 1px 4px rgba(0,18,47,0.06),0 4px 16px rgba(0,18,47,0.06);
+  --shadow-sm:0 1px 3px rgba(0,18,47,0.08);
+  --shadow-lg:0 4px 24px rgba(0,60,253,0.12);
   /* Layout */
   --radius:16px; --radius-sm:12px; --radius-xs:8px;
   --safe-top:env(safe-area-inset-top,0px);
@@ -44,22 +56,22 @@
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;}
-body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;overscroll-behavior:none;}
+body{font-family:\'Inter\',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;overscroll-behavior:none;}
 
-/* ── Tipografia Poppins — hierarquia ── */
-.t-title   {font-family:\'Poppins\',sans-serif;font-weight:700;font-size:16px;color:var(--text);letter-spacing:-.01em;}
-.t-subtitle{font-family:\'Poppins\',sans-serif;font-weight:400;font-size:13px;color:var(--text2);}
-.t-label   {font-family:\'Poppins\',sans-serif;font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;}
-.t-caption {font-family:\'Poppins\',sans-serif;font-weight:400;font-size:11px;color:var(--text3);}
-.t-tag     {font-family:\'Poppins\',sans-serif;font-weight:500;font-size:10px;}
-.card-title{font-family:\'Poppins\',sans-serif;font-weight:600;font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;}
+/* ── Tipografia Inter — hierarquia ── */
+.t-title   {font-family:\'Inter\',sans-serif;font-weight:700;font-size:16px;color:var(--text);letter-spacing:-.01em;}
+.t-subtitle{font-family:\'Inter\',sans-serif;font-weight:400;font-size:13px;color:var(--text2);}
+.t-label   {font-family:\'Inter\',sans-serif;font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;}
+.t-caption {font-family:\'Inter\',sans-serif;font-weight:400;font-size:11px;color:var(--text3);}
+.t-tag     {font-family:\'Inter\',sans-serif;font-weight:500;font-size:10px;}
+.card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;font-family:'Inter',sans-serif;letter-spacing:-.01em}
 
 .screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;}
 .screen.active{display:flex;}
 
 /* ── LOGIN ──────────────────────────────────────── */
 #screen-login{
-  background:linear-gradient(160deg,#1a56db 0%,#1e40af 40%,#1e3a8a 100%);
+  background:linear-gradient(160deg,#003cfd 0%,#00122f 40%,#1e3a8a 100%);
   align-items:center;justify-content:flex-start;
   padding:0;overflow-y:auto;
 }
@@ -129,7 +141,7 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
 .app-header-right{display:flex;align-items:center;gap:8px;}
 .update-chip{
   font-size:10px;color:var(--text2);
-  font-family:'DM Mono',monospace;
+  font-family:'Inter',sans-serif;
   background:var(--bg3);padding:4px 9px;
   border-radius:20px;border:1px solid var(--border);
 }
@@ -154,7 +166,7 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
   display:flex;flex-direction:column;align-items:center;gap:0;
   padding:10px 8px;cursor:pointer;flex:1;
   color:var(--text3);transition:color .15s;
-  background:none;border:none;font-family:\'Poppins\',sans-serif;
+  background:none;border:none;font-family:\'Inter\',sans-serif;
 }
 .nav-item.active{color:var(--accent);}
 .nav-icon{display:none;}
@@ -177,10 +189,7 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
   border:1px solid var(--border);
 }
 .card+.card,.card+.metrics-grid,.metrics-grid+.card{margin-top:12px;}
-.card-title{
-  font-size:11px;font-weight:600;color:var(--text2);
-  text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;
-}
+.card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;font-family:'Inter',sans-serif;letter-spacing:-.01em}
 
 /* Metric cards */
 .metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
@@ -197,7 +206,7 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
   font-size:14px;margin-bottom:8px;
 }
 .metric-label{font-size:12px;color:var(--text2);font-weight:600;margin-bottom:3px;}
-.metric-val{font-size:26px;font-weight:700;color:var(--text);line-height:1;font-family:'DM Mono',monospace;}
+.metric-val{font-size:26px;font-weight:700;color:var(--text);line-height:1;font-family:'Inter',sans-serif;}
 .metric-sub{font-size:12px;color:var(--text2);margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
 .metric-progress{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:10px;}
 .metric-progress-fill{height:100%;border-radius:2px;}
@@ -227,20 +236,20 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
 .funnel-name{font-size:11px;color:var(--text2);width:110px;flex-shrink:0;text-align:right;}
 .funnel-track{flex:1;height:26px;background:var(--bg3);border-radius:6px;overflow:hidden;}
 .funnel-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:9px;}
-.funnel-fill span{font-size:11px;font-weight:600;font-family:'DM Mono',monospace;color:rgba(255,255,255,.95);}
-.funnel-num{font-size:11px;font-family:'DM Mono',monospace;color:var(--text);width:28px;text-align:right;font-weight:600;}
+.funnel-fill span{font-size:11px;font-weight:600;font-family:'Inter',sans-serif;color:rgba(255,255,255,.95);}
+.funnel-num{font-size:11px;font-family:'Inter',sans-serif;color:var(--text);width:28px;text-align:right;font-weight:600;}
 
 /* Conv list */
 .conv-list{display:flex;flex-direction:column;}
 .conv-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
 .conv-item:last-child{border-bottom:none;}
-.conv-tag{font-size:10px;font-family:'DM Mono',monospace;background:var(--bg3);color:var(--text2);padding:3px 7px;border-radius:5px;flex-shrink:0;font-weight:600;}
+.conv-tag{font-size:10px;font-family:'Inter',sans-serif;background:var(--bg3);color:var(--text2);padding:3px 7px;border-radius:5px;flex-shrink:0;font-weight:600;}
 .conv-lbl{font-size:11px;color:var(--text2);margin-left:8px;flex:1;}
 .conv-right{display:flex;align-items:center;gap:6px;}
-.conv-pct{font-size:15px;font-weight:700;font-family:'DM Mono',monospace;}
+.conv-pct{font-size:15px;font-weight:700;font-family:'Inter',sans-serif;}
 .conv-meta{font-size:10px;color:var(--text3);}
-.delta-pos{font-size:11px;font-family:'DM Mono',monospace;font-weight:600;color:var(--green);}
-.delta-neg{font-size:11px;font-family:'DM Mono',monospace;font-weight:600;color:var(--red);}
+.delta-pos{font-size:11px;font-family:'Inter',sans-serif;font-weight:600;color:var(--green);}
+.delta-neg{font-size:11px;font-family:'Inter',sans-serif;font-weight:600;color:var(--red);}
 
 /* Insight block */
 .insight-block{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
@@ -282,7 +291,7 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
 .prog-row{margin-bottom:10px;}
 .prog-meta{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;}
 .prog-name{color:var(--text);font-weight:500;}
-.prog-num{color:var(--text2);font-family:'DM Mono',monospace;}
+.prog-num{color:var(--text2);font-family:'Inter',sans-serif;}
 .prog-track{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
 .prog-fill{height:100%;border-radius:3px;}
 
@@ -296,7 +305,7 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
 .bdr-info-sub{font-size:10px;color:var(--text2);}
 .bdr-right{display:flex;align-items:center;gap:10px;}
 .bdr-stat{text-align:right;}
-.bdr-stat-val{font-size:13px;font-family:'DM Mono',monospace;font-weight:600;display:block;color:var(--text);}
+.bdr-stat-val{font-size:13px;font-family:'Inter',sans-serif;font-weight:600;display:block;color:var(--text);}
 .bdr-stat-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;}
 .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 
@@ -316,20 +325,20 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
 .pp-red{background:var(--red-bg);color:var(--red);}
 
 /* Proj */
-.proj-big{font-size:40px;font-weight:700;font-family:'DM Mono',monospace;line-height:1;color:var(--text);}
+.proj-big{font-size:40px;font-weight:700;font-family:'Inter',sans-serif;line-height:1;color:var(--text);}
 .proj-track{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin:10px 0 6px;}
 .proj-bar{height:100%;border-radius:4px;}
 
 .divider{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 10px;padding-bottom:7px;border-bottom:1px solid var(--border);}
 
 /* BDR hero */
-.bdr-hero{background:linear-gradient(135deg,var(--accent) 0%,#1e40af 100%);border-radius:var(--radius);padding:20px;margin-bottom:12px;text-align:center;box-shadow:var(--shadow-lg);}
+.bdr-hero{background:linear-gradient(135deg,var(--accent) 0%,#00122f 100%);border-radius:var(--radius);padding:20px;margin-bottom:12px;text-align:center;box-shadow:var(--shadow-lg);}
 .bdr-hero-av{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;margin:0 auto 10px;border:3px solid rgba(255,255,255,.3);overflow:hidden;}
 .bdr-hero-name{font-size:17px;font-weight:700;margin-bottom:2px;color:#fff;}
 .bdr-hero-role{font-size:11px;color:rgba(255,255,255,.7);}
 .bdr-metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
 .bdr-metric-mini{background:var(--bg2);border-radius:var(--radius-sm);padding:12px 8px;text-align:center;box-shadow:var(--shadow-sm);}
-.bdr-metric-mini .val{font-size:22px;font-weight:700;font-family:'DM Mono',monospace;line-height:1;color:var(--text);}
+.bdr-metric-mini .val{font-size:22px;font-weight:700;font-family:'Inter',sans-serif;line-height:1;color:var(--text);}
 .bdr-metric-mini .lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-top:4px;}
 .bdr-metric-mini .sub{font-size:10px;margin-top:2px;color:var(--text2);}
 
@@ -338,10 +347,10 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
 .reun-date-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .reun-chips{display:flex;flex-wrap:wrap;gap:6px;}
 .reun-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid;}
-.rc-ta{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8;}
+.rc-ta{background:#eff6ff;border-color:#bfdbfe;color:#003cfd;}
 .rc-tm{background:#f0fdfa;border-color:#99f6e4;color:#0f766e;}
 .rc-dot{width:5px;height:5px;border-radius:50%;}
-.rc-ta .rc-dot{background:#1d4ed8;}
+.rc-ta .rc-dot{background:#003cfd;}
 .rc-tm .rc-dot{background:#0f766e;}
 
 /* Motivos */
@@ -349,12 +358,12 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
 .motivo-lbl{font-size:11px;color:var(--text);width:130px;flex-shrink:0;text-align:right;line-height:1.35;font-weight:500;}
 .motivo-track{flex:1;height:18px;background:var(--bg3);border-radius:4px;overflow:hidden;}
 .motivo-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:7px;}
-.motivo-fill span{font-size:10px;font-family:'DM Mono',monospace;color:rgba(255,255,255,.95);font-weight:600;}
-.motivo-n{font-size:10px;font-family:'DM Mono',monospace;color:var(--text2);width:22px;text-align:right;font-weight:600;}
+.motivo-fill span{font-size:10px;font-family:'Inter',sans-serif;color:rgba(255,255,255,.95);font-weight:600;}
+.motivo-n{font-size:10px;font-family:'Inter',sans-serif;color:var(--text2);width:22px;text-align:right;font-weight:600;}
 
 .etapa-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;}
 .etapa-box{background:var(--bg3);border-radius:var(--radius-sm);padding:12px;text-align:center;}
-.etapa-box .ev{font-size:24px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text);}
+.etapa-box .ev{font-size:24px;font-weight:700;font-family:'Inter',sans-serif;color:var(--text);}
 .etapa-box .el{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-top:3px;}
 .etapa-box .ep{font-size:10px;margin-top:3px;color:var(--text2);}
 
@@ -396,6 +405,187 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
   .motivo-lbl{width:100px;}
   .metrics-grid{grid-template-columns:1fr 1fr;}
 }
+
+/* ═══════════════════════════════════════
+   GUPY BRAND SYSTEM — Design Upgrade
+   ═══════════════════════════════════════ */
+
+/* Base typography — Inter */
+body, button, input, select, textarea {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App header — Gupy navy accent */
+#app-header {
+  background: #ffffff;
+  border-bottom: 1.5px solid rgba(0,18,47,0.08);
+  box-shadow: 0 1px 8px rgba(0,18,47,0.05);
+}
+
+#app-role {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text3);
+  letter-spacing: .02em;
+}
+
+/* Bottom nav — clean white with navy accent */
+#bottom-nav {
+  background: #ffffff;
+  border-top: 1.5px solid rgba(0,18,47,0.08);
+  box-shadow: 0 -2px 16px rgba(0,18,47,0.06);
+}
+
+.nav-item {
+  font-family: 'Inter', sans-serif;
+  transition: all .15s ease;
+}
+
+.nav-item.active {
+  color: var(--accent) !important;
+}
+
+.nav-item.active .nav-label {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.nav-item:not(.active):hover {
+  color: var(--text2);
+}
+
+/* Cards — refined */
+.card {
+  background: #ffffff;
+  border: 1px solid rgba(0,18,47,0.08);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 4px rgba(0,18,47,0.05), 0 2px 8px rgba(0,18,47,0.03);
+}
+
+.card-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -.01em;
+  margin-bottom: 12px;
+}
+
+/* Login screen — Gupy navy gradient */
+#screen-login {
+  background: linear-gradient(160deg, #00122f 0%, #001a4a 40%, #003cfd 100%);
+}
+
+/* Photo buttons on login */
+.photo-grid-item span {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
+
+/* Pill/badge components */
+.pill {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  border-radius: 20px;
+  font-size: 11px;
+  padding: 3px 9px;
+}
+
+/* Tab content background */
+.tab-pane {
+  background: var(--bg);
+}
+
+/* Scrollbar — subtle */
+.tab-pane::-webkit-scrollbar { width: 3px; }
+.tab-pane::-webkit-scrollbar-track { background: transparent; }
+.tab-pane::-webkit-scrollbar-thumb { background: rgba(0,18,47,0.12); border-radius: 3px; }
+
+/* Buttons — Inter */
+button {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Progress bars */
+.progress-fill, [style*="background:var(--accent)"] {
+  background: var(--accent) !important;
+}
+
+/* Data mono — keep Inter for numbers */
+.mono, [style*="Inter"] {
+  font-family: 'Inter', monospace;
+}
+
+/* Perf blocks white bg */
+.perf-blk {
+  background: #ffffff !important;
+  border: 1px solid rgba(0,18,47,0.08) !important;
+  border-radius: var(--radius) !important;
+}
+
+.perf-blk:hover {
+  border-color: rgba(0,60,253,0.2) !important;
+}
+
+/* Sem chips — S1/S2/S3 */
+.sem-chip {
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Hero gradient on BDR home — Gupy navy */
+/* (Updated via JS inline styles — CSS vars cascade) */
+
+/* Forecast inputs */
+input[type="number"] {
+  font-family: 'Inter', monospace;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid rgba(0,18,47,0.14);
+  background: #ffffff;
+  color: var(--text);
+}
+
+input[type="number"]:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,60,253,0.1);
+}
+
+/* Accent light override */
+.accent-bg, [style*="var(--accent-light)"] {
+  background: rgba(0,60,253,0.07) !important;
+}
+
+/* Green accent — Gupy Verde Aurora for positive signals */
+.stat-positive {
+  color: #16a34a;
+}
+
+/* Timeline columns */
+.timeline-col {
+  border-right: 1px solid rgba(0,18,47,0.07);
+}
+
+/* Drag handle */
+.drag-handle {
+  color: rgba(0,18,47,0.2) !important;
+  cursor: grab;
+}
+
+.drag-handle:hover {
+  color: var(--accent) !important;
+}
+
+/* MRR BDR panel */
+#mrr-bdr-pane .card-title {
+  color: var(--navy);
+}
+
+/* Notification dot */
+.notif-dot {
+  background: var(--gupy-orange);
+}
+
 </style>
 </head>
 <body>
@@ -407,7 +597,7 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
     <svg width="120" height="34" viewBox="0 0 200 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:24px">
       <circle cx="26" cy="28" r="24" fill="rgba(255,255,255,0.15)"/>
       <path d="M35 28h-7.5v5.5h4.8c-1.4 2.8-4.2 4.7-7.3 4.7A9.5 9.5 0 1 1 34.2 22l3.9-3.9A15.5 15.5 0 1 0 25.5 44v-2H35V28z" fill="white"/>
-      <text x="58" y="39" font-family="Poppins,sans-serif" font-weight="700" font-size="27" fill="white" letter-spacing="-0.5">Gupy Pulse</text>
+      <text x="58" y="39" font-family="Inter,sans-serif" font-weight="700" font-size="27" fill="white" letter-spacing="-0.5">Gupy Pulse</text>
     </svg>
     <div id="login-greeting" style="font-size:22px;font-weight:700;color:white;margin-bottom:6px;letter-spacing:-.02em"></div>
     <div style="font-size:13px;color:rgba(255,255,255,.65);margin-bottom:4px">Pre Vendas · OTB M</div>
@@ -437,14 +627,14 @@ body{font-family:\'Poppins\',sans-serif;background:var(--bg);color:var(--text);f
 </div>
 
 <!-- LOADING SCREEN -->
-<div id="screen-loading" class="screen active" style="background:linear-gradient(135deg,#1a56db 0%,#1e3a8a 100%);align-items:center;justify-content:center;flex-direction:column;gap:20px">
+<div id="screen-loading" class="screen active" style="background:linear-gradient(135deg,#003cfd 0%,#1e3a8a 100%);align-items:center;justify-content:center;flex-direction:column;gap:20px">
   <svg width="80" height="80" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="28" cy="30" r="26" fill="rgba(255,255,255,0.18)"/>
     <path d="M38 30h-8v6h5c-1.5 3-4.5 5-8 5a10 10 0 1 1 0-20c2.5 0 4.8.9 6.5 2.4l4.2-4.2A16 16 0 1 0 28 46v-2h10v-14z" fill="white"/>
-    <text x="62" y="42" font-family="Poppins,sans-serif" font-weight="700" font-size="26" fill="white" letter-spacing="-0.5">Pulse</text>
+    <text x="62" y="42" font-family="Inter,sans-serif" font-weight="700" font-size="26" fill="white" letter-spacing="-0.5">Pulse</text>
   </svg>
   <div style="text-align:center">
-    <div id="loading-msg" style="font-size:14px;color:rgba(255,255,255,.8);font-family:\'Poppins\',sans-serif">Carregando dados...</div>
+    <div id="loading-msg" style="font-size:14px;color:rgba(255,255,255,.8);font-family:\'Inter\',sans-serif">Carregando dados...</div>
     <div style="margin-top:16px;display:flex;gap:6px;justify-content:center">
       <div style="width:8px;height:8px;border-radius:50%;background:white;animation:loadDot 1.2s infinite 0s"></div>
       <div style="width:8px;height:8px;border-radius:50%;background:white;animation:loadDot 1.2s infinite .2s"></div>
@@ -508,8 +698,8 @@ const DATA = {
     tendencia:[8.9,8.8,8.9,8.9,8.9,8.8,8.7,8.7],
     semanas:['14/fev','21/fev','28/fev','07/mar','14/mar','21/mar','28/mar','Hoje'],
     dimensoes:[
-      {nome:'Alinhamento com a empresa',nota:9.2,cor:'#1a56db'},
-      {nome:'Carreira',nota:9.2,cor:'#1a56db'},
+      {nome:'Alinhamento com a empresa',nota:9.2,cor:'#003cfd'},
+      {nome:'Carreira',nota:9.2,cor:'#003cfd'},
       {nome:'Desenvolvimento profissional',nota:9.3,cor:'#16a34a'},
       {nome:'Liderança',nota:9.5,cor:'#16a34a'},
       {nome:'Embaixadorismo',nota:9.0,cor:'#16a34a'},
@@ -561,6 +751,18 @@ const DATA = {
       {id:'AG',name:'Adhara Gonçalves',ta:0,         tm:0},
       {id:'PS',name:'Pedro Souza',      ta:0,         tm:0},
     ]
+  },
+  // Q2 2026 metas por BDR
+  q2Metas:{
+    periodo:'Q2 2026 (Abr–Jun)',
+    meses:['Abril','Maio','Junho'],
+    opps:{Abril:12, Maio:12, Junho:12},
+    acv: {Abril:0,  Maio:0,  Junho:182500}, // meta ACV por BDR/mês
+    acvTrimestre:182500, // meta ACV junho (único mês com meta)
+    // ACV realizado por BDR (pipeline atual — atualizar semanalmente)
+    acvRealizado:{
+      MY:53605, JS:0, VE:21826, GF:34514, JR:0, AG:0, AM:45287, PS:0
+    }
   },
   // Q1 2026 performance por BDR (Jan-Mar 2026)
   q1:{
@@ -874,7 +1076,7 @@ function buildLogin(){
       background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);
       padding:16px 10px;cursor:pointer;transition:all .18s;
       display:flex;flex-direction:column;align-items:center;gap:10px;
-      box-shadow:var(--shadow-sm);font-family:\'Poppins\',sans-serif;
+      box-shadow:var(--shadow-sm);font-family:\'Inter\',sans-serif;
       text-align:center;
     `;
     const photoEl=u.photo
@@ -1252,7 +1454,7 @@ function buildResultadoGestor(pane){
       totalFcstEl.innerHTML='<div style="border-radius:var(--radius-sm);padding:12px 14px;background:'+(fcstSuficiente?'var(--green-bg)':'var(--red-bg)')+';border:1px solid '+(fcstSuficiente?'rgba(22,163,74,0.2)':'rgba(220,38,38,0.2)')+';">'
         +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
         +'<div style="font-size:12px;font-weight:700;color:'+(fcstSuficiente?'var(--green)':'var(--red)')+'">'+icone+' Forecast do time</div>'
-        +'<div style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+(fcstSuficiente?'var(--green)':'var(--red)')+'">'+totalFcst+' opps</div>'
+        +'<div style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+(fcstSuficiente?'var(--green)':'var(--red)')+'">'+totalFcst+' opps</div>'
         +'</div>'
         +'<div style="font-size:11px;color:var(--text);line-height:1.5;margin-bottom:'+(lowFcstBdrs.length>0?'8':'0')+'px">'+msg+'</div>'
         +(lowFcstBdrs.length>0?'<div style="font-size:10px;color:'+(fcstSuficiente?'var(--green)':'var(--red)')+'">BDRs abaixo: '+lowFcstBdrs.join(', ')+'</div>':'')
@@ -1273,7 +1475,7 @@ function buildResultadoGestor(pane){
       +'<span style="font-size:12px;color:var(--text2)">'+s.label+'</span>'
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:10px">'
-      +'<span style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+c+'">'+s.opps+'</span>'
+      +'<span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+c+'">'+s.opps+'</span>'
       +'<span style="font-size:10px;color:var(--text3)">opps</span>'
       +'</div>'
       +'</div>';
@@ -1296,23 +1498,23 @@ function buildResultadoGestor(pane){
       +'<span style="font-size:10px;color:var(--text3);font-weight:600">'+(i+1)+'</span>'
       +(b.photo?'<img src="'+b.photo+'" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0">':'<div style="width:24px;height:24px;border-radius:50%;background:'+b.bg+';color:'+b.color+';display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0">'+b.id+'</div>')
       +'<span style="font-size:12px;font-weight:600;color:var(--text)">'+b.name.split(' ')[0]+'</span>'
-      +'<span style="font-size:14px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+col+';text-align:center">'+b.opps+'</span>'
-      +'<span id="res-rank-fcst-'+b.id+'" style="font-size:13px;font-weight:600;font-family:\'DM Mono\',monospace;color:var(--accent);text-align:center">…</span>'
+      +'<span style="font-size:14px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+col+';text-align:center">'+b.opps+'</span>'
+      +'<span id="res-rank-fcst-'+b.id+'" style="font-size:13px;font-weight:600;font-family:\'Inter\',sans-serif;color:var(--accent);text-align:center">…</span>'
       +'<div style="display:flex;flex-direction:column;align-items:flex-end">'
       +'<span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;background:'+(pc>=70?'var(--green-bg)':pc>=30?'var(--amber-bg)':'var(--red-bg)')+';color:'+col+'">'+pc+'%</span>'
       +'</div>'
       +'</div>';
   });
 
-  pane.innerHTML='<div style="font-size:11px;color:var(--text3);margin-bottom:12px;font-family:\'DM Mono\',monospace">Abril 2026 · Semana '+semAtual+' de '+semTotal+'</div>'
+  pane.innerHTML='<div style="font-size:11px;color:var(--text3);margin-bottom:12px;font-family:\'Inter\',sans-serif">Abril 2026 · Semana '+semAtual+' de '+semTotal+'</div>'
 
     // ── Hero: resultado do mês ──
     +'<div style="background:linear-gradient(135deg,'+(gapProj>=0?'#16a34a':'#dc2626')+','+(gapProj>=0?'#15803d':'#b91c1c')+');border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow-lg)">'
     +'<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Resultado do mês — Abril 2026</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
-    +'<div style="text-align:center"><div style="font-size:32px;font-weight:700;font-family:\'DM Mono\',monospace;color:white;line-height:1">'+oppsAcum+'</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Atual</div></div>'
-    +'<div style="text-align:center;border-left:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2)"><div style="font-size:32px;font-weight:700;font-family:\'DM Mono\',monospace;color:white;line-height:1">'+proj+'</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Projeção</div></div>'
-    +'<div style="text-align:center"><div style="font-size:32px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+(gapProj>=0?'#bbf7d0':'#fecaca')+';line-height:1">'+(gapProj>=0?'+':'')+gapProj+'</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Gap</div></div>'
+    +'<div style="text-align:center"><div style="font-size:32px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">'+oppsAcum+'</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Atual</div></div>'
+    +'<div style="text-align:center;border-left:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2)"><div style="font-size:32px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">'+proj+'</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Projeção</div></div>'
+    +'<div style="text-align:center"><div style="font-size:32px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+(gapProj>=0?'#bbf7d0':'#fecaca')+';line-height:1">'+(gapProj>=0?'+':'')+gapProj+'</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Gap</div></div>'
     +'</div>'
     +'<div style="height:8px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden;margin-bottom:5px;position:relative">'
     +'<div style="position:absolute;left:0;top:0;height:100%;width:'+Math.round((paceEsp/metaMes)*100)+'%;background:rgba(255,255,255,.3);border-radius:4px"></div>'
@@ -1368,7 +1570,7 @@ function buildResultadoGestor(pane){
       return '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">'
         +(b.photo?'<img src="'+b.photo+'" style="width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0;">':'<div style="width:26px;height:26px;border-radius:50%;background:'+b.bg+';color:'+b.color+';display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">'+b.id+'</div>')
         +'<span style="font-size:12px;font-weight:500;color:var(--text);flex:1">'+b.name.split(' ')[0]+'</span>'
-        +'<span style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+col+'">'+b.meetrox.nota+'</span>'
+        +'<span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+col+'">'+b.meetrox.nota+'</span>'
         +'<span style="font-size:10px;color:var(--text3)">'+b.meetrox.conversas+' conv.</span>'
         +'</div>';
     }).join('')
@@ -1377,7 +1579,7 @@ function buildResultadoGestor(pane){
 
   // Build funnel
   buildFunnel('res-funil-bars',[
-    {name:'Novo Lead',        val:d.funil.novoLead,          max:d.funil.novoLead||1, color:'#1d4ed8'},
+    {name:'Novo Lead',        val:d.funil.novoLead,          max:d.funil.novoLead||1, color:'#003cfd'},
     {name:'Abord. Iniciada',  val:d.funil.abordagemIniciada, max:d.funil.novoLead||1, color:'#2563eb'},
     {name:'Lead Conectado',   val:d.funil.leadConectado,     max:d.funil.novoLead||1, color:'#0891b2'},
     {name:'Reunião Ag.',      val:d.funil.reuniaoAgendada,   max:d.funil.novoLead||1, color:'#f59e0b'},
@@ -1492,15 +1694,15 @@ function buildResumo(pane){
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;text-align:center">
         <div>
-          <div style="font-size:24px;font-weight:700;font-family:\'DM Mono\',monospace;color:white;line-height:1">${d.funil.oportunidades}</div>
+          <div style="font-size:24px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">${d.funil.oportunidades}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Atual</div>
         </div>
         <div style="border-left:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2)">
-          <div style="font-size:24px;font-weight:700;font-family:\'DM Mono\',monospace;color:white;line-height:1">${proj}</div>
+          <div style="font-size:24px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">${proj}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Projeção</div>
         </div>
         <div>
-          <div style="font-size:24px;font-weight:700;font-family:\'DM Mono\',monospace;color:${gapProj>=0?'#bbf7d0':'#fecaca'};line-height:1">${gapProj>=0?'+':''}${gapProj}</div>
+          <div style="font-size:24px;font-weight:700;font-family:\'Inter\',sans-serif;color:${gapProj>=0?'#bbf7d0':'#fecaca'};line-height:1">${gapProj>=0?'+':''}${gapProj}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Gap</div>
         </div>
       </div>
@@ -1530,12 +1732,12 @@ function buildResumo(pane){
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;text-align:center">
           <div style="background:white;border-radius:8px;padding:8px">
-            <div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text2)">${a.antes}%</div>
+            <div style="font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text2)">${a.antes}%</div>
             <div style="font-size:9px;color:var(--text3);margin-top:2px">Histórico</div>
           </div>
           <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--red)">→</div>
           <div style="background:white;border-radius:8px;padding:8px">
-            <div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--red)">${a.agora}%</div>
+            <div style="font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--red)">${a.agora}%</div>
             <div style="font-size:9px;color:var(--text3);margin-top:2px">Agora</div>
           </div>
         </div>
@@ -1559,7 +1761,7 @@ function buildResumo(pane){
             <span style="font-size:12px;font-weight:600">${b.name.split(' ')[0]}</span>
           </div>
           <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:12px;font-family:\'DM Mono\',monospace;font-weight:700;color:var(--red)">${b.conv}%</span>
+            <span style="font-size:12px;font-family:\'Inter\',sans-serif;font-weight:700;color:var(--red)">${b.conv}%</span>
             <span style="font-size:10px;color:var(--text3)">média: ${mediaConvLigRa}%</span>
           </div>
         </div>`;
@@ -1570,7 +1772,7 @@ function buildResumo(pane){
         <div style="display:flex;align-items:center;justify-content:space-between;background:var(--red-bg);border-radius:8px;padding:10px 12px">
           <div style="font-size:12px;font-weight:700;color:var(--red)">${piorEtapa.de} → ${piorEtapa.para}</div>
           <div style="text-align:right">
-            <div style="font-size:14px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--red)">${piorEtapa.pct}%</div>
+            <div style="font-size:14px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--red)">${piorEtapa.pct}%</div>
             <div style="font-size:9px;color:var(--text3)">meta ${piorEtapa.meta}%</div>
           </div>
         </div>
@@ -1607,7 +1809,7 @@ function buildResumo(pane){
             <div style="width:6px;height:6px;border-radius:50%;background:${a.cor}"></div>
             <span style="font-size:12px;font-weight:500;color:var(--text)">${a.label}</span>
           </div>
-          <span style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:${a.cor}">+${a.opps} opps</span>
+          <span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${a.cor}">+${a.opps} opps</span>
         </div>`).join('')}
       <div style="padding-top:10px;font-size:11px;color:var(--text3);text-align:center">
         Potencial total: +${alavancas.reduce((s,a)=>s+a.opps,0)} oportunidades adicionais
@@ -1624,7 +1826,7 @@ function buildResumo(pane){
           return `
           ${i>0?`<div style="font-size:16px;color:var(--text3)">→</div>`:''}
           <div style="flex:1;text-align:center;padding:10px 6px;border-radius:var(--radius-sm);background:${isPior?'#fff5f5':'var(--bg3)'};border:${isPior?'1.5px solid #fecaca':'1px solid transparent'}">
-            <div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:${cor}">${c.pct}%</div>
+            <div style="font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;color:${cor}">${c.pct}%</div>
             <div style="font-size:9px;color:var(--text3);margin-top:2px">${c.de}→${c.para}</div>
             <div style="font-size:9px;color:${cor};font-weight:600">meta ${c.meta}%</div>
             ${isPior?`<div style="font-size:8px;color:var(--red);font-weight:700;margin-top:3px">▼ CRÍTICO</div>`:''}
@@ -1684,19 +1886,19 @@ function buildTimeGestor(pane){
       <div style="margin-bottom:8px"></div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px">
         <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px">
-          <div style="font-size:16px;font-weight:600;font-family:\'DM Mono\',monospace;color:${b.opps>0?'var(--green)':'var(--red)'}">${b.opps||'0'}</div>
+          <div style="font-size:16px;font-weight:600;font-family:\'Inter\',sans-serif;color:${b.opps>0?'var(--green)':'var(--red)'}">${b.opps||'0'}</div>
           <div style="font-size:9px;color:var(--text3);margin-top:1px">Opps</div>
         </div>
         <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px">
-          <div style="font-size:16px;font-weight:600;font-family:\'DM Mono\',monospace;color:${b.ras>=3?'var(--green)':b.ras>=1?'var(--amber)':'var(--red)'}">${b.ras}</div>
+          <div style="font-size:16px;font-weight:600;font-family:\'Inter\',sans-serif;color:${b.ras>=3?'var(--green)':b.ras>=1?'var(--amber)':'var(--red)'}">${b.ras}</div>
           <div style="font-size:9px;color:var(--text3);margin-top:1px">RAs</div>
         </div>
         <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px">
-          <div style="font-size:16px;font-weight:600;font-family:\'DM Mono\',monospace;color:${b.lig>=20?'var(--green)':b.lig>=10?'var(--amber)':'var(--red)'}">${b.lig}</div>
+          <div style="font-size:16px;font-weight:600;font-family:\'Inter\',sans-serif;color:${b.lig>=20?'var(--green)':b.lig>=10?'var(--amber)':'var(--red)'}">${b.lig}</div>
           <div style="font-size:9px;color:var(--text3);margin-top:1px">Lig.</div>
         </div>
         <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px">
-          <div style="font-size:16px;font-weight:600;font-family:\'DM Mono\',monospace;color:var(--text2)">${b.ativ>300?b.ativ+'+':b.ativ}</div>
+          <div style="font-size:16px;font-weight:600;font-family:\'Inter\',sans-serif;color:var(--text2)">${b.ativ>300?b.ativ+'+':b.ativ}</div>
           <div style="font-size:9px;color:var(--text3);margin-top:1px">Ativ.</div>
         </div>
       </div>
@@ -1711,15 +1913,15 @@ function buildTimeGestor(pane){
         </div>
         <div style="display:flex;align-items:center;gap:10px">
           <div style="text-align:center">
-            <div style="font-size:13px;font-weight:600;font-family:\'DM Mono\',monospace;color:${b.meetrox.nota!==null?(b.meetrox.nota>=8?'var(--green)':b.meetrox.nota>=6?'var(--amber)':'var(--red)'):'var(--text3)'}">${b.meetrox.nota!==null?b.meetrox.nota:'—'}</div>
+            <div style="font-size:13px;font-weight:600;font-family:\'Inter\',sans-serif;color:${b.meetrox.nota!==null?(b.meetrox.nota>=8?'var(--green)':b.meetrox.nota>=6?'var(--amber)':'var(--red)'):'var(--text3)'}">${b.meetrox.nota!==null?b.meetrox.nota:'—'}</div>
             <div style="font-size:9px;color:var(--text3)">nota sem.</div>
           </div>
           <div style="text-align:center">
-            <div style="font-size:13px;font-weight:600;font-family:\'DM Mono\',monospace;color:${b.meetrox.notaMes>=8?'var(--green)':b.meetrox.notaMes>=6?'var(--amber)':'var(--red)'}">${b.meetrox.notaMes||'—'}</div>
+            <div style="font-size:13px;font-weight:600;font-family:\'Inter\',sans-serif;color:${b.meetrox.notaMes>=8?'var(--green)':b.meetrox.notaMes>=6?'var(--amber)':'var(--red)'}">${b.meetrox.notaMes||'—'}</div>
             <div style="font-size:9px;color:var(--text3)">nota M-1</div>
           </div>
           <div style="text-align:center">
-            <div style="font-size:13px;font-weight:600;font-family:\'DM Mono\',monospace;color:${b.meetrox.conversas>=5?'var(--green)':b.meetrox.conversas>=2?'var(--amber)':'var(--red)'}">${b.meetrox.conversas}</div>
+            <div style="font-size:13px;font-weight:600;font-family:\'Inter\',sans-serif;color:${b.meetrox.conversas>=5?'var(--green)':b.meetrox.conversas>=2?'var(--amber)':'var(--red)'}">${b.meetrox.conversas}</div>
             <div style="font-size:9px;color:var(--text3)">avaliadas</div>
           </div>
         </div>
@@ -1830,19 +2032,19 @@ function buildTimeGestor(pane){
           <span style="font-size:12px;font-weight:600;color:${isTop?'var(--green)':isBot?'var(--red)':'var(--text)'}">${b.name.split(' ')[0]}</span>
         </div>
       </td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:700;color:${b.opps>0?'var(--green)':'var(--text3)'}">${b.opps||'—'}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${b.opps>0?'var(--green)':'var(--text3)'}">${b.opps||'—'}</td>
       <td style="padding:10px 8px;text-align:center" id="fcst-rank-${b.id}"><span style="font-size:10px;color:var(--text3)">…</span></td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:700;color:${b.ras>=3?'var(--green)':b.ras>=1?'var(--amber)':'var(--red)'}">${b.ras}</td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:700;color:${raPend>0?'var(--amber)':'var(--text3)'}">${raPend>0?raPend:'—'}</td>
-      <td style="padding:10px 8px;text-align:center;font-size:12px;font-family:\'DM Mono\',monospace;font-weight:600;color:${aiOp!=='—'&&parseFloat(aiOp)>=5?'var(--green)':aiOp!=='—'?'var(--amber)':'var(--text3)'}">${aiOp!=='—'?aiOp+'%':aiOp}</td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:700;color:${b.lig>=20?'var(--green)':b.lig>=10?'var(--amber)':'var(--red)'}">${b.lig}</td>
-      <td style="padding:10px 8px;text-align:center;font-size:12px;font-family:\'DM Mono\',monospace;color:var(--text2)">${b.ativ}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${b.ras>=3?'var(--green)':b.ras>=1?'var(--amber)':'var(--red)'}">${b.ras}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${raPend>0?'var(--amber)':'var(--text3)'}">${raPend>0?raPend:'—'}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:12px;font-family:\'Inter\',sans-serif;font-weight:600;color:${aiOp!=='—'&&parseFloat(aiOp)>=5?'var(--green)':aiOp!=='—'?'var(--amber)':'var(--text3)'}">${aiOp!=='—'?aiOp+'%':aiOp}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${b.lig>=20?'var(--green)':b.lig>=10?'var(--amber)':'var(--red)'}">${b.lig}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:12px;font-family:\'Inter\',sans-serif;color:var(--text2)">${b.ativ}</td>
       <td style="padding:10px 10px">
         <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
           <div style="height:4px;width:44px;background:var(--bg3);border-radius:2px;overflow:hidden">
             <div style="width:${b.pacing}%;height:100%;background:${pc};border-radius:2px"></div>
           </div>
-          <span style="font-size:9px;font-family:\'DM Mono\',monospace;color:${pc};font-weight:700">${b.pacing}%</span>
+          <span style="font-size:9px;font-family:\'Inter\',sans-serif;color:${pc};font-weight:700">${b.pacing}%</span>
         </div>
       </td>
     </tr>`;
@@ -1887,16 +2089,16 @@ async function loadGestorForecast(){
             ${!f?`<span style="font-size:9px;color:var(--text3);background:var(--bg3);padding:1px 6px;border-radius:10px">pendente</span>`:''}
           </div>
         </td>
-        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:600;color:${f?'var(--text)':'var(--text3)'}">${f?f.fcst_lc:'—'}</td>
-        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:600;color:${f?'var(--text)':'var(--text3)'}">${f?f.fcst_ra:'—'}</td>
+        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:600;color:${f?'var(--text)':'var(--text3)'}">${f?f.fcst_lc:'—'}</td>
+        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:600;color:${f?'var(--text)':'var(--text3)'}">${f?f.fcst_ra:'—'}</td>
         <td style="padding:10px 8px;text-align:center">
-          <span style="font-size:13px;font-family:\'DM Mono\',monospace;font-weight:700;color:${f?'var(--accent)':'var(--text3)'}">${f?f.fcst_op:'—'}</span>
+          <span style="font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${f?'var(--accent)':'var(--text3)'}">${f?f.fcst_op:'—'}</span>
           ${f&&f.editado_apos_planejamento?'<div style="font-size:8px;font-weight:700;color:var(--amber);margin-top:1px">✎ editado</div>':''}
         </td>
-        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:700;color:${realOp>0?'var(--green)':'var(--text3)'}">${realOp||'—'}</td>
+        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${realOp>0?'var(--green)':'var(--text3)'}">${realOp||'—'}</td>
         <td style="padding:10px 10px;text-align:center">
           ${ating!==null
-            ?`<span style="font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;color:${atingColor}">${ating}%</span>`
+            ?`<span style="font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:${atingColor}">${ating}%</span>`
             :'<span style="font-size:12px;color:var(--text3)">—</span>'}
         </td>
       </tr>`;
@@ -1908,9 +2110,9 @@ async function loadGestorForecast(){
       <td style="padding:10px 12px;font-size:11px;font-weight:700;color:var(--text)">TOTAL</td>
       <td style="padding:10px 8px;text-align:center">—</td>
       <td style="padding:10px 8px;text-align:center">—</td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--accent)">${totalFcstOp}</td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--green)">${totalRealOp}</td>
-      <td style="padding:10px 10px;text-align:center;font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;color:${totalAting>=100?'var(--green)':totalAting>=70?'var(--amber)':'var(--red)'}">${totalAting}%</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--accent)">${totalFcstOp}</td>
+      <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--green)">${totalRealOp}</td>
+      <td style="padding:10px 10px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:${totalAting>=100?'var(--green)':totalAting>=70?'var(--amber)':'var(--red)'}">${totalAting}%</td>
     </tr>`;
 
     // Populate ranking fcst cells
@@ -1922,8 +2124,8 @@ async function loadGestorForecast(){
         const diff=bdr.opps-(f.fcst_op||0);
         const col=diff>=0?'var(--green)':diff>=-2?'var(--amber)':'var(--red)';
         el.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;gap:1px">'
-          +'<span style="font-size:12px;font-family:\'DM Mono\',monospace;font-weight:700;color:var(--accent)">'+f.fcst_op+'</span>'
-          +'<span style="font-size:9px;font-family:\'DM Mono\',monospace;color:'+col+'">'+(diff>=0?'+':'')+diff+'</span>'
+          +'<span style="font-size:12px;font-family:\'Inter\',sans-serif;font-weight:700;color:var(--accent)">'+f.fcst_op+'</span>'
+          +'<span style="font-size:9px;font-family:\'Inter\',sans-serif;color:'+col+'">'+(diff>=0?'+':'')+diff+'</span>'
           +'</div>';
       } else {
         el.innerHTML='<span style="font-size:10px;color:var(--text3)">—</span>';
@@ -1955,17 +2157,17 @@ function buildMRRGestor(pane){
   const maxOppsQ1=q1sorted[0]?q1sorted[0].opps||0:1;
 
   pane.innerHTML=`
-    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:\'DM Mono\',monospace">${m.periodo} · MRR gerado + Performance</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:\'Inter\',sans-serif">${m.periodo} · MRR gerado + Performance</div>
 
     <!-- MRR totals -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <div class="card" style="text-align:center;padding:14px 10px">
         <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600">Total TA</div>
-        <div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--accent)">R$${(m.totalTA/1000).toFixed(0)}k</div>
+        <div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--accent)">R$${(m.totalTA/1000).toFixed(0)}k</div>
       </div>
       <div class="card" style="text-align:center;padding:14px 10px">
         <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600">Total TM</div>
-        <div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--teal)">R$${(m.totalTM/1000).toFixed(0)}k</div>
+        <div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--teal)">R$${(m.totalTM/1000).toFixed(0)}k</div>
       </div>
     </div>
 
@@ -1982,7 +2184,7 @@ function buildMRRGestor(pane){
             ?`<img src="${bdrData.photo}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;">`
             :`<div style="width:20px;height:20px;border-radius:50%;background:${b.bg};color:${b.color};display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700">${b.id}</div>`;
           return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
-            <div style="font-size:9px;font-weight:700;color:${color};font-family:\'DM Mono\',monospace">${opps}</div>
+            <div style="font-size:9px;font-weight:700;color:${color};font-family:\'Inter\',sans-serif">${opps}</div>
             <div style="width:100%;height:${pct}%;background:${color};border-radius:3px 3px 0 0;min-height:4px;transition:height .4s ease"></div>
           </div>`;
         }).join('')}
@@ -2043,16 +2245,16 @@ function buildMRRGestor(pane){
                     </div>
                   </div>
                 </td>
-                <td style="padding:10px 8px;text-align:center;font-size:14px;font-weight:700;font-family:\'DM Mono\',monospace;color:${opps>=q.metaOpps?'var(--green)':opps>=q.metaOpps*0.7?'var(--amber)':'var(--red)'}">${opps}</td>
-                <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;color:var(--text)">${b.ras||'—'}</td>
-                <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;color:var(--text)">${b.lig||'—'}</td>
-                <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;color:var(--text2)">${b.ativ||'—'}</td>
+                <td style="padding:10px 8px;text-align:center;font-size:14px;font-weight:700;font-family:\'Inter\',sans-serif;color:${opps>=q.metaOpps?'var(--green)':opps>=q.metaOpps*0.7?'var(--amber)':'var(--red)'}">${opps}</td>
+                <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;color:var(--text)">${b.ras||'—'}</td>
+                <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;color:var(--text)">${b.lig||'—'}</td>
+                <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;color:var(--text2)">${b.ativ||'—'}</td>
                 <td style="padding:10px 12px">
                   <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
                     <div style="height:5px;width:50px;background:var(--bg3);border-radius:3px;overflow:hidden">
                       <div style="width:${Math.min(pct,100)}%;height:100%;background:${pc};border-radius:3px"></div>
                     </div>
-                    <span style="font-size:9px;font-weight:700;color:${pc};font-family:\'DM Mono\',monospace">${pct}%</span>
+                    <span style="font-size:9px;font-weight:700;color:${pc};font-family:\'Inter\',sans-serif">${pct}%</span>
                   </div>
                 </td>
               </tr>`;
@@ -2081,7 +2283,7 @@ function buildMRRGestor(pane){
               <span style="font-size:12px;font-weight:600">${b.name.split(' ')[0]}</span>
             </div>
             <div style="text-align:right">
-              <div style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:${total>0?barColor:'var(--text3)'}">${total>0?fmt(total):'—'}</div>
+              <div style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${total>0?barColor:'var(--text3)'}">${total>0?fmt(total):'—'}</div>
               ${total>0?`<div style="font-size:9px;color:var(--text3)">TA ${fmt(b.ta)} · TM ${fmt(b.tm)}</div>`:''}
             </div>
           </div>
@@ -2096,54 +2298,84 @@ function buildMRRGestor(pane){
 // ─── MRR BDR ──────────────────────────────────────────────────
 function buildMRRBDR(pane,bdr){
   const m=DATA.mrrTrimestre;
+  const q2=DATA.q2Metas;
   const myMrr=m.bdrs.find(b=>b.id===bdr.id)||{ta:0,tm:0};
   const total=myMrr.ta+myMrr.tm;
-  const fmt=v=>v>0?'R$'+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
+  const acvReal=q2.acvRealizado[bdr.id]||0;
+  const acvMeta=q2.acvTrimestre;
+  const acvPct=acvMeta>0?Math.round((acvReal/acvMeta)*100):0;
+  const acvCol=acvPct>=100?'var(--green)':acvPct>=60?'var(--amber)':'var(--red)';
+  const fmtK=v=>v>0?'R$'+(v/1000).toFixed(1)+'k':'R$ 0';
   const sorted=[...m.bdrs].sort((a,b)=>(b.ta+b.tm)-(a.ta+a.tm));
   const myRank=sorted.findIndex(b=>b.id===bdr.id)+1;
   const teamTotal=m.totalTA+m.totalTM;
   const myPct=teamTotal>0?Math.round((total/teamTotal)*100):0;
 
   pane.innerHTML=`
-    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:\'DM Mono\',monospace">${m.periodo} · Seu MRR gerado</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:14px;font-family:'Inter',sans-serif">MRR & ACV · Q2 2026 (Abr–Jun)</div>
 
-    <div class="card" style="text-align:center;padding:20px 16px;margin-bottom:10px">
-      <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Seu MRR total — ${m.periodo}</div>
-      <div style="font-size:42px;font-weight:700;font-family:\'DM Mono\',monospace;color:${total>0?'var(--green)':'var(--text3)'};line-height:1">${total>0?'R$'+(total/1000).toFixed(1)+'k':'R$ 0'}</div>
-      ${total>0?`<div style="font-size:12px;color:var(--text2);margin-top:6px">${myPct}% do total do time</div>`:''}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
-        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px">
-          <div style="font-size:18px;font-weight:600;font-family:\'DM Mono\',monospace;color:var(--accent)">${fmt(myMrr.ta)}</div>
-          <div style="font-size:9px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.04em">TA</div>
+    <div class="card" style="margin-bottom:10px">
+      <div class="card-title">ACV Realizado vs Meta — Q2</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:12px;text-align:center">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-family:'Inter',sans-serif">Realizado</div>
+          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:${acvReal>0?'var(--green)':'var(--text3)'};">${fmtK(acvReal)}</div>
         </div>
-        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px">
-          <div style="font-size:18px;font-weight:600;font-family:\'DM Mono\',monospace;color:var(--teal)">${fmt(myMrr.tm)}</div>
-          <div style="font-size:9px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.04em">TM</div>
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:12px;text-align:center">
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-family:'Inter',sans-serif">Meta (Jun)</div>
+          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:var(--text);">${fmtK(acvMeta)}</div>
         </div>
       </div>
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--text2)">
-        ${myRank<=3?`🏆 Top ${myRank}º do time em MRR no ${m.periodo}`:
-          total>0?`${myRank}º posição no ranking do time`:
-          `Sem registros de MRR no ${m.periodo}`}
+      <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:8px">
+        <div style="width:${Math.min(acvPct,100)}%;height:100%;background:${acvCol};border-radius:3px"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;font-family:'Inter',sans-serif;margin-bottom:10px">
+        <span style="color:${acvCol};font-weight:700">${acvPct}% da meta</span>
+        <span style="color:var(--text3)">Meta: Jun/26</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center">
+        ${['Abril','Maio','Junho'].map(mes=>`
+          <div style="background:var(--bg3);border-radius:8px;padding:8px 4px">
+            <div style="font-size:9px;color:var(--text3);margin-bottom:4px;font-family:'Inter',sans-serif">${mes}</div>
+            <div style="font-size:11px;font-weight:600;color:var(--accent);font-family:'Inter',sans-serif">${q2.opps[mes]} opps</div>
+            <div style="font-size:10px;color:${q2.acv[mes]>0?'var(--green)':'var(--text3)'};font-family:'Inter',sans-serif;margin-top:2px">${q2.acv[mes]>0?fmtK(q2.acv[mes]):'—'}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:10px">
+      <div class="card-title">MRR Pipeline — Q1 2026</div>
+      <div style="text-align:center;padding:10px 0">
+        <div style="font-size:34px;font-weight:700;font-family:'Inter',sans-serif;color:${total>0?'var(--green)':'var(--text3)'};">${fmtK(total)}</div>
+        ${total>0?`<div style="font-size:11px;color:var(--text2);margin-top:4px;font-family:'Inter',sans-serif">${myPct}% do time · ${myRank<=3?'🏆 Top '+myRank+'º':'Pos. '+myRank+'º'}</div>`:`<div style="font-size:11px;color:var(--text3);margin-top:4px">Sem registros</div>`}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center">
+          <div style="font-size:15px;font-weight:600;font-family:'Inter',sans-serif;color:var(--accent)">${myMrr.ta>0?fmtK(myMrr.ta):'—'}</div>
+          <div style="font-size:9px;color:var(--text3);margin-top:3px;text-transform:uppercase;font-family:'Inter',sans-serif">TA</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center">
+          <div style="font-size:15px;font-weight:600;font-family:'Inter',sans-serif;color:var(--teal)">${myMrr.tm>0?fmtK(myMrr.tm):'—'}</div>
+          <div style="font-size:9px;color:var(--text3);margin-top:3px;text-transform:uppercase;font-family:'Inter',sans-serif">TM</div>
+        </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">Ranking do time — ${m.periodo}</div>
+      <div class="card-title">Ranking MRR — Q1 time</div>
       ${sorted.map((b,i)=>{
         const isMe=b.id===bdr.id;
         const tot=b.ta+b.tm;
-        const maxTot=sorted[0]?sorted[0].ta+sorted[0].tm:1;
-        const pct=maxTot>0?Math.round((tot/maxTot)*100):0;
         const color=i===0?'var(--green)':i===1?'var(--accent)':i===2?'var(--teal)':'var(--text3)';
-        return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);${isMe?'background:rgba(59,130,246,0.04);border-radius:6px;padding:8px;':''}" >
+        return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);${isMe?'background:rgba(59,130,246,0.04);border-radius:6px;padding:8px;':''}">
           <span style="font-size:10px;color:${isMe?'var(--accent)':'var(--text3)'};width:14px;font-weight:${isMe?'700':'400'}">${i+1}</span>
-          <span style="font-size:12px;font-weight:${isMe?'600':'400'};color:${isMe?'var(--accent)':'var(--text)'};flex:1">${b.name.split(' ')[0]}${isMe?' ★':''}</span>
-          <span style="font-size:12px;font-family:\'DM Mono\',monospace;font-weight:500;color:${tot>0?color:'var(--text3)'}">${tot>0?fmt(tot):'—'}</span>
+          <span style="font-size:12px;font-weight:${isMe?'600':'400'};color:${isMe?'var(--accent)':'var(--text)'};flex:1;font-family:'Inter',sans-serif">${b.name.split(' ')[0]}${isMe?' ★':''}</span>
+          <span style="font-size:12px;font-family:'Inter',sans-serif;font-weight:500;color:${tot>0?color:'var(--text3)'}">${tot>0?fmtK(tot):'—'}</span>
         </div>`;
       }).join('')}
-      <div style="padding-top:10px;font-size:11px;color:var(--text3);text-align:center">Total time: ${fmt(teamTotal)}</div>
-    </div>`;
+      <div style="padding-top:8px;font-size:11px;color:var(--text3);text-align:center;font-family:'Inter',sans-serif">Total time: ${fmtK(teamTotal)}</div>
+    </div>
+  `;
 }
 
 // ─── NOSSAS NOTÍCIAS (Pulses) ────────────────────────────────
@@ -2153,14 +2385,14 @@ function buildNoticias(pane){
   const nivelCor=n=>n>=9?'var(--green)':n>=8?'var(--teal)':n>=7?'var(--amber)':'var(--red)';
 
   pane.innerHTML=`
-    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;font-family:\'DM Mono\',monospace">Pulso do time · W30 › 03 · Abril 2026</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;font-family:\'Inter\',sans-serif">Pulso do time · W30 › 03 · Abril 2026</div>
 
     <!-- Score geral -->
-    <div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,var(--accent) 0%,#1e40af 100%);border:none">
+    <div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,var(--accent) 0%,#00122f 100%);border:none">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div>
           <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.7);margin-bottom:6px">Score Geral · Gupy Pulses</div>
-          <div style="font-size:52px;font-weight:700;font-family:\'DM Mono\',monospace;color:white;line-height:1">${p.scoreGeral}</div>
+          <div style="font-size:52px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">${p.scoreGeral}</div>
           <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:4px">/10 · ${p.semanas[p.semanas.length-1]}</div>
         </div>
         <!-- Mini sparkline -->
@@ -2195,7 +2427,7 @@ function buildNoticias(pane){
         return `<div style="margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
             <span style="font-size:12px;font-weight:500;color:var(--text)">${d.nome}</span>
-            <span style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:${cor}">${d.nota}</span>
+            <span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${cor}">${d.nota}</span>
           </div>
           <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
             <div style="width:${w}%;height:100%;background:${cor};border-radius:3px"></div>
@@ -2227,14 +2459,14 @@ function buildNoticias(pane){
 // ─── PDI (Juliana e Jeanne) ───────────────────────────────────
 function buildPDI(pane,bdr){
   pane.innerHTML=`
-    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;font-family:\'DM Mono\',monospace">PDI · ${bdr.name.split(' ')[0]} · Abril 2026</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;font-family:\'Inter\',sans-serif">PDI · ${bdr.name.split(' ')[0]} · Abril 2026</div>
 
-    <div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,var(--accent) 0%,#1e40af 100%);border:none;text-align:center;padding:28px 20px">
+    <div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,var(--accent) 0%,#00122f 100%);border:none;text-align:center;padding:28px 20px">
       <div style="font-size:32px;margin-bottom:10px">📋</div>
       <div style="font-size:15px;font-weight:700;color:white;margin-bottom:6px">Plano de Desenvolvimento Individual</div>
       <div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:20px">${bdr.name.split(' ')[0]} · Abril 2026</div>
       <button onclick="window.open('${DATA.pdiLink}','_blank')"
-        style="background:white;color:var(--accent);border:none;border-radius:10px;padding:14px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Poppins\',sans-serif;width:100%;max-width:280px">
+        style="background:white;color:var(--accent);border:none;border-radius:10px;padding:14px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;width:100%;max-width:280px">
         Abrir meu PDI →
       </button>
     </div>
@@ -2325,8 +2557,8 @@ function buildReunioes(pane){
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
               <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
-              <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'DM Mono\',monospace;color:var(--text3)">${a.data}</td>
-              <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:${dc}">${dias}d</span></td>
+              <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'Inter\',sans-serif;color:var(--text3)">${a.data}</td>
+              <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${dc}">${dias}d</span></td>
             </tr>`;
           }).join("")}
           </tbody>
@@ -2357,8 +2589,8 @@ function buildReunioes(pane){
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
               <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
-              <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'DM Mono\',monospace;color:var(--text3)">${a.data}</td>
-              <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:${dc}">${dias}d</span></td>
+              <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'Inter\',sans-serif;color:var(--text3)">${a.data}</td>
+              <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${dc}">${dias}d</span></td>
             </tr>`;
           }).join("")}
           </tbody>
@@ -2484,17 +2716,17 @@ function buildLeadTimePanel(pane){
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
     +'<div class="metric-card" style="text-align:center;padding:12px 8px;border-top:3px solid var(--red)">'
     +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Lead time médio</div>'
-    +'<div style="font-size:28px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--red);line-height:1">'+avgDias+'d</div>'
+    +'<div style="font-size:28px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--red);line-height:1">'+avgDias+'d</div>'
     +'<div style="font-size:9px;color:var(--text3);margin-top:3px">SLA: 1 dia</div>'
     +'</div>'
     +'<div class="metric-card" style="text-align:center;padding:12px 8px;border-top:3px solid var(--red)">'
     +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Reuniões pendentes</div>'
-    +'<div style="font-size:28px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text);line-height:1">'+totalMeet+'</div>'
+    +'<div style="font-size:28px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text);line-height:1">'+totalMeet+'</div>'
     +'<div style="font-size:9px;color:var(--text3);margin-top:3px">'+noSla+' no SLA</div>'
     +'</div>'
     +'<div class="metric-card" style="text-align:center;padding:12px 8px;border-top:3px solid #7c3aed">'
     +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Graves (+14 dias)</div>'
-    +'<div style="font-size:28px;font-weight:700;font-family:\'DM Mono\',monospace;color:#7c3aed;line-height:1">'+criticas+'</div>'
+    +'<div style="font-size:28px;font-weight:700;font-family:\'Inter\',sans-serif;color:#7c3aed;line-height:1">'+criticas+'</div>'
     +'<div style="font-size:9px;color:var(--text3);margin-top:3px">aguardando AE</div>'
     +'</div>'
     +'</div>'
@@ -2514,7 +2746,7 @@ function buildLeadTimePanel(pane){
         var dc=ds>=14?'var(--red)':ds>=7?'var(--amber)':'var(--text2)';
         return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);background:var(--bg2)">'
           +'<span style="font-size:11px;color:var(--text)">'+x.empresa.substring(0,32)+(x.empresa.length>32?'…':'')+'</span>'
-          +'<span style="font-size:11px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+dc+';margin-left:10px">'+ds+'d</span>'
+          +'<span style="font-size:11px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+dc+';margin-left:10px">'+ds+'d</span>'
           +'</div>';
       }).join('');
       return '<div style="padding:10px 0;border-bottom:1px solid var(--border)">'
@@ -2525,7 +2757,7 @@ function buildLeadTimePanel(pane){
         +'<button id="'+aeId+'" onclick="toggleAEList(\''+aeId+'\')" '
         +'onmouseenter="this.style.background=\'var(--accent-light)\';this.style.color=\'var(--accent)\';this.style.borderColor=\'var(--accent)\'" '
         +'onmouseleave="if(!document.getElementById(\'list-'+aeId+'\').style.display||document.getElementById(\'list-'+aeId+'\').style.display===\'none\'){this.style.background=\'transparent\';this.style.color=\'var(--text)\';this.style.borderColor=\'transparent\';}" '
-        +'style="font-size:12px;font-weight:600;color:var(--text);background:transparent;border:1.5px solid transparent;border-radius:8px;padding:3px 8px;cursor:pointer;font-family:\'Poppins\',sans-serif;transition:all .15s">'
+        +'style="font-size:12px;font-weight:600;color:var(--text);background:transparent;border:1.5px solid transparent;border-radius:8px;padding:3px 8px;cursor:pointer;font-family:\'Inter\',sans-serif;transition:all .15s">'
         +ae.name+' ▾</button>'
         +'<div id="list-'+aeId+'" style="display:none;margin-top:6px;padding:4px 0;background:var(--bg2)">'
         +empresasListHtml
@@ -2534,7 +2766,7 @@ function buildLeadTimePanel(pane){
         +'</div>'
         +'</div>'
         +'<div style="text-align:right">'
-        +'<div style="font-size:16px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+s.col+'">'+avg+'d</div>'
+        +'<div style="font-size:16px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+s.col+'">'+avg+'d</div>'
         +'<div style="font-size:9px;color:var(--text3)">média</div>'
         +'</div>'
         +'</div>'
@@ -2547,12 +2779,12 @@ function buildLeadTimePanel(pane){
       .map(function(id){var m=allMeetings.find(function(x){return x.id===id;});return {id:id,name:m.name.split(' ')[0],bg:m.bg,color:m.color,photo:DATA.bdrs.find(function(b){return b.id===id;})&&DATA.bdrs.find(function(b){return b.id===id;}).photo};});
     var filterChips='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">'
       +'<button onclick="filterTimeline(\'todos\')" id="chip-todos" '
-      +'style="padding:4px 10px;border-radius:20px;border:1.5px solid var(--accent);background:var(--accent);color:white;font-size:11px;font-weight:600;cursor:pointer;font-family:\'Poppins\',sans-serif">Todos</button>'
+      +'style="padding:4px 10px;border-radius:20px;border:1.5px solid var(--accent);background:var(--accent);color:white;font-size:11px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">Todos</button>'
       +uniqueBdrs.map(function(b){
         var ph=b.photo?'<img src="'+b.photo+'" style="width:16px;height:16px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px">':
           '<div style="width:16px;height:16px;border-radius:50%;background:'+b.bg+';color:'+b.color+';display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;vertical-align:middle;margin-right:4px">'+b.id+'</div>';
         return '<button onclick="filterTimeline(\''+b.id+'\')" id="chip-'+b.id+'" '
-          +'style="display:flex;align-items:center;padding:4px 10px;border-radius:20px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:11px;font-weight:500;cursor:pointer;font-family:\'Poppins\',sans-serif">'
+          +'style="display:flex;align-items:center;padding:4px 10px;border-radius:20px;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:11px;font-weight:500;cursor:pointer;font-family:\'Inter\',sans-serif">'
           +ph+b.name+'</button>';
       }).join('')
       +'</div>';
@@ -2574,7 +2806,7 @@ function buildLeadTimePanel(pane){
         +'</div>'
         +'<div style="display:flex;align-items:center;gap:8px">'
         +'<span style="font-size:9px;color:var(--text3)">'+m.data+'</span>'
-        +'<span style="font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+m.status.col+';background:'+m.status.bg+';padding:2px 7px;border-radius:10px">'+m.dias+'d</span>'
+        +'<span style="font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+m.status.col+';background:'+m.status.bg+';padding:2px 7px;border-radius:10px">'+m.dias+'d</span>'
         +'</div>'
         +'</div>'
         +'<div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">'
@@ -2602,7 +2834,7 @@ function buildLeadTimePanel(pane){
         +'<div style="font-size:10px;color:var(--text3)">'+b.count+' reunião(ões) aguardando AE</div>'
         +'</div>'
         +'<div style="text-align:right">'
-        +'<div style="font-size:14px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+s.col+'">'+avg+'d</div>'
+        +'<div style="font-size:14px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+s.col+'">'+avg+'d</div>'
         +'<div style="font-size:9px;color:var(--text3)">média</div>'
         +'</div>'
         +'</div>';
@@ -2655,13 +2887,13 @@ function buildAnalise(pane){
       <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:0">
         <div style="border-right:1px solid var(--border);padding-right:10px">
           <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Outbound</div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">AI→LC</span><span style="font-family:\'DM Mono\',monospace;color:var(--green)">74%</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0"><span style="color:var(--text2)">LC→RA</span><span style="font-family:\'DM Mono\',monospace;color:var(--red)">26%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">AI→LC</span><span style="font-family:\'Inter\',sans-serif;color:var(--green)">74%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0"><span style="color:var(--text2)">LC→RA</span><span style="font-family:\'Inter\',sans-serif;color:var(--red)">26%</span></div>
         </div>
         <div style="padding-left:10px">
           <div style="font-size:10px;color:var(--purple);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">HR4Results</div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">AI→LC</span><span style="font-family:\'DM Mono\',monospace;color:var(--amber)">45%</span></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0"><span style="color:var(--text2)">LC→RA</span><span style="font-family:\'DM Mono\',monospace;color:var(--amber)">22%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">AI→LC</span><span style="font-family:\'Inter\',sans-serif;color:var(--amber)">45%</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0"><span style="color:var(--text2)">LC→RA</span><span style="font-family:\'Inter\',sans-serif;color:var(--amber)">22%</span></div>
         </div>
       </div>
       <div class="alert-banner ab-red" style="margin-top:10px;margin-bottom:0">
@@ -2699,12 +2931,12 @@ function buildHR4PassivosPanel(pane){
     var alertCol=b.raAtras>0?'var(--red)':b.ra>0?'var(--green)':'var(--text3)';
     bdrRows+='<tr style="border-bottom:1px solid var(--border)">'
       +'<td style="padding:8px 10px"><div style="display:flex;align-items:center;gap:7px">'+photo+'<span style="font-size:11px;font-weight:600;color:var(--text)">'+b.name.split(' ')[0]+'</span></div></td>'
-      +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--purple)">'+b.ativo+'</td>'
-      +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-family:\'DM Mono\',monospace;color:var(--text2)">'+b.ai+'</td>'
-      +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-family:\'DM Mono\',monospace;color:var(--accent)">'+b.lc+'</td>'
-      +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-family:\'DM Mono\',monospace;color:'+(b.ra>0?'var(--green)':'var(--text3)')+'">'+( b.ra||'—')+'</td>'
-      +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-family:\'DM Mono\',monospace;color:'+(b.raAtras>0?'var(--red)':'var(--text3)')+'">'+( b.raAtras||'—')+'</td>'
-      +'<td style="padding:8px 10px;text-align:center;font-size:12px;font-family:\'DM Mono\',monospace;color:var(--amber)">'+b.desqLc+'</td>'
+      +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-family:\'Inter\',sans-serif;font-weight:600;color:var(--purple)">'+b.ativo+'</td>'
+      +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-family:\'Inter\',sans-serif;color:var(--text2)">'+b.ai+'</td>'
+      +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-family:\'Inter\',sans-serif;color:var(--accent)">'+b.lc+'</td>'
+      +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-family:\'Inter\',sans-serif;color:'+(b.ra>0?'var(--green)':'var(--text3)')+'">'+( b.ra||'—')+'</td>'
+      +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-family:\'Inter\',sans-serif;color:'+(b.raAtras>0?'var(--red)':'var(--text3)')+'">'+( b.raAtras||'—')+'</td>'
+      +'<td style="padding:8px 10px;text-align:center;font-size:12px;font-family:\'Inter\',sans-serif;color:var(--amber)">'+b.desqLc+'</td>'
       +'</tr>';
   });
 
@@ -2718,19 +2950,19 @@ function buildHR4PassivosPanel(pane){
     +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">'
     +'<div class="metric-card" style="text-align:center;padding:10px 6px">'
     +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Ativo PV</div>'
-    +'<div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--purple)">'+t.ativo+'</div>'
+    +'<div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--purple)">'+t.ativo+'</div>'
     +'</div>'
     +'<div class="metric-card" style="text-align:center;padding:10px 6px">'
     +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">LC</div>'
-    +'<div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--accent)">'+t.lc+'</div>'
+    +'<div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--accent)">'+t.lc+'</div>'
     +'</div>'
     +'<div class="metric-card" style="text-align:center;padding:10px 6px">'
     +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">RA</div>'
-    +'<div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--green)">'+t.ra+'</div>'
+    +'<div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--green)">'+t.ra+'</div>'
     +'</div>'
     +'<div class="metric-card" style="text-align:center;padding:10px 6px">'
     +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">RA Atras.</div>'
-    +'<div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+(t.raAtras>0?'var(--red)':'var(--text3)')+'">'+( t.raAtras||'—')+'</div>'
+    +'<div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+(t.raAtras>0?'var(--red)':'var(--text3)')+'">'+( t.raAtras||'—')+'</div>'
     +'</div>'
     +'</div>'
 
@@ -2738,15 +2970,15 @@ function buildHR4PassivosPanel(pane){
     +'<div style="display:flex;gap:10px;margin-bottom:12px">'
     +'<div style="flex:1;background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.15);border-radius:var(--radius-sm);padding:10px;text-align:center">'
     +'<div style="font-size:11px;color:var(--text2);margin-bottom:3px">AI → LC</div>'
-    +'<div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+(aiLcPct>=50?'var(--green)':aiLcPct>=30?'var(--amber)':'var(--red)')+'">'+aiLcPct+'%</div>'
+    +'<div style="font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+(aiLcPct>=50?'var(--green)':aiLcPct>=30?'var(--amber)':'var(--red)')+'">'+aiLcPct+'%</div>'
     +'</div>'
     +'<div style="flex:1;background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.15);border-radius:var(--radius-sm);padding:10px;text-align:center">'
     +'<div style="font-size:11px;color:var(--text2);margin-bottom:3px">LC → RA</div>'
-    +'<div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+(lcRaPct>=30?'var(--green)':lcRaPct>=15?'var(--amber)':'var(--red)')+'">'+lcRaPct+'%</div>'
+    +'<div style="font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+(lcRaPct>=30?'var(--green)':lcRaPct>=15?'var(--amber)':'var(--red)')+'">'+lcRaPct+'%</div>'
     +'</div>'
     +'<div style="flex:1;background:rgba(124,58,237,0.06);border:1px solid rgba(124,58,237,0.15);border-radius:var(--radius-sm);padding:10px;text-align:center">'
     +'<div style="font-size:11px;color:var(--text2);margin-bottom:3px">Desq. LC</div>'
-    +'<div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--amber)">'+t.desqLc+'</div>'
+    +'<div style="font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--amber)">'+t.desqLc+'</div>'
     +'</div>'
     +'</div>'
 
@@ -2765,12 +2997,12 @@ function buildHR4PassivosPanel(pane){
     +'<tbody>'+bdrRows+'</tbody>'
     +'<tfoot><tr style="background:var(--bg3);border-top:2px solid var(--border)">'
     +'<td style="padding:8px 10px;font-size:11px;font-weight:700;color:var(--text)">TOTAL</td>'
-    +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--purple)">'+t.ativo+'</td>'
-    +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text2)">'+t.ai+'</td>'
-    +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--accent)">'+t.lc+'</td>'
-    +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--green)">'+t.ra+'</td>'
-    +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+(t.raAtras>0?'var(--red)':'var(--text3)')+'">'+( t.raAtras||'—')+'</td>'
-    +'<td style="padding:8px 10px;text-align:center;font-size:12px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--amber)">'+t.desqLc+'</td>'
+    +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--purple)">'+t.ativo+'</td>'
+    +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text2)">'+t.ai+'</td>'
+    +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--accent)">'+t.lc+'</td>'
+    +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--green)">'+t.ra+'</td>'
+    +'<td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+(t.raAtras>0?'var(--red)':'var(--text3)')+'">'+( t.raAtras||'—')+'</td>'
+    +'<td style="padding:8px 10px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--amber)">'+t.desqLc+'</td>'
     +'</tr></tfoot>'
     +'</table>'
     +'</div>';
@@ -2843,7 +3075,7 @@ function buildMeuResultado(pane, bdr){
 
   // Header
   var hd=document.createElement('div');
-  hd.style.cssText='font-size:11px;color:var(--text3);margin-bottom:12px;font-family:\'DM Mono\',monospace';
+  hd.style.cssText='font-size:11px;color:var(--text3);margin-bottom:12px;font-family:\'Inter\',sans-serif';
   var semInfo=DATA.mesAbril.semanas.find(function(s){return s.sem===DATA.semAtual;});
   var semDatas=semInfo&&semInfo.datas?semInfo.datas:'';
   hd.textContent='Meu Resultado · Abril 2026 · S'+DATA.semAtual+(semDatas?' · '+semDatas:'');
@@ -2861,16 +3093,16 @@ function buildMeuResultado(pane, bdr){
         var diff=real-(fcst||0);
         var diffCol=diff>=0?'var(--green)':'var(--red)';
         return '<div style="flex:1;min-width:0">'
-          +'<div style="font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;text-align:center;font-family:\'Poppins\',sans-serif">'+label+'</div>'
+          +'<div style="font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;text-align:center;font-family:\'Inter\',sans-serif">'+label+'</div>'
           +'<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 4px;text-align:center;margin-bottom:4px">'
-          +'<div style="font-size:8px;color:var(--text3);margin-bottom:2px;font-family:\'Poppins\',sans-serif">Fcst</div>'
-          +'<div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text)">'+(loading?'…':(fcst||0))+'</div>'
+          +'<div style="font-size:8px;color:var(--text3);margin-bottom:2px;font-family:\'Inter\',sans-serif">Fcst</div>'
+          +'<div style="font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">'+(loading?'…':(fcst||0))+'</div>'
           +'</div>'
           +'<div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:7px 4px;text-align:center;margin-bottom:4px">'
-          +'<div style="font-size:8px;color:var(--text3);margin-bottom:2px;font-family:\'Poppins\',sans-serif">Real</div>'
-          +'<div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text)">'+(loading?'…':real)+'</div>'
+          +'<div style="font-size:8px;color:var(--text3);margin-bottom:2px;font-family:\'Inter\',sans-serif">Real</div>'
+          +'<div style="font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">'+(loading?'…':real)+'</div>'
           +'</div>'
-          +'<div style="text-align:center;font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+(loading?'var(--text3)':diffCol)+'">'+(loading?'—':(diff>=0?'+':'')+diff)+'</div>'
+          +'<div style="text-align:center;font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+(loading?'var(--text3)':diffCol)+'">'+(loading?'—':(diff>=0?'+':'')+diff)+'</div>'
           +'</div>';
       }
       return '<div style="display:flex;gap:8px">'+block('LC',lcFcst,lcReal)+block('RA',raFcst,raReal)+block('OP',opFcst,opReal)+'</div>';
@@ -2896,7 +3128,7 @@ function buildMeuResultado(pane, bdr){
 
       if(isFuture){
         detailPanel.innerHTML='<div class="card" style="padding:20px;text-align:center">'
-          +'<div style="font-size:13px;color:var(--text3);font-family:\'Poppins\',sans-serif">📅 S'+n+' ainda não iniciou. Dados disponíveis quando a semana começar.</div>'
+          +'<div style="font-size:13px;color:var(--text3);font-family:\'Inter\',sans-serif">📅 S'+n+' ainda não iniciou. Dados disponíveis quando a semana começar.</div>'
           +'</div>';
         return;
       }
@@ -2911,12 +3143,12 @@ function buildMeuResultado(pane, bdr){
         +'<div id="sem-fcst-blocks-'+n+'">'+fcstBlocks(0,0,0,ligVal,rasVal,oppsVal,isCurrent)+'</div>'
         +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">'
         +'<div style="background:var(--bg3);border-radius:var(--radius-sm);padding:9px 12px">'
-        +'<div style="font-size:9px;color:var(--text3);margin-bottom:3px;font-family:\'Poppins\',sans-serif">Ligações</div>'
-        +'<div style="font-size:20px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text)">'+ligVal+'</div>'
+        +'<div style="font-size:9px;color:var(--text3);margin-bottom:3px;font-family:\'Inter\',sans-serif">Ligações</div>'
+        +'<div style="font-size:20px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">'+ligVal+'</div>'
         +'</div>'
         +'<div style="background:var(--bg3);border-radius:var(--radius-sm);padding:9px 12px">'
-        +'<div style="font-size:9px;color:var(--text3);margin-bottom:3px;font-family:\'Poppins\',sans-serif">Atividades</div>'
-        +'<div style="font-size:20px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text)">'+(isCurrent?bdr.ativ:(semData.ativ||'—'))+'</div>'
+        +'<div style="font-size:9px;color:var(--text3);margin-bottom:3px;font-family:\'Inter\',sans-serif">Atividades</div>'
+        +'<div style="font-size:20px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">'+(isCurrent?bdr.ativ:(semData.ativ||'—'))+'</div>'
         +'</div>'
         +'</div>'
         +'</div>';
@@ -2962,13 +3194,13 @@ function buildMeuResultado(pane, bdr){
         chip.className='sem-chip';
         chip.dataset.sem=sn;
         chip.style.cssText='flex:1;padding:10px 4px 12px;background:none;border:none;border-bottom:2.5px solid '+(isCurrent?'var(--accent)':'transparent')+';'
-          +'cursor:pointer;font-family:\'Poppins\',sans-serif;font-size:16px;font-weight:'+(isCurrent?'700':'400')+';'
+          +'cursor:pointer;font-family:\'Inter\',sans-serif;font-size:16px;font-weight:'+(isCurrent?'700':'400')+';'
           +'color:'+(isCurrent?'var(--accent)':isPast?'var(--text3)':'var(--text)')+';'
           +'transition:all .15s;user-select:none;text-align:center';
         var semInfoChip=sems.find(function(s){return s.sem===sn;})||{};
         var chipDatas=semInfoChip.datas||'';
-        chip.innerHTML='<div style="font-size:16px;font-weight:700;font-family:\'Poppins\',sans-serif">S'+sn+'</div>'
-          +'<div style="font-size:8px;margin-top:2px;font-weight:400;color:'+(isCurrent?'var(--accent)':isPast?'var(--text3)':'var(--text3)')+';font-family:\'Poppins\',sans-serif;line-height:1.3">'
+        chip.innerHTML='<div style="font-size:16px;font-weight:700;font-family:\'Inter\',sans-serif">S'+sn+'</div>'
+          +'<div style="font-size:8px;margin-top:2px;font-weight:400;color:'+(isCurrent?'var(--accent)':isPast?'var(--text3)':'var(--text3)')+';font-family:\'Inter\',sans-serif;line-height:1.3">'
           +(chipDatas||( isPast?'concluída':isCurrent?'atual':'próxima'))+'</div>';
         chip.onclick=function(){ setActiveChip(sn); };
         chipBar.appendChild(chip);
@@ -3046,7 +3278,7 @@ function buildMeuResultado(pane, bdr){
 
     var titleEl=document.createElement('span');
     titleEl.textContent=def.title;
-    titleEl.style.cssText='font-size:13px;font-weight:700;color:var(--text);font-family:\'Poppins\',sans-serif';
+    titleEl.style.cssText='font-size:13px;font-weight:700;color:var(--text);font-family:\'Inter\',sans-serif';
 
     left.appendChild(handle);
     left.appendChild(iconEl);
@@ -3207,7 +3439,7 @@ function buildResultadoMesBDR(body, bdr){
         +'<div style="position:absolute;left:0;top:0;height:100%;width:'+Math.round(((m.semAtual/m.semTotal)*100))+'%;background:rgba(99,179,237,0.45);border-radius:3px"></div>'
         +'<div style="width:'+pct+'%;height:100%;background:'+(pct>=100?'var(--green)':pct>=60?'var(--amber)':'var(--red)')+';border-radius:3px"></div>'
         +'</div>'
-        +'<div style="display:flex;justify-content:space-between;font-size:8px;color:var(--text3);margin-top:3px;font-family:\'Poppins\',sans-serif">'
+        +'<div style="display:flex;justify-content:space-between;font-size:8px;color:var(--text3);margin-top:3px;font-family:\'Inter\',sans-serif">'
         +'<span>sem '+m.semAtual+'/'+m.semTotal+'</span><span>'+pct+'%</span></div>'
         +'</div>';
     }
@@ -3224,9 +3456,9 @@ function buildResultadoMesBDR(body, bdr){
     var headerLine='<div onclick="toggleMesCard(\''+cardId+'\', this)" '
       +'style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none">'
       +'<div style="display:flex;align-items:center;gap:8px">'
-      +'<span style="font-size:12px;font-weight:700;color:'+(m.ativo?'var(--accent)':'var(--text2)')+';font-family:\'Poppins\',sans-serif">'+m.nome+'</span>'
-      +(m.ativo?'<span style="font-size:9px;font-weight:600;color:var(--accent);background:var(--accent-light);padding:2px 7px;border-radius:10px;font-family:\'Poppins\',sans-serif">em andamento</span>'
-               :'<span style="font-size:9px;color:var(--text3);font-family:\'Poppins\',sans-serif">em breve</span>')
+      +'<span style="font-size:12px;font-weight:700;color:'+(m.ativo?'var(--accent)':'var(--text2)')+';font-family:\'Inter\',sans-serif">'+m.nome+'</span>'
+      +(m.ativo?'<span style="font-size:9px;font-weight:600;color:var(--accent);background:var(--accent-light);padding:2px 7px;border-radius:10px;font-family:\'Inter\',sans-serif">em andamento</span>'
+               :'<span style="font-size:9px;color:var(--text3);font-family:\'Inter\',sans-serif">em breve</span>')
       +'</div>'
       +'<span id="chev-'+cardId+'" style="font-size:13px;color:var(--text3)">'+(openByDefault?'▴':'▾')+'</span>'
       +'</div>';
@@ -3239,12 +3471,12 @@ function buildResultadoMesBDR(body, bdr){
 
   function compact(label, val, col){
     return '<div style="text-align:center;padding:6px 4px;background:var(--bg3);border-radius:6px">'
-      +'<div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Poppins\',sans-serif">'+label+'</div>'
-      +'<div style="font-size:16px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+(col||'var(--text)')+'">'+val+'</div>'
+      +'<div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Inter\',sans-serif">'+label+'</div>'
+      +'<div style="font-size:16px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+(col||'var(--text)')+'">'+val+'</div>'
       +'</div>';
   }
 
-  body.innerHTML='<div style="font-size:10px;color:var(--text3);margin-bottom:10px;font-family:\'Poppins\',sans-serif">Q2 2026 · Abr → Jun · Meta mensal: '+meta+' opps</div>'
+  body.innerHTML='<div style="font-size:10px;color:var(--text3);margin-bottom:10px;font-family:\'Inter\',sans-serif">Q2 2026 · Abr → Jun · Meta mensal: '+meta+' opps</div>'
     +meses.map(mesCard).join('');
 }
 
@@ -3292,7 +3524,7 @@ function buildCalendarioBDR(body, bdr){
   });
 
   if(dateKeys.length===0){
-    body.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;font-family:\'Poppins\',sans-serif">Nenhuma reunião agendada ou atrasada.</div>';
+    body.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;font-family:\'Inter\',sans-serif">Nenhuma reunião agendada ou atrasada.</div>';
     return;
   }
 
@@ -3305,21 +3537,22 @@ function buildCalendarioBDR(body, bdr){
       var tipoCor=it.tipo==='TA'?'var(--accent)':'var(--teal)';
       var tipoBg=it.tipo==='TA'?'var(--accent-light)':'rgba(13,148,136,0.1)';
       var statusBadge=it.status==='atrasada'
-        ?'<span style="font-size:9px;font-weight:600;color:var(--red);font-family:\'Poppins\',sans-serif">'+it.dias+'d atrasada</span>'
+        ?'<span style="font-size:9px;font-weight:600;color:var(--red);font-family:\'Inter\',sans-serif">'+it.dias+'d atrasada</span>'
         :'';
-      return '<div style="padding:7px 8px;border-radius:6px;background:var(--bg2);border:1px solid var(--border);margin-bottom:5px">'
+      return '<div style="padding:8px 10px;border-radius:8px;background:var(--bg2);border:1px solid '+(it.status==='atrasada'?'rgba(220,38,38,0.2)':'var(--border)')+';margin-bottom:6px">'
         +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">'
-        +'<span style="font-size:8px;font-weight:700;color:'+tipoCor+';background:'+tipoBg+';padding:1px 5px;border-radius:3px;font-family:\'Poppins\',sans-serif">'+it.tipo+'</span>'
+        +'<span style="font-size:8px;font-weight:700;color:'+tipoCor+';background:'+tipoBg+';padding:1px 6px;border-radius:4px;font-family:\'Inter\',sans-serif">'+it.tipo+'</span>'
         +statusBadge
         +'</div>'
-        +'<div style="font-size:11px;font-weight:500;color:var(--text);line-height:1.3;font-family:\'Poppins\',sans-serif">'+it.empresa+'</div>'
+        +'<div style="font-size:12px;font-weight:500;color:var(--text);line-height:1.3;font-family:\'Inter\',sans-serif">'+it.empresa+'</div>'
         +'</div>';
     }).join('');
 
-    return '<div style="min-width:160px;max-width:190px;border-right:1px solid var(--border);padding:12px;flex-shrink:0">'
-      +'<div style="padding:5px 8px;border-radius:6px;background:'+headerBg+';margin-bottom:10px;border:1px solid '+borderCol+'">'
-      +'<div style="font-size:11px;font-weight:700;color:'+headerCol+';font-family:\'Poppins\',sans-serif">'+d.date+(d.day?' · '+d.day:'')+'</div>'
-      +(d.isAtrasada?'<div style="font-size:9px;color:var(--red);font-weight:500;font-family:\'Poppins\',sans-serif">⚠ atrasada</div>':'')
+    // Each date = a card column (vertical, fixed width, swipeable horizontally)
+    return '<div style="width:160px;flex-shrink:0;display:flex;flex-direction:column">'
+      +'<div style="padding:7px 10px;border-radius:8px;background:'+headerBg+';margin-bottom:8px;border:1px solid '+borderCol+';text-align:center">'
+      +'<div style="font-size:12px;font-weight:700;color:'+headerCol+';font-family:\'Inter\',sans-serif">'+d.date+(d.day?' · '+d.day:'')+'</div>'
+      +(d.isAtrasada?'<div style="font-size:9px;color:var(--red);font-weight:500;margin-top:1px;font-family:\'Inter\',sans-serif">⚠ atrasada</div>':'')
       +'</div>'
       +items
       +'</div>';
@@ -3347,39 +3580,39 @@ function buildCalendarioBDR(body, bdr){
   var aeRows=Object.values(byAE).map(function(ae){
     var temAt=ae.taAt>0||ae.tmAt>0;
     return '<div style="display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">'
-      +'<span style="font-size:12px;font-weight:500;color:var(--text);font-family:\'Poppins\',sans-serif">'+ae.ae+'</span>'
+      +'<span style="font-size:12px;font-weight:500;color:var(--text);font-family:\'Inter\',sans-serif">'+ae.ae+'</span>'
       +'<div style="display:flex;gap:5px">'
-      +(ae.taFut+ae.tmFut>0?'<span style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);padding:2px 7px;border-radius:10px;font-family:\'Poppins\',sans-serif">'+(ae.taFut>0?ae.taFut+'TA ':'')+( ae.tmFut>0?ae.tmFut+'TM':'')+'</span>':'')
-      +(ae.taAt+ae.tmAt>0?'<span style="font-size:10px;font-weight:600;color:var(--red);background:var(--red-bg);padding:2px 7px;border-radius:10px;font-family:\'Poppins\',sans-serif">'+(ae.taAt>0?ae.taAt+'TA ':'')+( ae.tmAt>0?ae.tmAt+'TM':'')+'⚠</span>':'')
+      +(ae.taFut+ae.tmFut>0?'<span style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);padding:2px 7px;border-radius:10px;font-family:\'Inter\',sans-serif">'+(ae.taFut>0?ae.taFut+'TA ':'')+( ae.tmFut>0?ae.tmFut+'TM':'')+'</span>':'')
+      +(ae.taAt+ae.tmAt>0?'<span style="font-size:10px;font-weight:600;color:var(--red);background:var(--red-bg);padding:2px 7px;border-radius:10px;font-family:\'Inter\',sans-serif">'+(ae.taAt>0?ae.taAt+'TA ':'')+( ae.tmAt>0?ae.tmAt+'TM':'')+'⚠</span>':'')
       +'</div>'
-      +'<span style="font-size:10px;color:var(--text3);font-family:\'Poppins\',sans-serif">'+(ae.taFut+ae.tmFut+ae.taAt+ae.tmAt)+' total</span>'
+      +'<span style="font-size:10px;color:var(--text3);font-family:\'Inter\',sans-serif">'+(ae.taFut+ae.tmFut+ae.taAt+ae.tmAt)+' total</span>'
       +'</div>';
   }).join('');
 
   var summaryHtml='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'
     +'<div style="background:var(--accent-light);border:1px solid rgba(26,86,219,0.2);border-radius:var(--radius-sm);padding:10px 12px;text-align:center">'
-    +'<div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--accent)">'+totalFuturas+'</div>'
-    +'<div style="font-size:10px;color:var(--accent);font-weight:600;margin-top:2px;font-family:\'Poppins\',sans-serif">Futuras</div>'
+    +'<div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--accent)">'+totalFuturas+'</div>'
+    +'<div style="font-size:10px;color:var(--accent);font-weight:600;margin-top:2px;font-family:\'Inter\',sans-serif">Futuras</div>'
     +'</div>'
     +'<div style="background:var(--red-bg);border:1px solid rgba(220,38,38,0.2);border-radius:var(--radius-sm);padding:10px 12px;text-align:center">'
-    +'<div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--red)">'+totalAtrasadas+'</div>'
-    +'<div style="font-size:10px;color:var(--red);font-weight:600;margin-top:2px;font-family:\'Poppins\',sans-serif">Atrasadas</div>'
+    +'<div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--red)">'+totalAtrasadas+'</div>'
+    +'<div style="font-size:10px;color:var(--red);font-weight:600;margin-top:2px;font-family:\'Inter\',sans-serif">Atrasadas</div>'
     +'</div>'
     +'</div>'
     +(aeRows?'<div style="margin-bottom:12px">'
-      +'<div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-family:\'Poppins\',sans-serif">Por AE / Por mundo</div>'
+      +'<div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-family:\'Inter\',sans-serif">Por AE / Por mundo</div>'
       +aeRows
       +'</div>':'');
 
   body.innerHTML=summaryHtml
-    +'<div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-family:\'Poppins\',sans-serif">Timeline</div>'
-    +'<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -16px">'
-    +'<div style="display:flex;min-width:max-content;padding:0 16px">'
+    +'<div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;font-family:\'Inter\',sans-serif">Timeline</div>'
+    +'<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;margin:0 -16px;padding-bottom:8px">'
+    +'<div style="display:flex;gap:10px;min-width:max-content;padding:0 16px">'
     +cols
     +'</div>'
     +'</div>'
-    +'<div style="padding:8px 0 0;font-size:10px;color:var(--text3);font-family:\'Poppins\',sans-serif;display:flex;align-items:center;gap:4px">'
-    +'<span>←</span> arraste para ver mais <span>→</span>'
+    +'<div style="padding:6px 0 0;font-size:10px;color:var(--text3);font-family:\'Inter\',sans-serif;display:flex;align-items:center;gap:4px;justify-content:center">'
+    +'<span style="opacity:.5">←</span><span style="opacity:.5"> deslize </span><span style="opacity:.5">→</span>'
     +'</div>';
 
 }
@@ -3466,7 +3699,7 @@ function buildHoje(pane, bdr){
         pane.scrollTop=0;
       }
     })()" onmouseenter="this.style.background='rgba(220,38,38,0.12)';this.style.transform='scale(1.01)'" onmouseleave="this.style.background='var(--red-bg)';this.style.transform=''"
-      style="width:100%;text-align:left;border:1.5px solid rgba(220,38,38,0.3);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;background:var(--red-bg);cursor:pointer;transition:all .15s;font-family:\'Poppins\',sans-serif">
+      style="width:100%;text-align:left;border:1.5px solid rgba(220,38,38,0.3);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;background:var(--red-bg);cursor:pointer;transition:all .15s;font-family:\'Inter\',sans-serif">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:13px">🔴</span>
@@ -3481,13 +3714,13 @@ function buildHoje(pane, bdr){
       <span>🚨</span><div><strong>Semana crítica.</strong> ${bdr.lig<=5?`Apenas ${bdr.lig} ligação(ões) conectada(s).`:''} ${bdr.ras===0?'Nenhuma reunião agendada ainda.':''} Fale com seu gestor.</div>
     </div>`:''}
 
-    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:\'DM Mono\',monospace">Ter, 07 abr 2026 · W32 › 07</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:\'Inter\',sans-serif">Ter, 07 abr 2026 · W32 › 07</div>
 
     <!-- HERO: ATINGIMENTO -->
     <div style="margin-bottom:10px;background:linear-gradient(135deg,${pctMetaBDR>=70?'#16a34a,#15803d':pctMetaBDR>=30?'#d97706,#b45309':'#dc2626,#b91c1c'});border-radius:var(--radius);padding:20px 18px;box-shadow:0 4px 20px rgba(0,0,0,0.12)">
       <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Atingimento da meta · Abril 2026</div>
       <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:12px">
-        <div style="font-size:64px;font-weight:700;font-family:\'DM Mono\',monospace;color:#fff;line-height:1">${pctMetaBDR}%</div>
+        <div style="font-size:64px;font-weight:700;font-family:\'Inter\',sans-serif;color:#fff;line-height:1">${pctMetaBDR}%</div>
         <div style="margin-bottom:8px">
           <div style="font-size:13px;color:rgba(255,255,255,.75)">${bdr.opps} de ${DATA.metaBDR} opps</div>
           <div style="font-size:11px;color:rgba(255,255,255,.5)">meta do mês</div>
@@ -3496,19 +3729,19 @@ function buildHoje(pane, bdr){
       <div style="height:8px;background:rgba(255,255,255,.25);border-radius:4px;overflow:hidden;margin-bottom:14px">
         <div style="width:${pctMetaBDR}%;height:100%;background:#fff;border-radius:4px"></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-        <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px 8px;text-align:center">
-          <div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:#fff">${bdr.opps||'0'}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Opps</div>
-        </div>
-        <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px 8px;text-align:center">
-          <div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:#fff">${bdr.ras}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Reuniões</div>
-        </div>
-        <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:10px 8px;text-align:center">
-          <div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:#fff">${bdr.lig}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Ligações</div>
-        </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button onclick="(function(){document.querySelectorAll('.nav-item').forEach(function(b){if(b.querySelector('.nav-label')&&b.querySelector('.nav-label').textContent==='Meu Resultado'){b.click();}});})()"
+          style="background:rgba(255,255,255,.15);border:none;border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:background .15s;font-family:inherit"
+          onmouseenter="this.style.background='rgba(255,255,255,.25)'" onmouseleave="this.style.background='rgba(255,255,255,.15)'">
+          <div style="font-size:26px;font-weight:700;font-family:\'Inter\',sans-serif;color:#fff">${bdr.opps||'0'}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Opps ↗</div>
+        </button>
+        <button onclick="(function(){document.querySelectorAll('.nav-item').forEach(function(b){if(b.querySelector('.nav-label')&&b.querySelector('.nav-label').textContent==='Meu Resultado'){b.click();}});})()"
+          style="background:rgba(255,255,255,.15);border:none;border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:background .15s;font-family:inherit"
+          onmouseenter="this.style.background='rgba(255,255,255,.25)'" onmouseleave="this.style.background='rgba(255,255,255,.15)'">
+          <div style="font-size:26px;font-weight:700;font-family:\'Inter\',sans-serif;color:#fff">${bdr.ras}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Reuniões ↗</div>
+        </button>
       </div>
       <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.2);font-size:11px;color:rgba(255,255,255,.6)">
         Time: ${totalRAsTime} RAs · ${totalOppsTime} opps · <span style="color:rgba(255,255,255,.85);font-weight:600">${pctMetaTime}% da meta</span>
@@ -3533,33 +3766,78 @@ function buildHoje(pane, bdr){
       </div>
     </div>
 
-    <!-- REUNIÕES TIMELINE - destaque -->
-    <div class="card" style="margin-bottom:10px;${temAtrasadas?'border:2px solid var(--red);':'border:1.5px solid var(--accent-dim);'}">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:32px;height:32px;border-radius:9px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;font-size:16px">📅</div>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--text)">Reuniões da semana</div>
-            <div style="font-size:10px;color:var(--text3);margin-top:1px">${minhasReunioes.length>0?minhasReunioes.reduce((s,d)=>s+d.ta.length+d.tm.length,0)+' reuniões agendadas':'Nenhuma reunião'}</div>
+    <!-- REUNIÕES — colunas por data, deslize horizontal -->
+    <div class="card" style="margin-bottom:10px;padding:0;overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:700;color:var(--text);font-family:'Inter',sans-serif">Agenda do mês</div>
+      </div>
+      ${(()=>{
+        const atrasadasBDR=[...DATA.reunioes.atrasadasTA,...DATA.reunioes.atrasadasTM].filter(a=>a.id===bdr.id);
+
+        // Merge all dates into one map: atrasadas + futuras
+        const allDates={};
+
+        // Atrasadas
+        atrasadasBDR.forEach(a=>{
+          if(!allDates[a.data]) allDates[a.data]={date:a.data,day:'',items:[],isAtrasada:true};
+          const pts=a.data.split('/');
+          const dias=Math.floor((new Date()-new Date(2026,parseInt(pts[1])-1,parseInt(pts[0])))/(1000*60*60*24));
+          const tipo=DATA.reunioes.atrasadasTA.includes(a)?'TA':'TM';
+          allDates[a.data].items.push({tipo,empresa:a.empresa,status:'atrasada',dias});
+          allDates[a.data].isAtrasada=true;
+        });
+
+        // Futuras
+        minhasReunioes.forEach(d=>{
+          if(!allDates[d.date]) allDates[d.date]={date:d.date,day:d.day,items:[],isAtrasada:false};
+          d.ta.forEach(r=>allDates[d.date].items.push({tipo:'TA',empresa:r.empresa,status:'futura'}));
+          d.tm.forEach(r=>allDates[d.date].items.push({tipo:'TM',empresa:r.empresa,status:'futura'}));
+        });
+
+        const keys=Object.keys(allDates).sort((a,b)=>{
+          const pa=a.split('/'),pb=b.split('/');
+          return new Date(2026,parseInt(pa[1])-1,parseInt(pa[0]))-new Date(2026,parseInt(pb[1])-1,parseInt(pb[0]));
+        });
+
+        if(keys.length===0) return '<div style="padding:16px;text-align:center;color:var(--text3);font-size:12px">Nenhuma reunião agendada.</div>';
+
+        const cols=keys.map(dt=>{
+          const d=allDates[dt];
+          const isAt=d.isAtrasada;
+          const headerBg=isAt?'rgba(220,38,38,0.08)':'rgba(26,86,219,0.06)';
+          const headerBorder=isAt?'rgba(220,38,38,0.25)':'rgba(26,86,219,0.18)';
+          const headerCol=isAt?'var(--red)':'var(--accent)';
+
+          const items=d.items.map(it=>{
+            const isTa=it.tipo==='TA';
+            const bg=it.status==='atrasada'?'rgba(220,38,38,0.06)':(isTa?'rgba(26,86,219,0.05)':'rgba(13,148,136,0.05)');
+            const border=it.status==='atrasada'?'rgba(220,38,38,0.2)':(isTa?'rgba(26,86,219,0.15)':'rgba(13,148,136,0.15)');
+            const tagBg=it.status==='atrasada'?'var(--red)':(isTa?'var(--accent)':'var(--teal)');
+            return `<div style="background:${bg};border:1px solid ${border};border-radius:8px;padding:8px 10px;margin-bottom:6px">
+              <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+                <span style="font-size:8px;font-weight:700;color:#fff;background:${tagBg};padding:1px 6px;border-radius:4px">${it.tipo}</span>
+                ${it.status==='atrasada'?`<span style="font-size:9px;font-weight:600;color:var(--red)">${it.dias}d atrasada</span>`:''}
+              </div>
+              <div style="font-size:12px;font-weight:500;color:var(--text);line-height:1.3;font-family:'Inter',sans-serif">${it.empresa}</div>
+            </div>`;
+          }).join('');
+
+          return `<div style="flex-shrink:0;width:150px;scroll-snap-align:start">
+            <div style="background:${headerBg};border:1px solid ${headerBorder};border-radius:10px;padding:8px 10px;margin-bottom:8px;text-align:center">
+              <div style="font-size:13px;font-weight:700;color:${headerCol};font-family:'Inter',sans-serif">${d.date}${d.day?' · '+d.day:''}</div>
+              ${isAt?'<div style="font-size:9px;color:var(--red);font-weight:500;margin-top:2px">⚠ atrasada</div>':''}
+            </div>
+            ${items}
+          </div>`;
+        }).join('');
+
+        return `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;padding:12px 16px 4px">
+          <div style="display:flex;gap:10px;min-width:max-content">
+            ${cols}
           </div>
         </div>
-        ${temAtrasadas?`<span style="font-size:11px;font-weight:600;color:var(--red);background:var(--red-bg);padding:3px 10px;border-radius:20px;border:1px solid rgba(220,38,38,0.2)">🔴 ${totalAtrasadas} atrasada(s)</span>`:'<span style="font-size:11px;font-weight:600;color:var(--green);background:var(--green-bg);padding:3px 10px;border-radius:20px">✓ em dia</span>'}
-      </div>
-      ${minhasReunioes.length>0?minhasReunioes.map(d=>`
-        <div style="margin-bottom:10px">
-          <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid var(--accent-dim)">${d.date} · ${d.day}</div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            ${d.ta.map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);background:rgba(26,86,219,0.05);border:1px solid rgba(26,86,219,0.12)">
-              <div style="width:28px;height:28px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0">TA</div>
-              <span style="font-size:13px;font-weight:500;color:var(--text)">${r.empresa}</span>
-            </div>`).join('')}
-            ${d.tm.map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);background:rgba(13,148,136,0.05);border:1px solid rgba(13,148,136,0.12)">
-              <div style="width:28px;height:28px;border-radius:8px;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0">TM</div>
-              <span style="font-size:13px;font-weight:500;color:var(--text)">${r.empresa}</span>
-            </div>`).join('')}
-          </div>
-        </div>`).join('')
-      :`<div style="text-align:center;padding:16px 0;color:var(--text3);font-size:13px">Nenhuma reunião agendada esta semana.</div>`}
+        <div style="padding:4px 16px 10px;font-size:10px;color:var(--text3);font-family:'Inter',sans-serif;text-align:center;opacity:.6">← deslize →</div>`;
+      })()}
     </div>
 
     <!-- MEETROX BDR -->
@@ -3588,17 +3866,17 @@ function buildHoje(pane, bdr){
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
           <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center">
             <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Nota semana</div>
-            <div style="font-size:24px;font-weight:600;font-family:\'DM Mono\',monospace;color:${notaColor}">${temNota?m.nota:'—'}</div>
-            ${diffMes!==null?`<div style="font-size:10px;font-family:\'DM Mono\',monospace;color:${diffMes>=0?'var(--green)':'var(--red)'};margin-top:2px">${diffMes>=0?'+':''}${diffMes} vs M-1</div>`:''}
+            <div style="font-size:24px;font-weight:600;font-family:\'Inter\',sans-serif;color:${notaColor}">${temNota?m.nota:'—'}</div>
+            ${diffMes!==null?`<div style="font-size:10px;font-family:\'Inter\',sans-serif;color:${diffMes>=0?'var(--green)':'var(--red)'};margin-top:2px">${diffMes>=0?'+':''}${diffMes} vs M-1</div>`:''}
           </div>
           <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center">
             <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Nota M-1</div>
-            <div style="font-size:24px;font-weight:600;font-family:\'DM Mono\',monospace;color:${m&&m.notaMes>=8?'var(--green)':m&&m.notaMes>=6?'var(--amber)':'var(--text3)'}">${m&&m.notaMes?m.notaMes:'—'}</div>
+            <div style="font-size:24px;font-weight:600;font-family:\'Inter\',sans-serif;color:${m&&m.notaMes>=8?'var(--green)':m&&m.notaMes>=6?'var(--amber)':'var(--text3)'}">${m&&m.notaMes?m.notaMes:'—'}</div>
             <div style="font-size:9px;color:var(--text3);margin-top:2px">Mar 2026</div>
           </div>
           <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center">
             <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Avaliadas</div>
-            <div style="font-size:24px;font-weight:600;font-family:\'DM Mono\',monospace;color:${flagColor}">${conv}</div>
+            <div style="font-size:24px;font-weight:600;font-family:\'Inter\',sans-serif;color:${flagColor}">${conv}</div>
             <div style="font-size:9px;color:var(--text3);margin-top:2px">de ${bdr.lig} lig.</div>
           </div>
         </div>
@@ -3661,12 +3939,12 @@ async function loadBDRForecast(bdr){
               <div style="font-size:10px;color:var(--text3);margin-top:1px">Obrigado pelo compromisso com o time.</div>
             </div>
           </div>
-          <button onclick="editForecast('${bdr.id}','${bdr.name}',${semId},${f.id})" style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-family:\'Poppins\',sans-serif">Editar ✎</button>
+          <button onclick="editForecast('${bdr.id}','${bdr.name}',${semId},${f.id})" style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-family:\'Inter\',sans-serif">Editar ✎</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
           ${[['LC',f.fcst_lc],['RA',f.fcst_ra],['OP',f.fcst_op]].map(([l,v])=>`
             <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px;text-align:center">
-              <div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--accent)">${v}</div>
+              <div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--accent)">${v}</div>
               <div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-top:3px">${l}</div>
             </div>`).join('')}
         </div>`;
@@ -3684,12 +3962,12 @@ async function loadBDRForecast(bdr){
           <div>
             <div style="font-size:9px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">${l}</div>
             <input id="${id}-${bdr.id}" type="number" min="0" max="99" placeholder="0"
-              style="width:100%;padding:10px 8px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;text-align:center;background:var(--bg2);color:var(--text);outline:none">
+              style="width:100%;padding:10px 8px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;text-align:center;background:var(--bg2);color:var(--text);outline:none">
             <div style="font-size:9px;color:var(--text3);text-align:center;margin-top:3px">${desc}</div>
           </div>`).join('')}
       </div>
       <button onclick="submitForecast('${bdr.id}','${bdr.name}',${semId})"
-        style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:\'Poppins\',sans-serif">
+        style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif">
         Assumir meu forecast ↗
       </button>`;
   }catch(e){
@@ -3734,17 +4012,17 @@ async function editForecast(bdrId,bdrNome,semId,forecastId){
         <div>
           <div style="font-size:9px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">${l}</div>
           <input id="${id}-${bdrId}" type="number" min="0" max="99" value="${val}"
-            style="width:100%;padding:10px 8px;border:1.5px solid var(--amber);border-radius:var(--radius-sm);font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;text-align:center;background:var(--bg2);color:var(--text);outline:none">
+            style="width:100%;padding:10px 8px;border:1.5px solid var(--amber);border-radius:var(--radius-sm);font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;text-align:center;background:var(--bg2);color:var(--text);outline:none">
           <div style="font-size:9px;color:var(--text3);text-align:center;margin-top:3px">${desc}</div>
         </div>`).join('')}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button onclick="loadBDRForecast(DATA.bdrs.find(b=>b.id==='${bdrId}'))"
-        style="padding:12px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:\'Poppins\',sans-serif">
+        style="padding:12px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">
         Cancelar
       </button>
       <button onclick="saveEditForecast('${bdrId}',${forecastId})"
-        style="padding:12px;background:var(--amber);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:\'Poppins\',sans-serif">
+        style="padding:12px;background:var(--amber);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif">
         Salvar edição
       </button>
     </div>`;
@@ -3797,19 +4075,19 @@ function buildBDRSemana(pane,bdr){
       const diffStr=(diff>=0?'+':'')+diff;
       return `<div style="flex:1;min-width:0">
         <!-- Label -->
-        <div style="font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;text-align:center;font-family:\'Poppins\',sans-serif">${label}</div>
+        <div style="font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;text-align:center;font-family:\'Inter\',sans-serif">${label}</div>
         <!-- Forecast mini square -->
         <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 4px;text-align:center;margin-bottom:4px">
-          <div style="font-size:8px;color:var(--text3);margin-bottom:2px;font-family:\'Poppins\',sans-serif">Fcst</div>
-          <div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text)">${fcst}</div>
+          <div style="font-size:8px;color:var(--text3);margin-bottom:2px;font-family:\'Inter\',sans-serif">Fcst</div>
+          <div style="font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">${fcst}</div>
         </div>
         <!-- Realizado square same size -->
         <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:7px 4px;text-align:center;margin-bottom:4px">
-          <div style="font-size:8px;color:var(--text3);margin-bottom:2px;font-family:\'Poppins\',sans-serif">Real</div>
-          <div style="font-size:18px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--text)">${real}</div>
+          <div style="font-size:8px;color:var(--text3);margin-bottom:2px;font-family:\'Inter\',sans-serif">Real</div>
+          <div style="font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">${real}</div>
         </div>
         <!-- Delta -->
-        <div style="text-align:center;font-size:13px;font-weight:700;font-family:\'DM Mono\',monospace;color:${diffCol}">${diffStr}</div>
+        <div style="text-align:center;font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${diffCol}">${diffStr}</div>
       </div>`;
     }
     return `<div style="display:flex;gap:8px">`
@@ -3820,7 +4098,7 @@ function buildBDRSemana(pane,bdr){
   }
 
   pane.innerHTML=`
-    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:\'DM Mono\',monospace">Resultado S-1 · W30 › 03</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:\'Inter\',sans-serif">Resultado S-1 · W30 › 03</div>
 
     <div class="card" style="margin-bottom:10px">
       <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
@@ -3863,7 +4141,7 @@ function buildPerformanceBDR(pane, bdr){
   var h=DATA.hist3m;
   var b=h&&h.bdrs&&h.bdrs[bdr.id];
   if(!b){
-    pane.innerHTML='<div style="padding:20px;text-align:center;color:#8892a0;font-family:\'Poppins\',sans-serif;font-size:13px">Dados históricos não disponíveis.</div>';
+    pane.innerHTML='<div style="padding:20px;text-align:center;color:#8892a0;font-family:\'Inter\',sans-serif;font-size:13px">Dados históricos não disponíveis.</div>';
     return;
   }
   var bench=DATA.benchmarks||{aiLc:57,lcRa:37,raOp:75,ligDia:10,noshow:1.5};
@@ -3963,16 +4241,16 @@ function buildPerformanceBDR(pane, bdr){
         ? '<rect x="'+bx+'" y="'+gapY+'" width="'+bw+'" height="'+gapH+'" rx="3 3 0 0" fill="rgba(239,99,78,0.75)"/>'
         : '')
         +'<rect x="'+bx+'" y="'+realY+'" width="'+bw+'" height="'+realH+'" rx="'+(gap_pct>0?'0':'3 3 0 0')+'" fill="rgba(45,100,160,0.82)"/>'
-        +'<text x="'+cx.toFixed(1)+'" y="'+labelY+'" text-anchor="middle" font-size="6" font-weight="700" font-family="Poppins,sans-serif" fill="'+labelCol+'">'+labelTxt+'</text>'
-        +'<text x="'+cx.toFixed(1)+'" y="'+mY+'" text-anchor="middle" font-size="6" font-family="Poppins,sans-serif" fill="rgba(156,163,175,0.75)">'+m+'</text>';
+        +'<text x="'+cx.toFixed(1)+'" y="'+labelY+'" text-anchor="middle" font-size="6" font-weight="700" font-family="Inter,sans-serif" fill="'+labelCol+'">'+labelTxt+'</text>'
+        +'<text x="'+cx.toFixed(1)+'" y="'+mY+'" text-anchor="middle" font-size="6" font-family="Inter,sans-serif" fill="rgba(156,163,175,0.75)">'+m+'</text>';
     }).join('');
 
     // legend
     var legY = H-4;
     var leg = '<rect x="'+pL+'" y="'+(legY-7)+'" width="8" height="8" rx="1" fill="rgba(239,99,78,0.75)"/>'
-      +'<text x="'+(pL+11)+'" y="'+legY+'" font-size="6" font-family="Poppins,sans-serif" fill="rgba(156,163,175,0.8)">Não atingido</text>'
+      +'<text x="'+(pL+11)+'" y="'+legY+'" font-size="6" font-family="Inter,sans-serif" fill="rgba(156,163,175,0.8)">Não atingido</text>'
       +'<rect x="'+(pL+80)+'" y="'+(legY-7)+'" width="8" height="8" rx="1" fill="rgba(45,100,160,0.82)"/>'
-      +'<text x="'+(pL+93)+'" y="'+legY+'" font-size="6" font-family="Poppins,sans-serif" fill="rgba(156,163,175,0.8)">Realizado</text>';
+      +'<text x="'+(pL+93)+'" y="'+legY+'" font-size="6" font-family="Inter,sans-serif" fill="rgba(156,163,175,0.8)">Realizado</text>';
 
     return '<svg width="100%" viewBox="0 0 '+W+' '+H+'" style="overflow:visible">'+base+bars+leg+'</svg>';
   }
@@ -3990,20 +4268,20 @@ function buildPerformanceBDR(pane, bdr){
       html:function(){
         var t='<table style="width:100%;border-collapse:collapse">'
           +'<thead><tr style="border-bottom:1.5px solid var(--border)">'
-          +'<th style="text-align:left;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;font-family:\'Poppins\',sans-serif">Mês</th>'
-          +'<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Poppins\',sans-serif">Meta</th>'
-          +'<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Poppins\',sans-serif">Real</th>'
-          +'<th style="text-align:center;font-size:9px;color:var(--accent);padding:5px 6px;text-transform:uppercase;font-weight:700;font-family:\'Poppins\',sans-serif">Ating.</th>'
+          +'<th style="text-align:left;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;font-family:\'Inter\',sans-serif">Mês</th>'
+          +'<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Inter\',sans-serif">Meta</th>'
+          +'<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Inter\',sans-serif">Real</th>'
+          +'<th style="text-align:center;font-size:9px;color:var(--accent);padding:5px 6px;text-transform:uppercase;font-weight:700;font-family:\'Inter\',sans-serif">Ating.</th>'
           +'</tr></thead><tbody>'
           +meses.map(function(m,i){
             var p=pcts[i];
             var c=p>=100?'var(--green)':p>=70?'var(--amber)':'var(--red)';
             var bg=p>=100?'var(--green-bg)':p>=70?'var(--amber-bg)':'var(--red-bg)';
             return '<tr style="border-bottom:1px solid var(--border)">'
-              +'<td style="padding:8px 6px;font-size:11px;font-weight:600;color:var(--text);font-family:\'Poppins\',sans-serif">'+m+'</td>'
-              +'<td style="padding:8px 6px;text-align:center;font-size:11px;font-family:\'DM Mono\',monospace;color:var(--text3)">'+meta+'</td>'
-              +'<td style="padding:8px 6px;text-align:center;font-size:11px;font-family:\'DM Mono\',monospace;color:var(--text)">'+months[i].opps+'</td>'
-              +'<td style="padding:8px 6px;text-align:center"><span style="font-size:11px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+c+';background:'+bg+';padding:2px 8px;border-radius:8px">'+p+'%</span></td>'
+              +'<td style="padding:8px 6px;font-size:11px;font-weight:600;color:var(--text);font-family:\'Inter\',sans-serif">'+m+'</td>'
+              +'<td style="padding:8px 6px;text-align:center;font-size:11px;font-family:\'Inter\',sans-serif;color:var(--text3)">'+meta+'</td>'
+              +'<td style="padding:8px 6px;text-align:center;font-size:11px;font-family:\'Inter\',sans-serif;color:var(--text)">'+months[i].opps+'</td>'
+              +'<td style="padding:8px 6px;text-align:center"><span style="font-size:11px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+c+';background:'+bg+';padding:2px 8px;border-radius:8px">'+p+'%</span></td>'
               +'</tr>';
           }).join('')
           +'</tbody></table>';
@@ -4020,17 +4298,17 @@ function buildPerformanceBDR(pane, bdr){
           +pcts.map(function(p,i){
             var c=p>=100?'var(--green)':p>=70?'var(--amber)':'var(--red)';
             return '<div style="text-align:center;padding:10px 6px;background:#ffffff;border:1.5px solid rgba(0,0,0,0.12);border-radius:8px">'
-              +'<div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-family:\'Poppins\',sans-serif;font-weight:500">'+meses[i]+'</div>'
-              +'<div style="font-size:22px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+c+'">'+p+'%</div>'
-              +'<div style="font-size:9px;color:var(--text3);margin-top:2px;font-family:\'Poppins\',sans-serif">'+months[i].opps+'/'+meta+' opps</div>'
+              +'<div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-family:\'Inter\',sans-serif;font-weight:500">'+meses[i]+'</div>'
+              +'<div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+c+'">'+p+'%</div>'
+              +'<div style="font-size:9px;color:var(--text3);margin-top:2px;font-family:\'Inter\',sans-serif">'+months[i].opps+'/'+meta+' opps</div>'
               +'</div>';
           }).join('')
           +'</div>'
           +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px">'
-          +'<div style="text-align:center;padding:8px 4px;background:#ffffff;border:1.5px solid rgba(0,0,0,0.12);border-radius:8px"><div style="font-size:9px;color:#8892a0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Poppins\',sans-serif;font-weight:500">Média</div><div style="font-size:17px;font-weight:700;font-family:\'DM Mono\',monospace">'+avg+'%</div></div>'
-          +'<div style="text-align:center;padding:8px 4px;background:rgba(34,197,94,0.08);border:1.5px solid rgba(34,197,94,0.30);border-radius:8px"><div style="font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Poppins\',sans-serif;font-weight:500">Melhor</div><div style="font-size:17px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--green)">'+best+'%</div><div style="font-size:8px;color:var(--green);font-family:\'Poppins\',sans-serif">'+meses[bestIdx]+'</div></div>'
-          +'<div style="text-align:center;padding:8px 4px;background:rgba(239,68,68,0.07);border:1.5px solid rgba(239,68,68,0.28);border-radius:8px"><div style="font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Poppins\',sans-serif;font-weight:500">Pior</div><div style="font-size:17px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--red)">'+worst+'%</div><div style="font-size:8px;color:var(--red);font-family:\'Poppins\',sans-serif">'+meses[worstIdx]+'</div></div>'
-          +'<div style="text-align:center;padding:8px 4px;background:#ffffff;border:1.5px solid rgba(0,0,0,0.12);border-radius:8px"><div style="font-size:9px;color:#8892a0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Poppins\',sans-serif;font-weight:500">Tendência</div><div style="font-size:20px;font-weight:700;color:'+trendCol+'">'+trendIcon+'</div><div style="font-size:8px;color:'+trendCol+';font-family:\'Poppins\',sans-serif">'+trend+'</div></div>'
+          +'<div style="text-align:center;padding:8px 4px;background:#ffffff;border:1.5px solid rgba(0,0,0,0.12);border-radius:8px"><div style="font-size:9px;color:#8892a0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Inter\',sans-serif;font-weight:500">Média</div><div style="font-size:17px;font-weight:700;font-family:\'Inter\',sans-serif">'+avg+'%</div></div>'
+          +'<div style="text-align:center;padding:8px 4px;background:rgba(34,197,94,0.08);border:1.5px solid rgba(34,197,94,0.30);border-radius:8px"><div style="font-size:9px;color:var(--green);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Inter\',sans-serif;font-weight:500">Melhor</div><div style="font-size:17px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--green)">'+best+'%</div><div style="font-size:8px;color:var(--green);font-family:\'Inter\',sans-serif">'+meses[bestIdx]+'</div></div>'
+          +'<div style="text-align:center;padding:8px 4px;background:rgba(239,68,68,0.07);border:1.5px solid rgba(239,68,68,0.28);border-radius:8px"><div style="font-size:9px;color:var(--red);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Inter\',sans-serif;font-weight:500">Pior</div><div style="font-size:17px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--red)">'+worst+'%</div><div style="font-size:8px;color:var(--red);font-family:\'Inter\',sans-serif">'+meses[worstIdx]+'</div></div>'
+          +'<div style="text-align:center;padding:8px 4px;background:#ffffff;border:1.5px solid rgba(0,0,0,0.12);border-radius:8px"><div style="font-size:9px;color:#8892a0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px;font-family:\'Inter\',sans-serif;font-weight:500">Tendência</div><div style="font-size:20px;font-weight:700;color:'+trendCol+'">'+trendIcon+'</div><div style="font-size:8px;color:'+trendCol+';font-family:\'Inter\',sans-serif">'+trend+'</div></div>'
           +'</div>';
       }
     },
@@ -4051,25 +4329,25 @@ function buildPerformanceBDR(pane, bdr){
           var isCurrent=l.label===profile;
           return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05)'+(isCurrent?';background:rgba(0,0,0,0.03);margin:0 -12px;padding:5px 12px;border-radius:4px':'')+'">'+
             '<div style="width:7px;height:7px;border-radius:50%;background:'+l.col+';flex-shrink:0"></div>'+
-            '<span style="font-size:11px;font-family:\'Poppins\',sans-serif;font-weight:'+(isCurrent?'700':'400')+';color:'+(isCurrent?'#111':'#555e6b')+'">'+l.label+'</span>'+
-            (isCurrent?'<span style="margin-left:auto;font-size:9px;font-weight:700;color:'+l.col+';font-family:\'Poppins\',sans-serif">← você</span>':'')
+            '<span style="font-size:11px;font-family:\'Inter\',sans-serif;font-weight:'+(isCurrent?'700':'400')+';color:'+(isCurrent?'#111':'#555e6b')+'">'+l.label+'</span>'+
+            (isCurrent?'<span style="margin-left:auto;font-size:9px;font-weight:700;color:'+l.col+';font-family:\'Inter\',sans-serif">← você</span>':'')
           +'</div>';
         }).join('');
 
         return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
           +'<div style="width:10px;height:10px;border-radius:50%;background:'+profileCol+';flex-shrink:0"></div>'
           +'<div style="position:relative;display:inline-block">'
-          +'<span style="font-size:13px;font-weight:700;color:'+profileCol+';font-family:\'Poppins\',sans-serif;cursor:help;border-bottom:1px dashed '+profileCol+'" '
+          +'<span style="font-size:13px;font-weight:700;color:'+profileCol+';font-family:\'Inter\',sans-serif;cursor:help;border-bottom:1px dashed '+profileCol+'" '
           +'onmouseenter="(function(el,e){var t=document.getElementById(\'perf-lvl-tooltip\');if(t){t.style.display=\'block\';var r=el.getBoundingClientRect();t.style.top=(r.bottom+6)+\'px\';t.style.left=r.left+\'px\';};})(this,event)" '
           +'onmouseleave="(function(){var t=document.getElementById(\'perf-lvl-tooltip\');if(t)t.style.display=\'none\';})()">'+profile+'</span>'
           +'<div id="perf-lvl-tooltip" style="display:none;position:fixed;background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:260px;z-index:9999">'
-          +'<div style="font-size:9px;font-weight:700;color:#8892a0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-family:\'Poppins\',sans-serif">Níveis de performance</div>'
+          +'<div style="font-size:9px;font-weight:700;color:#8892a0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-family:\'Inter\',sans-serif">Níveis de performance</div>'
           +levelsHtml
           +'</div>'
           +'</div>'
-          +'<div style="margin-left:auto;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(0,0,0,0.05);color:'+consistencyCol+';font-family:\'Poppins\',sans-serif">'+consistency+'</div>'
+          +'<div style="margin-left:auto;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(0,0,0,0.05);color:'+consistencyCol+';font-family:\'Inter\',sans-serif">'+consistency+'</div>'
           +'</div>'
-          +'<div style="font-size:12px;color:#555e6b;font-family:\'Poppins\',sans-serif;line-height:1.5">'+profileDesc+'</div>';
+          +'<div style="font-size:12px;color:#555e6b;font-family:\'Inter\',sans-serif;line-height:1.5">'+profileDesc+'</div>';
       }
     },
     {
@@ -4080,24 +4358,24 @@ function buildPerformanceBDR(pane, bdr){
       html:function(){
         return '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:300px">'
           +'<thead><tr style="border-bottom:1.5px solid var(--border)">'
-          +'<th style="text-align:left;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Poppins\',sans-serif">Ind.</th>'
-          +meses.map(function(m){return '<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Poppins\',sans-serif">'+m+'</th>';}).join('')
-          +'<th style="text-align:center;font-size:9px;color:var(--accent);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Poppins\',sans-serif">Bench</th>'
+          +'<th style="text-align:left;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Inter\',sans-serif">Ind.</th>'
+          +meses.map(function(m){return '<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Inter\',sans-serif">'+m+'</th>';}).join('')
+          +'<th style="text-align:center;font-size:9px;color:var(--accent);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Inter\',sans-serif">Bench</th>'
           +'<th style="text-align:center;font-size:9px;padding:5px 6px">Tend.</th>'
           +'</tr></thead><tbody>'
           +indicators.map(function(ind){
             var tnd=ind.lower?(ind.vals[2]<ind.vals[0]?'↓':'↑'):(ind.vals[2]>ind.vals[0]?'↑':ind.vals[2]<ind.vals[0]?'↓':'→');
             var tndC=ind.lower?(tnd==='↓'?'var(--green)':'var(--red)'):(tnd==='↑'?'var(--green)':tnd==='↓'?'var(--red)':'var(--text3)');
             return '<tr style="border-bottom:1px solid var(--border)">'
-              +'<td style="padding:7px 6px;font-size:11px;font-weight:600;color:var(--text);font-family:\'Poppins\',sans-serif">'+ind.label+'</td>'
-              +ind.vals.map(function(v){return '<td style="padding:7px 6px;text-align:center;font-size:12px;font-family:\'DM Mono\',monospace;font-weight:600;color:var(--text)">'+v+(ind.unit||'')+'</td>';}).join('')
-              +'<td style="padding:7px 6px;text-align:center;font-size:11px;font-family:\'DM Mono\',monospace;color:var(--text3)">'+ind.bench+(ind.unit||'')+'</td>'
+              +'<td style="padding:7px 6px;font-size:11px;font-weight:600;color:var(--text);font-family:\'Inter\',sans-serif">'+ind.label+'</td>'
+              +ind.vals.map(function(v){return '<td style="padding:7px 6px;text-align:center;font-size:12px;font-family:\'Inter\',sans-serif;font-weight:600;color:var(--text)">'+v+(ind.unit||'')+'</td>';}).join('')
+              +'<td style="padding:7px 6px;text-align:center;font-size:11px;font-family:\'Inter\',sans-serif;color:var(--text3)">'+ind.bench+(ind.unit||'')+'</td>'
               +'<td style="padding:7px 6px;text-align:center;font-size:14px;font-weight:700;color:'+tndC+'">'+tnd+'</td>'
               +'</tr>';
           }).join('')
           +'</tbody></table></div>'
           +'<button onclick="(function(){var btns=document.querySelectorAll(\'.nav-item\');btns.forEach(function(b){if(b.querySelector(\'.nav-label\')&&b.querySelector(\'.nav-label\').textContent===\'Funil\')b.click();});})()" '
-          +'style="margin-top:10px;font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:\'Poppins\',sans-serif">Ver meu funil →</button>';
+          +'style="margin-top:10px;font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:\'Inter\',sans-serif">Ver meu funil →</button>';
       }
     },
     {
@@ -4108,12 +4386,12 @@ function buildPerformanceBDR(pane, bdr){
       html:function(){
         return '<div style="display:flex;flex-direction:column;gap:8px">'
           +'<div style="padding:10px 12px;background:var(--green-bg);border-radius:var(--radius-sm);border-left:3px solid var(--green)">'
-          +'<div style="font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-family:\'Poppins\',sans-serif">Meses bons</div>'
-          +'<div style="font-size:12px;color:var(--text);font-family:\'Poppins\',sans-serif;line-height:1.5">'+goodPatt+'</div>'
+          +'<div style="font-size:9px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-family:\'Inter\',sans-serif">Meses bons</div>'
+          +'<div style="font-size:12px;color:var(--text);font-family:\'Inter\',sans-serif;line-height:1.5">'+goodPatt+'</div>'
           +'</div>'
           +'<div style="padding:10px 12px;background:var(--red-bg);border-radius:var(--radius-sm);border-left:3px solid var(--red)">'
-          +'<div style="font-size:9px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-family:\'Poppins\',sans-serif">Meses ruins</div>'
-          +'<div style="font-size:12px;color:var(--text);font-family:\'Poppins\',sans-serif;line-height:1.5">'+badPatt+'</div>'
+          +'<div style="font-size:9px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-family:\'Inter\',sans-serif">Meses ruins</div>'
+          +'<div style="font-size:12px;color:var(--text);font-family:\'Inter\',sans-serif;line-height:1.5">'+badPatt+'</div>'
           +'</div>'
           +'</div>';
       }
@@ -4125,25 +4403,25 @@ function buildPerformanceBDR(pane, bdr){
       open:false,
       html:function(){
         return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-          +'<div><div style="font-size:15px;font-weight:700;color:var(--text);font-family:\'Poppins\',sans-serif">'+mainGap.label+'</div>'
-          +'<div style="font-size:11px;color:#8892a0;font-family:\'Poppins\',sans-serif">Maior gap vs benchmark</div></div>'
-          +'<div style="text-align:right"><div style="font-size:26px;font-weight:700;font-family:\'DM Mono\',monospace;color:var(--red)">'+mainGap.avgVal+mainGap.unit+'</div>'
+          +'<div><div style="font-size:15px;font-weight:700;color:var(--text);font-family:\'Inter\',sans-serif">'+mainGap.label+'</div>'
+          +'<div style="font-size:11px;color:#8892a0;font-family:\'Inter\',sans-serif">Maior gap vs benchmark</div></div>'
+          +'<div style="text-align:right"><div style="font-size:26px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--red)">'+mainGap.avgVal+mainGap.unit+'</div>'
           +'<div style="font-size:10px;color:var(--text3)">bench: '+mainGap.bench+mainGap.unit+'</div></div>'
           +'</div>'
           +'<div style="height:5px;background:#eef0f3;border-radius:3px;overflow:hidden;margin-bottom:8px;position:relative">'
           +'<div style="position:absolute;left:0;top:0;height:100%;width:'+Math.min(100,Math.round((mainGap.bench/Math.max(mainGap.bench,mainGap.avgVal+5))*100))+'%;background:rgba(59,130,246,0.25);border-radius:3px"></div>'
           +'<div style="width:'+Math.min(100,Math.round((mainGap.avgVal/Math.max(mainGap.bench,mainGap.avgVal+5))*100))+'%;height:100%;background:var(--red);border-radius:3px"></div>'
           +'</div>'
-          +'<div style="font-size:12px;color:var(--text2);font-family:\'Poppins\',sans-serif">'
+          +'<div style="font-size:12px;color:var(--text2);font-family:\'Inter\',sans-serif">'
           +'Gap de <strong>'+Math.abs(mainGap.gap)+'pp</strong>. '
           +'<span style="color:var(--accent);font-weight:600;cursor:pointer;border-bottom:1px dashed var(--accent)" '
           +'onmouseenter="this.nextElementSibling.style.display=\'block\'" '
           +'onmouseleave="this.nextElementSibling.style.display=\'none\'">Corrigindo isso</span>'
           +' você ganha +'+Math.round(Math.abs(mainGap.gap)*0.15)+' opps/mês.'
           +'<div style="display:none;margin-top:8px;padding:10px 12px;background:#f4f5f7;border-radius:var(--radius-sm);border:1px solid var(--border2)">'
-          +'<div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-family:\'Poppins\',sans-serif">O que fazer:</div>'
+          +'<div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-family:\'Inter\',sans-serif">O que fazer:</div>'
           +(pdcaMap[mainGap.label]||baseActions).map(function(a,i){
-            return '<div style="font-size:11px;color:var(--text);padding:4px 0;border-bottom:1px solid var(--border);font-family:\'Poppins\',sans-serif"><span style="color:var(--accent);font-weight:700">'+(i+1)+'.</span> '+a+'</div>';
+            return '<div style="font-size:11px;color:var(--text);padding:4px 0;border-bottom:1px solid var(--border);font-family:\'Inter\',sans-serif"><span style="color:var(--accent);font-weight:700">'+(i+1)+'.</span> '+a+'</div>';
           }).join('')
           +'</div>'
           +'</div>';
@@ -4161,16 +4439,16 @@ function buildPerformanceBDR(pane, bdr){
           {letter:'C',name:'Checar',  desc:'Revisar resultado toda sexta com o gestor'},
           {letter:'A',name:'Ajustar', desc:'Manter o que funcionou, descartar o que não gerou resultado'},
         ];
-        return '<div style="font-size:11px;color:var(--text2);margin-bottom:10px;font-family:\'Poppins\',sans-serif">Foco: <strong>'+mainGap.label+'</strong></div>'
+        return '<div style="font-size:11px;color:var(--text2);margin-bottom:10px;font-family:\'Inter\',sans-serif">Foco: <strong>'+mainGap.label+'</strong></div>'
           +pdcaSteps.map(function(s){
             return '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;overflow:hidden">'
               +'<div onclick="(function(el){var b=el.nextElementSibling;var open=b.style.display!==\'none\';b.style.display=open?\'none\':\'block\';el.querySelector(\'.pc\').textContent=open?\'▾\':\'▴\';})(this)" '
               +'style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;border-bottom:1px solid rgba(0,0,0,0.04)">'
-              +'<div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:\'Poppins\',sans-serif">'+s.letter+'</div>'
-              +'<span style="font-size:12px;font-weight:700;color:var(--text);flex:1;font-family:\'Poppins\',sans-serif">'+s.name+'</span>'
+              +'<div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:\'Inter\',sans-serif">'+s.letter+'</div>'
+              +'<span style="font-size:12px;font-weight:700;color:var(--text);flex:1;font-family:\'Inter\',sans-serif">'+s.name+'</span>'
               +'<span class="pc" style="font-size:13px;color:var(--text3)">▾</span>'
               +'</div>'
-              +'<div style="display:none;padding:10px 14px;background:var(--bg2);font-size:12px;color:#555e6b;font-family:\'Poppins\',sans-serif;line-height:1.5">'+s.desc+'</div>'
+              +'<div style="display:none;padding:10px 14px;background:var(--bg2);font-size:12px;color:#555e6b;font-family:\'Inter\',sans-serif;line-height:1.5">'+s.desc+'</div>'
               +'</div>';
           }).join('');
       }
@@ -4182,8 +4460,8 @@ function buildPerformanceBDR(pane, bdr){
       open:true,
       html:function(){
         return '<div style="height:5px;background:#eef0f3;border-radius:3px;overflow:hidden;margin-bottom:8px"><div id="pf-bar" style="height:100%;width:0%;background:var(--green);border-radius:3px;transition:width .4s"></div></div>'
-          +'<div style="font-size:10px;color:var(--text3);margin-bottom:10px;font-family:\'Poppins\',sans-serif" id="pf-txt">0 de 3 concluídas</div>'
-          +'<div id="pf-actions"><div style="padding:14px;text-align:center;color:var(--text3);font-size:12px;font-family:\'Poppins\',sans-serif"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1s infinite;display:inline-block;margin-right:6px"></div>Gerando com IA...</div></div>';
+          +'<div style="font-size:10px;color:var(--text3);margin-bottom:10px;font-family:\'Inter\',sans-serif" id="pf-txt">0 de 3 concluídas</div>'
+          +'<div id="pf-actions"><div style="padding:14px;text-align:center;color:var(--text3);font-size:12px;font-family:\'Inter\',sans-serif"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1s infinite;display:inline-block;margin-right:6px"></div>Gerando com IA...</div></div>';
       }
     },
   ];
@@ -4199,7 +4477,7 @@ function buildPerformanceBDR(pane, bdr){
     perfBlocks=reordered;
   }
 
-  pane.innerHTML='<div style="font-size:11px;color:var(--text3);margin-bottom:14px;font-family:\'DM Mono\',monospace">Performance · '+meses[0]+'–'+meses[meses.length-1]+' 2026</div>';
+  pane.innerHTML='<div style="font-size:11px;color:var(--text3);margin-bottom:14px;font-family:\'Inter\',sans-serif">Performance · '+meses[0]+'–'+meses[meses.length-1]+' 2026</div>';
 
   var dragSrc=null;
 
@@ -4222,7 +4500,7 @@ function buildPerformanceBDR(pane, bdr){
     handle.onmouseleave=function(){handle.style.color='var(--border2)';};
 
     var titleEl=document.createElement('span');
-    titleEl.style.cssText='font-size:13px;font-weight:700;color:var(--text);flex:1;font-family:\'Poppins\',sans-serif;letter-spacing:-.01em';
+    titleEl.style.cssText='font-size:13px;font-weight:700;color:var(--text);flex:1;font-family:\'Inter\',sans-serif;letter-spacing:-.01em';
     titleEl.textContent=blk.title;
 
     var chev=document.createElement('span');
@@ -4231,7 +4509,7 @@ function buildPerformanceBDR(pane, bdr){
 
     if(blk.subtitle){
       var sub=document.createElement('span');
-      sub.style.cssText='font-size:9px;color:#8892a0;font-family:\'Poppins\',sans-serif;font-weight:400';
+      sub.style.cssText='font-size:9px;color:#8892a0;font-family:\'Inter\',sans-serif;font-weight:400';
       sub.textContent=blk.subtitle;
       hdr.appendChild(handle);
       hdr.appendChild(titleEl);
@@ -4346,15 +4624,15 @@ function buildPerformanceBDR(pane, bdr){
         +'<div style="width:24px;height:24px;border-radius:50%;background:'+(done?'var(--green)':'var(--accent)')+';color:white;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px">'+(done?'✓':(i+1))+'</div>'
         +'<div style="flex:1">'
         +'<div style="display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-bottom:3px">'
-        +'<span style="font-size:12px;font-weight:700;color:'+(done?'var(--text3)':'var(--text)')+';font-family:\'Poppins\',sans-serif;'+(done?'text-decoration:line-through':'')+'">>'+(a.titulo||a)+'</span>'
-        +(a.impacto?'<span style="font-size:9px;font-weight:600;color:'+(impactCol[a.impacto]||'var(--amber)')+';background:var(--bg3);padding:1px 6px;border-radius:8px;font-family:\'Poppins\',sans-serif">'+a.impacto+'</span>':'')
+        +'<span style="font-size:12px;font-weight:700;color:'+(done?'var(--text3)':'var(--text)')+';font-family:\'Inter\',sans-serif;'+(done?'text-decoration:line-through':'')+'">>'+(a.titulo||a)+'</span>'
+        +(a.impacto?'<span style="font-size:9px;font-weight:600;color:'+(impactCol[a.impacto]||'var(--amber)')+';background:var(--bg3);padding:1px 6px;border-radius:8px;font-family:\'Inter\',sans-serif">'+a.impacto+'</span>':'')
         +'</div>'
-        +(a.descricao?'<div style="font-size:11px;color:var(--text2);font-family:\'Poppins\',sans-serif;line-height:1.4;margin-bottom:4px">'+a.descricao+'</div>':'')
+        +(a.descricao?'<div style="font-size:11px;color:var(--text2);font-family:\'Inter\',sans-serif;line-height:1.4;margin-bottom:4px">'+a.descricao+'</div>':'')
         +'<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">'
-        +(a.prazo?'<span style="font-size:10px;color:#8892a0;font-family:\'Poppins\',sans-serif">'+(prazoIcons[a.prazo]||'⏱')+' '+a.prazo+'</span>':'')
+        +(a.prazo?'<span style="font-size:10px;color:#8892a0;font-family:\'Inter\',sans-serif">'+(prazoIcons[a.prazo]||'⏱')+' '+a.prazo+'</span>':'')
         +(done
-          ?'<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;font-weight:600;color:var(--green);font-family:\'Poppins\',sans-serif">✓ Concluído</span><button onclick="window._perfToggle('+i+')" style="font-size:10px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:2px 8px;cursor:pointer;font-family:\'Poppins\',sans-serif">Desfazer</button></div>'
-          :'<button onclick="window._perfToggle('+i+')" style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-family:\'Poppins\',sans-serif">Marcar feito ✓</button>')
+          ?'<div style="display:flex;align-items:center;gap:6px"><span style="font-size:10px;font-weight:600;color:var(--green);font-family:\'Inter\',sans-serif">✓ Concluído</span><button onclick="window._perfToggle('+i+')" style="font-size:10px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:2px 8px;cursor:pointer;font-family:\'Inter\',sans-serif">Desfazer</button></div>'
+          :'<button onclick="window._perfToggle('+i+')" style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-family:\'Inter\',sans-serif">Marcar feito ✓</button>')
         +'</div>'
         +'</div></div>';
     }).join('');
@@ -4416,7 +4694,7 @@ function buildBDRFunil(pane,bdr){
       <div class="card-title">Desqualificações — semana</div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
         <span style="font-size:13px;color:var(--text2)">Total desqualificados</span>
-        <span style="font-size:18px;font-weight:600;font-family:\'DM Mono\',monospace;color:var(--amber)">${f.desq||0}</span>
+        <span style="font-size:18px;font-weight:600;font-family:\'Inter\',sans-serif;color:var(--amber)">${f.desq||0}</span>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0">
         <span style="font-size:13px;color:var(--text2)">Principal motivo</span>
@@ -4439,7 +4717,7 @@ function buildBDRFunil(pane,bdr){
     </div>`;
 
   buildFunnel('funnel-bdr',[
-    {name:'Novo Lead',    val:f.nl||0,  max:Math.max(f.nl||1,1), color:'#1d4ed8'},
+    {name:'Novo Lead',    val:f.nl||0,  max:Math.max(f.nl||1,1), color:'#003cfd'},
     {name:'Abord. Iniciada',val:f.ai||0,max:Math.max(f.nl||1,1), color:'#2563eb'},
     {name:'Lead Conectado',val:f.lc||0, max:Math.max(f.nl||1,1), color:'#0891b2'},
     {name:'Reunião Ag.',  val:f.ras||0, max:Math.max(f.nl||1,1), color:'#f59e0b'},
@@ -4497,9 +4775,9 @@ function buildTimeView(pane,bdr){
             <div class="bdr-av" style="background:${b.bg};color:${b.color};width:26px;height:26px;font-size:9px">${b.id}</div>
             <span style="font-size:12px;font-weight:${isMe?'600':'400'};color:${isMe?'var(--accent)':'var(--text)'}">${b.name.split(' ')[0]}${isMe?' ★':''}</span>
           </div>
-          <div style="width:42px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:500;color:${b.opps>0?'var(--green)':'var(--text3)'}">${b.opps||'—'}</div>
-          <div style="width:42px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:500;color:${b.ras>0?'var(--text)':'var(--text3)'}">${b.ras||'—'}</div>
-          <div style="width:42px;text-align:center;font-size:13px;font-family:\'DM Mono\',monospace;font-weight:500">${b.lig}</div>
+          <div style="width:42px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:500;color:${b.opps>0?'var(--green)':'var(--text3)'}">${b.opps||'—'}</div>
+          <div style="width:42px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:500;color:${b.ras>0?'var(--text)':'var(--text3)'}">${b.ras||'—'}</div>
+          <div style="width:42px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:500">${b.lig}</div>
         </div>`;
       }).join('')}
       <div style="padding:10px 14px;background:var(--bg3)">
