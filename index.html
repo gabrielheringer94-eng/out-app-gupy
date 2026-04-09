@@ -614,6 +614,7 @@ input[type="number"]:focus {
       <div>
         <div class="app-user-name" id="app-name"></div>
         <div class="app-user-role" id="app-role"></div>
+        <div id="app-badges" style="display:none;flex-wrap:wrap;gap:4px;margin-top:4px;align-items:center"></div>
       </div>
     </div>
     <div class="app-header-right">
@@ -663,6 +664,33 @@ input[type="number"]:focus {
 
 <script>
 // ─── DATA ────────────────────────────────────────────────────
+// ── Trophies & Badges helpers ──
+function calcTrofeus(bdrId){
+  const hist=DATA.metaHistorico&&DATA.metaHistorico[bdrId];
+  if(!hist) return {count:0,streak:0};
+  // Count consecutive months ending at most recent
+  const months=['mar','fev','jan'];
+  let streak=0;
+  for(const m of months){
+    if(hist[m]) streak++; else break;
+  }
+  // Total months with meta
+  const count=months.filter(m=>hist[m]).length;
+  return {count,streak};
+}
+
+function getEspecialidades(bdrId){
+  return (DATA.especialistas&&DATA.especialistas[bdrId])||[];
+}
+
+// Badge label config
+const ESPECIALIDADE_CONFIG={
+  'CRM':          {icon:'🗂',  color:'#6366f1', bg:'rgba(99,102,241,0.1)'},
+  'MeetRox':      {icon:'🎙',  color:'#8b5cf6', bg:'rgba(139,92,246,0.1)'},
+  'Treinamentos': {icon:'📚',  color:'#0891b2', bg:'rgba(8,145,178,0.1)'},
+  'Embaixador Gupy':{icon:'🏅',color:'#003cfd', bg:'rgba(0,60,253,0.1)'},
+};
+
 // Calcula semana atual de Abril 2026 baseada na data real
 function calcSemAtual(){
   const hoje=new Date();
@@ -858,6 +886,27 @@ const DATA = {
   benchmarks:{
     aiLc:57, lcRa:37, raOp:75,
     ligDia:10, ativSem:200, noshow:1.5
+  },
+  // Especialistas do time
+  especialistas:{
+    PS:['CRM'],
+    AG:['MeetRox'],
+    MY:['MeetRox'],
+    AM:['Treinamentos'],
+    JR:['Embaixador Gupy'],
+  },
+  // Troféus: meses consecutivos batendo meta (base = Março 2026)
+  // true = bateu meta naquele mês. Calculado sequencialmente.
+  metaHistorico:{
+    // {mar, fev, jan} — true se bateu a meta do mês
+    MY:{mar:true,  fev:false, jan:false},
+    JS:{mar:true,  fev:false, jan:false},
+    VE:{mar:false, fev:false, jan:false},
+    GF:{mar:false, fev:false, jan:false},
+    JR:{mar:true,  fev:false, jan:false},
+    AG:{mar:false, fev:false, jan:false},
+    AM:{mar:false, fev:false, jan:false},
+    PS:{mar:false, fev:false, jan:false},
   },
   // RA pendentes por BDR (reuniões agendadas ainda não realizadas)
   raPendentes:{
@@ -1154,8 +1203,46 @@ function setupApp(){
     av.style.color=u.color;
     av.textContent=u.av;
   }
-  document.getElementById('app-name').textContent=u.name.split(' ')[0];
-  document.getElementById('app-role').textContent=u.isGestor?'Líder · Pre Vendas':'BDR · Pre Vendas';
+  // Apply saved display name pref
+  const prefsKey='gpulse-prefs-'+(u.id||'');
+  let savedPrefs={};
+  try{ savedPrefs=JSON.parse(localStorage.getItem(prefsKey)||'{}'); }catch(e){}
+  const displayName=savedPrefs.nomeApp||u.name.split(' ')[0];
+  document.getElementById('app-name').textContent=displayName;
+
+  if(u.isGestor){
+    document.getElementById('app-role').textContent='Líder · Pre Vendas';
+  } else {
+    // Build role line with senioridade + badges
+    const prefs=savedPrefs;
+    const nivel=prefs.nivel||'';
+    const trofeus=calcTrofeus(u.id);
+    const espec=getEspecialidades(u.id);
+
+    // Role line: "BDR · Pre Vendas · Pleno"
+    const roleEl=document.getElementById('app-role');
+    const roleText='BDR · Pre Vendas'+(nivel?' · '+nivel:'');
+    roleEl.textContent=roleText;
+
+    // Badges row — trophies + specialties
+    const badgesEl=document.getElementById('app-badges');
+    if(badgesEl){
+      let html='';
+      // Trophies
+      if(trofeus.streak>0){
+        const trofLabel=trofeus.streak>=3?'🏆'.repeat(trofeus.streak):'🏅'.repeat(trofeus.streak);
+        const trofTitle=trofeus.streak>=3?trofeus.streak+' meses seguidos — conquista especial!':trofeus.streak+' mes(es) batendo meta';
+        html+=`<span title="${trofTitle}" style="font-size:13px;letter-spacing:1px">${trofLabel}</span>`;
+      }
+      // Specialties
+      espec.forEach(function(e){
+        const cfg=ESPECIALIDADE_CONFIG[e]||{icon:'⭐',color:'var(--accent)',bg:'var(--accent-light)'};
+        html+=`<span title="Especialista: ${e}" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;color:${cfg.color};background:${cfg.bg};padding:2px 7px;border-radius:10px;font-family:'Inter',sans-serif">${cfg.icon} ${e}</span>`;
+      });
+      badgesEl.innerHTML=html;
+      badgesEl.style.display=html?'flex':'none';
+    }
+  }
   // Update timestamp chip — show last data update
   const chip=document.getElementById('last-update-chip');
   if(chip){
@@ -5401,6 +5488,14 @@ function saveSettings(){
   if(prefs.nomeApp){
     const nameEl=document.getElementById('app-name');
     if(nameEl) nameEl.textContent=prefs.nomeApp;
+  }
+  // Refresh role line with new nivel
+  if(currentUser&&!currentUser.isGestor){
+    const roleEl=document.getElementById('app-role');
+    if(roleEl){
+      const nivel=prefs.nivel||'';
+      roleEl.textContent='BDR · Pre Vendas'+(nivel?' · '+nivel:'');
+    }
   }
 
   // Visual feedback
