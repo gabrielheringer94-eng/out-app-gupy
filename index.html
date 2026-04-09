@@ -1140,6 +1140,8 @@ function setupApp(){
   buildTicker(u);
   if(u.isGestor) buildGestorApp();
   else buildBDRApp(u);
+  // Check daily alerts after login
+  setTimeout(checkDailyAlerts, 2000);
 }
 
 function buildTicker(user){
@@ -3913,6 +3915,20 @@ function buildHoje(pane, bdr){
 
   // Load forecast async after pane renders
   loadBDRForecast(bdr);
+
+  // Push notification settings card
+  setTimeout(function(){
+    var pushWrap=document.createElement('div');
+    pushWrap.className='card push-settings-wrap';
+    pushWrap.style.cssText='margin-bottom:10px';
+    var pushTitle=document.createElement('div');
+    pushTitle.className='card-title';
+    pushTitle.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:12px';
+    pushTitle.innerHTML='<span>🔔</span> Notificações';
+    pushWrap.appendChild(pushTitle);
+    buildPushSettings(pushWrap);
+    pane.appendChild(pushWrap);
+  },100);
 }
 
 async function loadBDRForecast(bdr){
@@ -3951,23 +3967,69 @@ async function loadBDRForecast(bdr){
       return;
     }
 
+    // Smart suggestion based on BDR conversions
+    const semR=DATA.semTotal-DATA.semAtual;
+    const oppsLeft=Math.max(0,DATA.metaBDR-bdr.opps);
+    const bench=DATA.benchmarks;
+    // Use BDR hist3m if available, else bench
+    const bdrH=DATA.hist3m&&DATA.hist3m.bdrs&&DATA.hist3m.bdrs[bdr.id];
+    const m3=bdrH?bdrH.m3:null;
+    const aiLcRate=(m3&&m3.aiLc>0?m3.aiLc:bench.aiLc)/100;
+    const lcRaRate=(m3&&m3.lcRa>0?m3.lcRa:bench.lcRa)/100;
+    const raOpRate=(m3&&m3.raOp>0?m3.raOp:bench.raOp)/100;
+    // Suggested values for this week
+    const sugOp=semR>0?Math.ceil(oppsLeft/semR):oppsLeft;
+    const sugRa=raOpRate>0?Math.ceil(sugOp/raOpRate):0;
+    const sugLc=lcRaRate>0?Math.ceil(sugRa/lcRaRate):0;
+    const hasHistory=m3&&(m3.aiLc>0||m3.lcRa>0);
+
     // Show input form
     el.innerHTML=`
-      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
+      <div style="background:rgba(0,60,253,0.05);border:1px solid rgba(0,60,253,0.15);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
         <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Este é o seu compromisso.</div>
-        <div style="font-size:12px;color:var(--text2);line-height:1.6">Seu forecast é visível para o seu gestor e para o time. Seja honesto e realista — um bom forecast não é o número que você quer, é o número que você acredita que vai entregar. Você pode enviar apenas uma vez por semana.</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6">Seu forecast é visível para o gestor e para o time. Seja honesto — um bom forecast não é o número que você quer, é o número que você acredita que vai entregar.</div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+
+      ${oppsLeft>0?`
+      <div style="background:rgba(0,18,47,0.04);border:1px solid rgba(0,18,47,0.1);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
+        <div style="font-size:10px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:5px">
+          <span>💡</span> Sugestão para fechar o mês
+        </div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7">
+          Faltam <strong style="color:var(--text)">${oppsLeft} opp${oppsLeft>1?'s':''}</strong> para bater a meta nas próximas <strong style="color:var(--text)">${semR} semana${semR>1?'s':''}</strong>.
+          ${sugRa>0?`Para entregar <strong style="color:var(--accent)">${sugOp} opp${sugOp>1?'s':''} esta semana</strong>, você precisa de ~<strong style="color:var(--teal)">${sugRa} RAs</strong> e ~<strong style="color:var(--text)">${sugLc} LCs</strong>${hasHistory?' (baseado no seu histórico)':' (baseado no benchmark do time)'}.`:''}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px">
+          ${[['LC',sugLc,'var(--text2)'],['RA',sugRa,'var(--teal)'],['OP',sugOp,'var(--accent)']].map(([l,v,c])=>`
+            <div style="text-align:center;padding:6px;background:rgba(255,255,255,0.7);border-radius:6px;border:1px solid rgba(0,18,47,0.08)">
+              <div style="font-size:16px;font-weight:700;color:${c};font-family:'Inter',sans-serif">${v}</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:1px">${l} sugerido</div>
+            </div>`).join('')}
+        </div>
+        <button onclick="(function(){
+          document.getElementById('fcst-lc-${bdr.id}').value=${sugLc};
+          document.getElementById('fcst-ra-${bdr.id}').value=${sugRa};
+          document.getElementById('fcst-op-${bdr.id}').value=${sugOp};
+          document.getElementById('fcst-submit-${bdr.id}').disabled=false;
+          document.getElementById('fcst-submit-${bdr.id}').style.opacity='1';
+        })()" style="width:100%;margin-top:8px;padding:8px;background:transparent;border:1px solid rgba(0,18,47,0.15);border-radius:8px;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">
+          Usar sugestão ↗
+        </button>
+      </div>`:``}
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
         ${[['LC','Leads Conectados','fcst-lc'],['RA','Reuniões Agendadas','fcst-ra'],['OP','Oportunidades','fcst-op']].map(([l,desc,id])=>`
           <div>
             <div style="font-size:9px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">${l}</div>
             <input id="${id}-${bdr.id}" type="number" min="0" max="99" placeholder="0"
-              style="width:100%;padding:10px 8px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;text-align:center;background:var(--bg2);color:var(--text);outline:none">
+              oninput="(function(){var lc=parseInt(document.getElementById('fcst-lc-${bdr.id}').value)||0;var ra=parseInt(document.getElementById('fcst-ra-${bdr.id}').value)||0;var op=parseInt(document.getElementById('fcst-op-${bdr.id}').value)||0;var btn=document.getElementById('fcst-submit-${bdr.id}');var empty=lc===0&&ra===0&&op===0;btn.disabled=empty;btn.style.opacity=empty?'0.4':'1';})()"
+              style="width:100%;padding:10px 8px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:18px;font-weight:700;font-family:'Inter',sans-serif;text-align:center;background:var(--bg2);color:var(--text);outline:none;box-sizing:border-box">
             <div style="font-size:9px;color:var(--text3);text-align:center;margin-top:3px">${desc}</div>
           </div>`).join('')}
       </div>
-      <button onclick="submitForecast('${bdr.id}','${bdr.name}',${semId})"
-        style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif">
+      <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:10px;font-family:'Inter',sans-serif">Preencha pelo menos um campo para enviar.</div>
+      <button id="fcst-submit-${bdr.id}" onclick="submitForecast('${bdr.id}','${bdr.name}',${semId})"
+        disabled style="opacity:0.4;width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .2s">
         Assumir meu forecast ↗
       </button>`;
   }catch(e){
@@ -3979,6 +4041,7 @@ async function submitForecast(bdrId,bdrNome,semId){
   const lc=parseInt(document.getElementById(`fcst-lc-${bdrId}`)?.value)||0;
   const ra=parseInt(document.getElementById(`fcst-ra-${bdrId}`)?.value)||0;
   const op=parseInt(document.getElementById(`fcst-op-${bdrId}`)?.value)||0;
+  if(lc===0&&ra===0&&op===0){alert('Preencha pelo menos um campo antes de enviar o forecast.');return;}
   const btn=event.target;
   btn.textContent='Enviando...';btn.disabled=true;
   try{
@@ -4932,6 +4995,164 @@ async function loadDataFromSupabase(){
   }catch(e){}
   buildLogin();
 })();
+
+
+// ═══════════════════════════════════════════════════
+// WEB PUSH NOTIFICATIONS — Gupy Pulse
+// ═══════════════════════════════════════════════════
+
+// VAPID public key (generate at https://vapidkeys.com and replace)
+const VAPID_PUBLIC_KEY = 'BDGV8Wpx959FKS3uSuU1WyYsFQL-z307o_3o9h6Oq8owqqw0BEdna93qX2iKM5FMFDV15L4JS6__UBP85Qaty9A';
+
+// Convert VAPID key
+function urlBase64ToUint8Array(base64String){
+  const padding='='.repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  const rawData=window.atob(base64);
+  return Uint8Array.from([...rawData].map(c=>c.charCodeAt(0)));
+}
+
+// Request push permission and subscribe
+async function requestPushPermission(){
+  if(!('Notification' in window)||!('serviceWorker' in navigator)){return null;}
+  const permission=await Notification.requestPermission();
+  if(permission!=='granted') return null;
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    const existing=await reg.pushManager.getSubscription();
+    if(existing) return existing;
+    const sub=await reg.pushManager.subscribe({
+      userVisibleOnly:true,
+      applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    // Save subscription to Supabase
+    if(currentUser){
+      await fetch(`${SUPA_URL}/rest/v1/gp_push_subs`,{
+        method:'POST',
+        headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({user_id:currentUser.id,user_name:currentUser.name,subscription:JSON.stringify(sub),updated_at:new Date().toISOString()})
+      }).catch(()=>{});
+    }
+    return sub;
+  }catch(e){console.warn('Push subscribe error:',e);return null;}
+}
+
+// Show local notification (fallback when app is open)
+function showLocalNotification(title, body, icon='🔔'){
+  if(Notification.permission==='granted'){
+    new Notification(title,{body,icon:'/icon-512.png',badge:'/icon-512.png',tag:'gupy-pulse'});
+  }
+}
+
+// Check and trigger local alerts on app open
+function checkDailyAlerts(){
+  if(!currentUser||currentUser.isGestor) return;
+  const bdr=DATA.bdrs.find(b=>b.id===currentUser.id);
+  if(!bdr) return;
+
+  const now=new Date();
+  const dow=now.getDay(); // 0=Dom,1=Seg,...,5=Sex,6=Sab
+  const hour=now.getHours();
+  const todayStr=`${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}`;
+  const lastAlertKey=`gpulse-alert-${currentUser.id}-${now.toDateString()}`;
+
+  // Only show once per day
+  if(localStorage.getItem(lastAlertKey)) return;
+  localStorage.setItem(lastAlertKey,'1');
+
+  // 1. Monday 8-10h: forecast reminder
+  if(dow===1&&hour>=8&&hour<=10){
+    // Check if forecast already submitted
+    supaFetch('gp_semanas','order=id.desc&limit=1').then(sems=>{
+      if(!sems||!sems[0]) return;
+      return supaFetch('gp_forecast',`semana_id=eq.${sems[0].id}&bdr_id=eq.${bdr.id}`);
+    }).then(fcsts=>{
+      if(!fcsts||fcsts.length===0){
+        showLocalNotification(
+          '📊 Forecast da semana',
+          `${bdr.name.split(' ')[0]}, você ainda não enviou seu forecast desta semana. Acesse o Gupy Pulse!`
+        );
+      }
+    }).catch(()=>{});
+  }
+
+  // 2. Reunião hoje
+  const reunioesHoje=DATA.reunioes.futuras.filter(d=>{
+    const [dia,mes]=d.date.split('/');
+    return d.date===todayStr&&(
+      d.ta.some(r=>r.bdr===bdr.name)||
+      d.tm.some(r=>r.bdr===bdr.name)
+    );
+  });
+  if(reunioesHoje.length>0&&hour>=7&&hour<=9){
+    const count=reunioesHoje.reduce((s,d)=>s+d.ta.filter(r=>r.bdr===bdr.name).length+d.tm.filter(r=>r.bdr===bdr.name).length,0);
+    showLocalNotification(
+      '📅 Reunião hoje!',
+      `Você tem ${count} reunião(ões) agendada(s) para hoje. Prepare-se!`
+    );
+  }
+
+  // 3. Reuniões atrasadas
+  const atrasadasMeu=[...DATA.reunioes.atrasadasTA,...DATA.reunioes.atrasadasTM].filter(a=>a.id===bdr.id);
+  if(atrasadasMeu.length>0&&hour>=8&&hour<=11){
+    showLocalNotification(
+      `🚨 ${atrasadasMeu.length} reunião(ões) atrasada(s)`,
+      `Você tem reuniões vencidas que precisam ser reagendadas. Acesse Meu Resultado.`
+    );
+  }
+
+  // 4. Friday 17h: weekly summary
+  if(dow===5&&hour>=16&&hour<=18){
+    const pct=DATA.metaBDR>0?Math.round((bdr.opps/DATA.metaBDR)*100):0;
+    showLocalNotification(
+      '📊 Resumo da semana',
+      `Você fechou a semana em ${pct}% da meta do mês (${bdr.opps}/${DATA.metaBDR} opps). Confira seu painel.`
+    );
+  }
+}
+
+// Push settings UI — shown in profile/settings area
+function buildPushSettings(container){
+  if(!('Notification' in window)){
+    container.innerHTML='<div style="font-size:12px;color:var(--text3);padding:8px">Notificações não suportadas neste dispositivo.</div>';
+    return;
+  }
+  const current=Notification.permission;
+  const statusColor=current==='granted'?'var(--green)':current==='denied'?'var(--red)':'var(--amber)';
+  const statusLabel=current==='granted'?'Ativadas':current==='denied'?'Bloqueadas (ajuste nas config. do browser)':'Não configurado';
+
+  container.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);font-family:'Inter',sans-serif">Notificações push</div>
+        <div style="font-size:11px;color:${statusColor};margin-top:2px;font-family:'Inter',sans-serif">${statusLabel}</div>
+      </div>
+      ${current!=='granted'&&current!=='denied'?`
+        <button onclick="requestPushPermission().then(s=>{if(s)buildPushSettings(this.closest('.push-settings-wrap'));else this.closest('.push-settings-wrap').querySelector('div:first-child div:last-child').textContent='Permissão negada';})"
+          style="padding:7px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">
+          Ativar
+        </button>`:
+        current==='granted'?`<span style="font-size:18px">🔔</span>`:`<span style="font-size:18px">🔕</span>`
+      }
+    </div>
+    <div style="padding-top:10px">
+      <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Você receberá alertas quando:</div>
+      ${[
+        ['📊','Segunda de manhã','Forecast da semana não enviado'],
+        ['📅','Dia de reunião','Lembrete das reuniões do dia (8h)'],
+        ['🚨','Reunião atrasada','Alerta de reagendamento urgente'],
+        ['📈','Sexta à tarde','Resumo da semana com seu resultado'],
+      ].map(([icon,title,desc])=>`
+        <div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:14px;flex-shrink:0">${icon}</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text);font-family:'Inter',sans-serif">${title}</div>
+            <div style="font-size:11px;color:var(--text3);font-family:'Inter',sans-serif">${desc}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
 
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
