@@ -1,0 +1,57 @@
+name: Gupy Pulse — Push Notifications
+
+on:
+  schedule:
+    # Segunda 08:00 BRT (11:00 UTC) — lembrete de forecast
+    - cron: '0 11 * * 1'
+    # Sexta 17:00 BRT (20:00 UTC) — resumo da semana
+    - cron: '0 20 * * 5'
+    # Todos os dias 08:00 BRT (11:00 UTC) — lembrete de reunião do dia
+    - cron: '0 11 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      message_type:
+        description: 'Tipo de notificação'
+        required: true
+        default: 'custom'
+        type: choice
+        options:
+          - forecast_reminder
+          - meeting_reminder
+          - weekly_summary
+          - custom
+      custom_title:
+        description: 'Título (se custom)'
+        required: false
+        default: ''
+      custom_body:
+        description: 'Mensagem (se custom)'
+        required: false
+        default: ''
+
+jobs:
+  send-notifications:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install web-push
+        run: npm install web-push @supabase/supabase-js
+
+      - name: Send Push Notifications
+        env:
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: mailto:gabrielheringer94@gmail.com
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          MESSAGE_TYPE: ${{ github.event.inputs.message_type || 'auto' }}
+          CUSTOM_TITLE: ${{ github.event.inputs.custom_title || '' }}
+          CUSTOM_BODY: ${{ github.event.inputs.custom_body || '' }}
+        run: node .github/scripts/send-push.js
