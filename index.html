@@ -618,12 +618,26 @@ input[type="number"]:focus {
     </div>
     <div class="app-header-right">
       <div class="update-chip" id="last-update-chip">03 abr · 20:44</div>
+      <button id="settings-btn" onclick="openSettings()" title="Configurações" style="width:34px;height:34px;border-radius:50%;background:var(--bg3);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;transition:all .15s" onmouseenter="this.style.background='var(--accent-light)';this.style.borderColor='var(--accent)'" onmouseleave="this.style.background='var(--bg3)';this.style.borderColor='var(--border)'">⚙</button>
       <div class="logout-btn" onclick="doLogout()" title="Sair">↩</div>
     </div>
   </div>
 
   <div class="tab-content" id="tab-content"></div>
   <nav class="bottom-nav" id="bottom-nav"></nav>
+
+  <!-- SETTINGS PANEL -->
+  <div id="settings-overlay" onclick="closeSettings()" style="display:none;position:fixed;inset:0;background:rgba(0,18,47,0.4);z-index:200;backdrop-filter:blur(2px)"></div>
+  <div id="settings-panel" style="display:none;position:fixed;top:0;right:0;bottom:0;width:min(360px,100vw);background:#fff;z-index:201;box-shadow:-4px 0 24px rgba(0,18,47,0.12);overflow-y:auto;transform:translateX(100%);transition:transform .3s cubic-bezier(.25,.46,.45,.94)">
+    <div style="padding:20px 20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1">
+      <div>
+        <div style="font-size:16px;font-weight:700;color:var(--navy);font-family:'Inter',sans-serif">Configurações</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:1px;font-family:'Inter',sans-serif" id="settings-subtitle">Personalize sua experiência</div>
+      </div>
+      <button onclick="closeSettings()" style="width:32px;height:32px;border-radius:50%;background:var(--bg3);border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div style="padding:20px" id="settings-content"></div>
+  </div>
 </div>
 
 <!-- LOADING SCREEN -->
@@ -649,8 +663,22 @@ input[type="number"]:focus {
 
 <script>
 // ─── DATA ────────────────────────────────────────────────────
+// Calcula semana atual de Abril 2026 baseada na data real
+function calcSemAtual(){
+  const hoje=new Date();
+  const ano=hoje.getFullYear(), mes=hoje.getMonth(), dia=hoje.getDate();
+  if(ano===2026 && mes===3){ // Abril
+    if(dia<=4)  return 1; // S1: 31mar–04abr
+    if(dia<=11) return 2; // S2: 07–11abr
+    if(dia<=17) return 3; // S3: 14–17abr
+    return 4;             // S4: 22–25abr
+  }
+  if(ano===2026 && mes===2 && dia>=31) return 1; // 31 Mar
+  return 2; // fallback
+}
+
 const DATA = {
-  meta:84, metaBDR:12, semAtual:2, semTotal:4,
+  meta:84, metaBDR:12, semAtual:calcSemAtual(), semTotal:4,
   // Acumulado do mês (Abril 2026) — atualizado manualmente a cada semana
   mesAbril:{
     opps:1,    // acumulado até S2
@@ -658,10 +686,10 @@ const DATA = {
     lig:100,   // acumulado até S2 (estimado S1+S2)
     ativ:1531, // S2 somente (Salesforce hoje)
     semanas:[
-      {sem:1, opps:0,  ras:0,  lig:0,   label:'S1 · 31/mar', datas:'31/mar – 04/abr'},
-      {sem:2, opps:8,  ras:6,  lig:51,  label:'S2 · 07/abr', datas:'07 – 11/abr'},
-      {sem:2, opps:0,  ras:0,  lig:0,   label:'S2 · 07/abr (atual)', datas:'07 – 11/abr'},
-      {sem:4, opps:0,  ras:0,  lig:0,   label:'S4',                  datas:'22 – 25/abr'},
+      {sem:1, opps:0,  ras:0,  lig:0,   label:'S1', datas:'31/mar – 04/abr'},
+      {sem:2, opps:0,  ras:0,  lig:0,   label:'S2', datas:'07 – 11/abr'},
+      {sem:3, opps:0,  ras:0,  lig:0,   label:'S3', datas:'14 – 17/abr'},
+      {sem:4, opps:0,  ras:0,  lig:0,   label:'S4', datas:'22 – 25/abr'},
     ]
   },
   funil:{novoLead:100,abordagemIniciada:91,leadConectado:46,reuniaoAgendada:22,oportunidades:1,desqualificados:72},
@@ -1140,6 +1168,8 @@ function setupApp(){
   buildTicker(u);
   if(u.isGestor) buildGestorApp();
   else buildBDRApp(u);
+  // Apply saved preferences
+  applyUserPrefs(u.id);
   // Check daily alerts after login
   setTimeout(checkDailyAlerts, 2000);
 }
@@ -2339,7 +2369,6 @@ function buildMRRBDR(pane,bdr){
         ${['Abril','Maio','Junho'].map(mes=>`
           <div style="background:var(--bg3);border-radius:8px;padding:8px 4px">
             <div style="font-size:9px;color:var(--text3);margin-bottom:4px;font-family:'Inter',sans-serif">${mes}</div>
-            <div style="font-size:11px;font-weight:600;color:var(--accent);font-family:'Inter',sans-serif">${q2.opps[mes]} opps</div>
             <div style="font-size:10px;color:${q2.acv[mes]>0?'var(--green)':'var(--text3)'};font-family:'Inter',sans-serif;margin-top:2px">${q2.acv[mes]>0?fmtK(q2.acv[mes]):'—'}</div>
           </div>`).join('')}
       </div>
@@ -5151,6 +5180,168 @@ function buildPushSettings(container){
           </div>
         </div>`).join('')}
     </div>`;
+}
+
+
+
+// ═══════════════════════════════════════════════════
+// SETTINGS PANEL
+// ═══════════════════════════════════════════════════
+
+function openSettings(){
+  const overlay=document.getElementById('settings-overlay');
+  const panel=document.getElementById('settings-panel');
+  if(!overlay||!panel) return;
+  buildSettingsContent();
+  overlay.style.display='block';
+  panel.style.display='block';
+  requestAnimationFrame(()=>{ panel.style.transform='translateX(0)'; });
+}
+
+function closeSettings(){
+  const overlay=document.getElementById('settings-overlay');
+  const panel=document.getElementById('settings-panel');
+  if(!panel) return;
+  panel.style.transform='translateX(100%)';
+  setTimeout(()=>{
+    panel.style.display='none';
+    overlay.style.display='none';
+  },300);
+}
+
+function buildSettingsContent(){
+  if(!currentUser) return;
+  const c=document.getElementById('settings-content');
+  const sub=document.getElementById('settings-subtitle');
+  if(sub) sub.textContent=currentUser.name.split(' ')[0]+' · '+(currentUser.isGestor?'Líder':'BDR');
+
+  // Load saved prefs
+  const prefsKey='gpulse-prefs-'+currentUser.id;
+  let prefs={};
+  try{ prefs=JSON.parse(localStorage.getItem(prefsKey)||'{}'); }catch(e){}
+
+  const notifStatus=('Notification' in window)?Notification.permission:'unsupported';
+  const notifLabel=notifStatus==='granted'?'Ativadas ✓':notifStatus==='denied'?'Bloqueadas':notifStatus==='unsupported'?'Não suportado':'Não configurado';
+  const notifColor=notifStatus==='granted'?'var(--green)':notifStatus==='denied'?'var(--red)':'var(--amber)';
+
+  c.innerHTML=`
+    <!-- Perfil -->
+    <div style="margin-bottom:24px">
+      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;font-family:'Inter',sans-serif">Perfil</div>
+
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:600;color:var(--text);font-family:'Inter',sans-serif;display:block;margin-bottom:6px">Nome no app</label>
+        <input id="pref-nome" type="text" placeholder="${currentUser.name.split(' ')[0]}" value="${prefs.nomeApp||''}"
+          style="width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);outline:none;box-sizing:border-box"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
+        <div style="font-size:10px;color:var(--text3);margin-top:4px;font-family:'Inter',sans-serif">Como você quer ser chamado no app</div>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:600;color:var(--text);font-family:'Inter',sans-serif;display:block;margin-bottom:6px">Tempo de Gupy</label>
+        <select id="pref-tempo" style="width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);outline:none;appearance:none;box-sizing:border-box"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
+          <option value="">Selecione...</option>
+          ${['Menos de 3 meses','3 a 6 meses','6 meses a 1 ano','1 a 2 anos','Mais de 2 anos'].map(o=>`<option value="${o}" ${prefs.tempoGupy===o?'selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <label style="font-size:12px;font-weight:600;color:var(--text);font-family:'Inter',sans-serif;display:block;margin-bottom:6px">Nível de senioridade</label>
+        <select id="pref-nivel" style="width:100%;padding:10px 12px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);outline:none;appearance:none;box-sizing:border-box"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
+          <option value="">Selecione...</option>
+          ${['Júnior','Pleno','Sênior','Especialista'].map(o=>`<option value="${o}" ${prefs.nivel===o?'selected':''}>${o}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+
+    <!-- Notificações -->
+    <div style="margin-bottom:24px">
+      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;font-family:'Inter',sans-serif">Notificações</div>
+
+      <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:14px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text);font-family:'Inter',sans-serif">Push notifications</div>
+            <div style="font-size:11px;color:${notifColor};margin-top:2px;font-family:'Inter',sans-serif">${notifLabel}</div>
+          </div>
+          ${notifStatus==='granted'?
+            '<span style="font-size:22px">🔔</span>':
+            notifStatus==='denied'?
+            '<span style="font-size:22px">🔕</span>':
+            notifStatus==='unsupported'?'':
+            `<button onclick="requestPushPermission().then(()=>buildSettingsContent())"
+              style="padding:8px 14px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">
+              Ativar
+            </button>`
+          }
+        </div>
+        ${notifStatus==='denied'?`<div style="font-size:11px;color:var(--text3);font-family:'Inter',sans-serif;line-height:1.5">Para ativar, vá em Configurações do browser → Notificações → Permitir para este site.</div>`:''}
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${[
+          ['📊','Segunda de manhã','Forecast da semana não enviado'],
+          ['📅','Dia de reunião','Lembrete das reuniões do dia (8h)'],
+          ['🚨','Reunião atrasada','Alerta de reagendamento urgente'],
+          ['📈','Sexta à tarde','Resumo da semana com seu resultado'],
+        ].map(([icon,title,desc])=>`
+          <div style="display:flex;gap:10px;padding:10px;background:var(--bg3);border-radius:var(--radius-sm)">
+            <span style="font-size:16px;flex-shrink:0">${icon}</span>
+            <div>
+              <div style="font-size:12px;font-weight:600;color:var(--text);font-family:'Inter',sans-serif">${title}</div>
+              <div style="font-size:11px;color:var(--text3);font-family:'Inter',sans-serif;margin-top:1px">${desc}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Salvar -->
+    <button onclick="saveSettings()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:12px">
+      Salvar preferências
+    </button>
+    <button onclick="doLogout()" style="width:100%;padding:12px;background:transparent;color:var(--red);border:1.5px solid rgba(220,38,38,0.3);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">
+      Sair da conta ↩
+    </button>
+  `;
+}
+
+function saveSettings(){
+  if(!currentUser) return;
+  const prefsKey='gpulse-prefs-'+currentUser.id;
+  const prefs={
+    nomeApp: document.getElementById('pref-nome')?.value?.trim()||'',
+    tempoGupy: document.getElementById('pref-tempo')?.value||'',
+    nivel: document.getElementById('pref-nivel')?.value||'',
+  };
+  localStorage.setItem(prefsKey, JSON.stringify(prefs));
+
+  // Update displayed name if set
+  if(prefs.nomeApp){
+    const nameEl=document.getElementById('app-name');
+    if(nameEl) nameEl.textContent=prefs.nomeApp;
+  }
+
+  // Visual feedback
+  const btn=document.querySelector('#settings-content button');
+  if(btn){
+    const orig=btn.textContent;
+    btn.textContent='✓ Salvo!';
+    btn.style.background='var(--green)';
+    setTimeout(()=>{ btn.textContent=orig; btn.style.background='var(--accent)'; },2000);
+  }
+}
+
+// Apply saved prefs on login
+function applyUserPrefs(userId){
+  try{
+    const prefs=JSON.parse(localStorage.getItem('gpulse-prefs-'+userId)||'{}');
+    if(prefs.nomeApp){
+      const nameEl=document.getElementById('app-name');
+      if(nameEl) nameEl.textContent=prefs.nomeApp;
+    }
+  }catch(e){}
 }
 
 
