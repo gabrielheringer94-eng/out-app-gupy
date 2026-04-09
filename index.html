@@ -3996,21 +3996,59 @@ async function loadBDRForecast(bdr){
       return;
     }
 
-    // Smart suggestion based on BDR conversions
-    const semR=DATA.semTotal-DATA.semAtual;
+    // ── Smart suggestion with full rationale ──
+    const semR=Math.max(1,DATA.semTotal-DATA.semAtual+1); // semanas restantes incl. atual
+    const semRest=DATA.semTotal-DATA.semAtual; // após esta semana
     const oppsLeft=Math.max(0,DATA.metaBDR-bdr.opps);
     const bench=DATA.benchmarks;
-    // Use BDR hist3m if available, else bench
+
+    // Use hist3m m3 (mês mais recente) for conversions
     const bdrH=DATA.hist3m&&DATA.hist3m.bdrs&&DATA.hist3m.bdrs[bdr.id];
     const m3=bdrH?bdrH.m3:null;
-    const aiLcRate=(m3&&m3.aiLc>0?m3.aiLc:bench.aiLc)/100;
-    const lcRaRate=(m3&&m3.lcRa>0?m3.lcRa:bench.lcRa)/100;
-    const raOpRate=(m3&&m3.raOp>0?m3.raOp:bench.raOp)/100;
-    // Suggested values for this week
+
+    // Per-conversion: use BDR if >= bench*0.5, else flag as critical and use bench
+    const CRITICAL_THRESHOLD=0.6; // abaixo de 60% do bench = crítico
+    function resolveConv(bdrVal, benchVal, label){
+      const hasBdr=m3&&bdrVal>0;
+      const bdrRate=hasBdr?bdrVal/100:null;
+      const benchRate=benchVal/100;
+      const isCritical=hasBdr&&(bdrRate<benchRate*CRITICAL_THRESHOLD);
+      const usedRate=(!hasBdr||isCritical)?benchRate:bdrRate;
+      return {
+        bdrVal:hasBdr?bdrVal:null,
+        benchVal,
+        usedRate,
+        isCritical,
+        usedBench:!hasBdr||isCritical,
+        label
+      };
+    }
+
+    const convAiLc=resolveConv(m3?m3.aiLc:0, bench.aiLc, 'AI→LC');
+    const convLcRa=resolveConv(m3?m3.lcRa:0, bench.lcRa, 'LC→RA');
+    const convRaOp=resolveConv(m3?m3.raOp:0, bench.raOp, 'RA→OP');
+
+    // Calculate suggestion bottom-up
     const sugOp=semR>0?Math.ceil(oppsLeft/semR):oppsLeft;
-    const sugRa=raOpRate>0?Math.ceil(sugOp/raOpRate):0;
-    const sugLc=lcRaRate>0?Math.ceil(sugRa/lcRaRate):0;
-    const hasHistory=m3&&(m3.aiLc>0||m3.lcRa>0);
+    const sugRa=convRaOp.usedRate>0?Math.ceil(sugOp/convRaOp.usedRate):0;
+    const sugLc=convLcRa.usedRate>0?Math.ceil(sugRa/convLcRa.usedRate):0;
+
+    // Critical conversions list
+    const criticals=[convRaOp,convLcRa,convAiLc].filter(c=>c.isCritical);
+
+    // Build rationale rows
+    function convRow(conv, from, to){
+      const col=conv.isCritical?'var(--red)':conv.usedBench?'var(--amber)':'var(--green)';
+      const src=conv.usedBench
+        ?(conv.isCritical?'crit. — usando benchmark':'ref. do time')
+        :'seu histórico';
+      return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border)">'
+        +'<span style="font-size:11px;color:var(--text2)">'+from+' → '+to+'</span>'
+        +'<div style="display:flex;align-items:center;gap:5px">'
+        +'<span style="font-size:12px;font-weight:700;color:'+col+'">'+Math.round(conv.usedRate*100)+'%</span>'
+        +'<span style="font-size:9px;color:var(--text3)">('+src+')</span>'
+        +'</div></div>';
+    }
 
     // Show input form
     el.innerHTML=`
@@ -4020,28 +4058,74 @@ async function loadBDRForecast(bdr){
       </div>
 
       ${oppsLeft>0?`
-      <div style="background:rgba(0,18,47,0.04);border:1px solid rgba(0,18,47,0.1);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
-        <div style="font-size:10px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:5px">
-          <span>💡</span> Sugestão para fechar o mês
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px">
+
+        <!-- Header -->
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+          <span style="font-size:14px">💡</span>
+          <div style="font-size:12px;font-weight:700;color:var(--text);font-family:'Inter',sans-serif">Sugestão para esta semana</div>
+          <span style="font-size:9px;color:var(--text3);background:var(--bg4);padding:2px 7px;border-radius:10px;font-family:'Inter',sans-serif;margin-left:auto">${semR} sem. restante${semR>1?'s':''}</span>
         </div>
-        <div style="font-size:12px;color:var(--text2);line-height:1.7">
-          Faltam <strong style="color:var(--text)">${oppsLeft} opp${oppsLeft>1?'s':''}</strong> para bater a meta nas próximas <strong style="color:var(--text)">${semR} semana${semR>1?'s':''}</strong>.
-          ${sugRa>0?`Para entregar <strong style="color:var(--accent)">${sugOp} opp${sugOp>1?'s':''} esta semana</strong>, você precisa de ~<strong style="color:var(--teal)">${sugRa} RAs</strong> e ~<strong style="color:var(--text)">${sugLc} LCs</strong>${hasHistory?' (baseado no seu histórico)':' (baseado no benchmark do time)'}.`:''}
+
+        <!-- Goal summary -->
+        <div style="background:#fff;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;border:1px solid var(--border)">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px;font-family:'Inter',sans-serif">Para bater a meta de ${DATA.metaBDR} opps</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.6;font-family:'Inter',sans-serif">
+            Faltam <strong style="color:var(--accent)">${oppsLeft} opp${oppsLeft>1?'s':''}</strong> em ${semR} semana${semR>1?'s':''}
+            → <strong style="color:var(--accent)">${sugOp} opp${sugOp>1?'s':''} esta semana</strong>
+          </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px">
-          ${[['LC',sugLc,'var(--text2)'],['RA',sugRa,'var(--teal)'],['OP',sugOp,'var(--accent)']].map(([l,v,c])=>`
-            <div style="text-align:center;padding:6px;background:rgba(255,255,255,0.7);border-radius:6px;border:1px solid rgba(0,18,47,0.08)">
-              <div style="font-size:16px;font-weight:700;color:${c};font-family:'Inter',sans-serif">${v}</div>
-              <div style="font-size:9px;color:var(--text3);margin-top:1px">${l} sugerido</div>
+
+        <!-- Racional completo -->
+        <div style="background:#fff;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:10px;border:1px solid var(--border)">
+          <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-family:'Inter',sans-serif">Como chegamos nesses números</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.9;font-family:'Inter',sans-serif">
+            <span style="color:var(--accent);font-weight:600">${sugOp} OP</span>
+            necessári${sugOp>1?'as':'a'}
+            ÷ <span style="color:var(--teal);font-weight:600">${Math.round(convRaOp.usedRate*100)}% RA→OP</span>
+            = <span style="font-weight:600;color:var(--text)">${sugRa} RAs</span>
+            ÷ <span style="color:var(--teal);font-weight:600">${Math.round(convLcRa.usedRate*100)}% LC→RA</span>
+            = <span style="font-weight:600;color:var(--text)">${sugLc} LCs</span>
+          </div>
+          <div style="margin-top:8px">
+            ${convRow(convRaOp,'RA','OP',sugOp)}
+            ${convRow(convLcRa,'LC','RA',sugRa)}
+          </div>
+        </div>
+
+        <!-- Cards com valores sugeridos -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px">
+          ${[['LC',sugLc,'var(--text)'],['RA',sugRa,'var(--teal)'],['OP',sugOp,'var(--accent)']].map(([l,v,c])=>`
+            <div style="text-align:center;padding:8px 4px;background:#fff;border-radius:8px;border:1px solid var(--border)">
+              <div style="font-size:20px;font-weight:700;color:${c};font-family:'Inter',sans-serif">${v}</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:2px;font-family:'Inter',sans-serif">${l} sugerido</div>
             </div>`).join('')}
         </div>
+
+        <!-- Alerta se há conversões críticas -->
+        ${criticals.length>0?`
+        <div style="background:rgba(220,38,38,0.06);border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:10px 12px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:4px;font-family:'Inter',sans-serif">⚠ Conversão${criticals.length>1?'ões':''} crítica${criticals.length>1?'s':''}: ${criticals.map(c=>c.label).join(', ')}</div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.5;font-family:'Inter',sans-serif">
+            Seu histórico nessa etapa está abaixo do esperado. Usamos o benchmark do time como referência — seus números reais podem exigir mais esforço.
+          </div>
+          <button onclick="(function(){
+            document.querySelectorAll('.nav-item').forEach(function(b){
+              if(b.querySelector('.nav-label')&&b.querySelector('.nav-label').textContent==='Performance'){b.click();}
+            });
+          })()" style="margin-top:8px;width:100%;padding:8px;background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.2);border-radius:6px;font-size:11px;font-weight:600;color:var(--red);cursor:pointer;font-family:'Inter',sans-serif;text-align:center">
+            Ver minha performance em detalhe →
+          </button>
+        </div>`:``}
+
+        <!-- Usar sugestão -->
         <button onclick="(function(){
           document.getElementById('fcst-lc-${bdr.id}').value=${sugLc};
           document.getElementById('fcst-ra-${bdr.id}').value=${sugRa};
           document.getElementById('fcst-op-${bdr.id}').value=${sugOp};
           document.getElementById('fcst-submit-${bdr.id}').disabled=false;
           document.getElementById('fcst-submit-${bdr.id}').style.opacity='1';
-        })()" style="width:100%;margin-top:8px;padding:8px;background:transparent;border:1px solid rgba(0,18,47,0.15);border-radius:8px;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">
+        })()" style="width:100%;padding:9px;background:transparent;border:1.5px solid rgba(0,18,47,0.15);border-radius:8px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">
           Usar sugestão ↗
         </button>
       </div>`:``}
