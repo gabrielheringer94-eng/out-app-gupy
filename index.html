@@ -170,7 +170,7 @@ body{font-family:\'Inter\',sans-serif;background:var(--bg);color:var(--text);fon
 }
 .nav-item.active{color:var(--accent);}
 .nav-icon{display:none;}
-.nav-label{font-size:12px;font-weight:600;}
+.nav-label{font-size:10px;font-weight:400;}
 .nav-item.active .nav-icon-dot{
   width:4px;height:4px;border-radius:50%;
   background:var(--accent);margin:0 auto;
@@ -720,7 +720,7 @@ const DATA = {
       {sem:4, opps:0,  ras:0,  lig:0,   label:'S4', datas:'22 – 25/abr'},
     ]
   },
-  funil:{novoLead:100,abordagemIniciada:91,leadConectado:46,reuniaoAgendada:22,oportunidades:1,desqualificados:72},
+  funil:{novoLead:100,abordagemIniciada:91,leadConectado:46,reuniaoAgendada:22,oportunidades:7,desqualificados:72},
   conversoes:{aiLc:{real:51,meta:57},lcRa:{real:48,meta:37},raOp:{real:5,meta:75}},
   // ras = Reuniões Agendadas (negócios/SQLs), opps = Oportunidades (mundo)
   bdrs:[
@@ -3929,21 +3929,21 @@ function buildHoje(pane, bdr){
           const items=d.items.map(it=>{
             const isTa=it.tipo==='TA';
             const bg=it.status==='atrasada'?'rgba(220,38,38,0.06)':(isTa?'rgba(26,86,219,0.05)':'rgba(13,148,136,0.05)');
-            const border=it.status==='atrasada'?'rgba(220,38,38,0.2)':(isTa?'rgba(26,86,219,0.15)':'rgba(13,148,136,0.15)');
+            const border=it.status==='atrasada'?'rgba(220,38,38,0.18)':(isTa?'rgba(26,86,219,0.12)':'rgba(13,148,136,0.12)');
             const tagBg=it.status==='atrasada'?'var(--red)':(isTa?'var(--accent)':'var(--teal)');
-            return `<div style="background:${bg};border:1px solid ${border};border-radius:8px;padding:8px 10px;margin-bottom:6px">
-              <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
-                <span style="font-size:8px;font-weight:700;color:#fff;background:${tagBg};padding:1px 6px;border-radius:4px">${it.tipo}</span>
-                ${it.status==='atrasada'?`<span style="font-size:9px;font-weight:600;color:var(--red)">${it.dias}d atrasada</span>`:''}
+            return `<div style="background:${bg};border:1px solid ${border};border-radius:6px;padding:5px 7px;margin-bottom:4px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:4px;margin-bottom:2px">
+                <span style="font-size:7px;font-weight:700;color:#fff;background:${tagBg};padding:1px 5px;border-radius:3px;flex-shrink:0">${it.tipo}</span>
+                ${it.status==='atrasada'?`<span style="font-size:8px;font-weight:600;color:var(--red);white-space:nowrap">${it.dias}d</span>`:''}
               </div>
-              <div style="font-size:12px;font-weight:500;color:var(--text);line-height:1.3;font-family:'Inter',sans-serif">${it.empresa}</div>
+              <div style="font-size:10px;font-weight:500;color:var(--text);line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${it.empresa}</div>
             </div>`;
           }).join('');
 
-          return `<div style="flex-shrink:0;width:150px;scroll-snap-align:start">
-            <div style="background:${headerBg};border:1px solid ${headerBorder};border-radius:10px;padding:8px 10px;margin-bottom:8px;text-align:center">
-              <div style="font-size:13px;font-weight:700;color:${headerCol};font-family:'Inter',sans-serif">${d.date}${d.day?' · '+d.day:''}</div>
-              ${isAt?'<div style="font-size:9px;color:var(--red);font-weight:500;margin-top:2px">⚠ atrasada</div>':''}
+          return `<div style="flex-shrink:0;width:130px;scroll-snap-align:start">
+            <div style="background:${headerBg};border:1px solid ${headerBorder};border-radius:8px;padding:6px 8px;margin-bottom:6px;text-align:center">
+              <div style="font-size:11px;font-weight:700;color:${headerCol}">${d.date}${d.day?' · '+d.day:''}</div>
+              ${isAt?'<div style="font-size:8px;color:var(--red);font-weight:500;margin-top:1px">⚠ atrasada</div>':''}
             </div>
             ${items}
           </div>`;
@@ -4103,10 +4103,11 @@ async function loadBDRForecast(bdr){
     const convLcRa=resolveConv(m3?m3.lcRa:0, bench.lcRa, 'LC→RA');
     const convRaOp=resolveConv(m3?m3.raOp:0, bench.raOp, 'RA→OP');
 
-    // Calculate suggestion bottom-up
+    // Calculate suggestion bottom-up (OP → RA → LC → AI)
     const sugOp=semR>0?Math.ceil(oppsLeft/semR):oppsLeft;
     const sugRa=convRaOp.usedRate>0?Math.ceil(sugOp/convRaOp.usedRate):0;
     const sugLc=convLcRa.usedRate>0?Math.ceil(sugRa/convLcRa.usedRate):0;
+    const sugAi=convAiLc.usedRate>0?Math.ceil(sugLc/convAiLc.usedRate):0;
 
     // Critical conversions list
     const criticals=[convRaOp,convLcRa,convAiLc].filter(c=>c.isCritical);
@@ -4165,20 +4166,22 @@ async function loadBDRForecast(bdr){
           <div style="display:none;background:#fff;border-radius:var(--radius-sm);padding:10px 12px;margin-top:6px;border:1px solid var(--border)">
             <div style="font-size:12px;color:var(--text2);line-height:1.9;margin-bottom:8px">
               <span style="color:var(--accent);font-weight:600">${sugOp} OP</span>
-              necessári${sugOp>1?'as':'a'}
               ÷ <span style="color:var(--teal);font-weight:600">${Math.round(convRaOp.usedRate*100)}% RA→OP</span>
               = <span style="font-weight:600;color:var(--text)">${sugRa} RAs</span>
               ÷ <span style="color:var(--teal);font-weight:600">${Math.round(convLcRa.usedRate*100)}% LC→RA</span>
               = <span style="font-weight:600;color:var(--text)">${sugLc} LCs</span>
+              ÷ <span style="color:var(--teal);font-weight:600">${Math.round(convAiLc.usedRate*100)}% AI→LC</span>
+              = <span style="font-weight:600;color:var(--text)">${sugAi} Abordagens</span>
             </div>
             ${convRow(convRaOp,'RA','OP')}
             ${convRow(convLcRa,'LC','RA')}
+            ${convRow(convAiLc,'AI','LC')}
           </div>
         </div>
 
         <!-- Cards com valores sugeridos -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px">
-          ${[['LC',sugLc,'var(--text)'],['RA',sugRa,'var(--teal)'],['OP',sugOp,'var(--accent)']].map(([l,v,c])=>`
+          ${[['AI',sugAi,'var(--text2)'],['LC',sugLc,'var(--text)'],['RA',sugRa,'var(--teal)'],['OP',sugOp,'var(--accent)']].map(([l,v,c])=>`
             <div style="text-align:center;padding:8px 4px;background:#fff;border-radius:8px;border:1px solid var(--border)">
               <div style="font-size:20px;font-weight:700;color:${c};font-family:'Inter',sans-serif">${v}</div>
               <div style="font-size:9px;color:var(--text3);margin-top:2px;font-family:'Inter',sans-serif">${l} sugerido</div>
@@ -4206,6 +4209,7 @@ async function loadBDRForecast(bdr){
           document.getElementById('fcst-lc-${bdr.id}').value=${sugLc};
           document.getElementById('fcst-ra-${bdr.id}').value=${sugRa};
           document.getElementById('fcst-op-${bdr.id}').value=${sugOp};
+          // AI field is read-only reference — no input to fill
           document.getElementById('fcst-submit-${bdr.id}').disabled=false;
           document.getElementById('fcst-submit-${bdr.id}').style.opacity='1';
         })()" style="width:100%;padding:9px;background:transparent;border:1.5px solid rgba(0,18,47,0.15);border-radius:8px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">
