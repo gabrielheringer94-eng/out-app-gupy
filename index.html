@@ -3945,19 +3945,7 @@ function buildHoje(pane, bdr){
   // Load forecast async after pane renders
   loadBDRForecast(bdr);
 
-  // Push notification settings card
-  setTimeout(function(){
-    var pushWrap=document.createElement('div');
-    pushWrap.className='card push-settings-wrap';
-    pushWrap.style.cssText='margin-bottom:10px';
-    var pushTitle=document.createElement('div');
-    pushTitle.className='card-title';
-    pushTitle.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:12px';
-    pushTitle.innerHTML='<span>🔔</span> Notificações';
-    pushWrap.appendChild(pushTitle);
-    buildPushSettings(pushWrap);
-    pane.appendChild(pushWrap);
-  },100);
+  // Push settings moved to ⚙ Settings panel
 }
 
 async function loadBDRForecast(bdr){
