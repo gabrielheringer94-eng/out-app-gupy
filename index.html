@@ -714,8 +714,8 @@ const DATA = {
     lig:100,   // acumulado até S2 (estimado S1+S2)
     ativ:1531, // S2 somente (Salesforce hoje)
     semanas:[
-      {sem:1, opps:0,  ras:0,  lig:0,   label:'S1', datas:'31/mar – 04/abr'},
-      {sem:2, opps:0,  ras:0,  lig:0,   label:'S2', datas:'07 – 11/abr'},
+      {sem:1, opps:6,  ras:10, lig:158, label:'S1', datas:'31/mar – 04/abr'},
+      {sem:2, opps:1,  ras:22, lig:100, label:'S2', datas:'07 – 11/abr'},
       {sem:3, opps:0,  ras:0,  lig:0,   label:'S3', datas:'14 – 17/abr'},
       {sem:4, opps:0,  ras:0,  lig:0,   label:'S4', datas:'22 – 25/abr'},
     ]
@@ -1020,7 +1020,7 @@ const DATA = {
     {dir:'down',text:'<strong>LC → RA em 26%</strong> — 11pp abaixo da meta de 37%. Gargalo claro: a conversa não está convertendo em reunião.'},
     {dir:'down',text:'<strong>RA → OP em 30%</strong> vs meta de 75%. De cada 10 reuniões feitas, apenas 3 viram oportunidade — foco do AE na validação.'},
     {dir:'warn',text:'<strong>115 leads desqualificados</strong> na semana — 57% saíram em Lead Conectado. Revisar qualidade da cadência.'},
-    {dir:'down',text:'<strong>Projeção de fechamento: 24 opps</strong> no ritmo atual vs meta de 84. Precisamos de 26 opps nas próximas 3 semanas.'},
+    {dir:'down',text:'<strong>Projeção de fechamento: 24 opps</strong> no ritmo atual vs meta de 84. Precisamos de ${DATA.meta - DATA.funil.oportunidades} opps nas próximas ${DATA.semTotal - DATA.semAtual} semanas.'},
   ],
 
   // Por BDR: diagnóstico individual da semana
@@ -1736,7 +1736,7 @@ function buildResumo(pane){
   const d=DATA;
 
   // ── Cálculos base ──
-  const diasPassados=7;          // semana 1 de 30 dias
+  const diasPassados=DATA.semAtual*7;  // semanas corridas
   const diasTotais=30;
   const diasRestantes=diasTotais-diasPassados;
   const diasUteisRestantes=21;   // estimativa dias úteis restantes
@@ -1908,7 +1908,7 @@ function buildResumo(pane){
       ${[
         {acao:`Revisar pitch com ${bdrsBaixos.slice(0,2).map(b=>b.name.split(' ')[0]).join(' e ') || 'BDRs abaixo da média'}`,impacto:'+4–6 opps'},
         {acao:'Rodar 2 role plays focados em objeção esta semana',impacto:'+3–5 opps'},
-        {acao:`Aumentar volume de ligações — time com ${d.bdrs.reduce((s,b)=>s+b.lig,0)} lig. na S1`,impacto:'+2–4 opps'},
+        {acao:`Aumentar volume de ligações — time com ${d.bdrs.reduce((s,b)=>s+b.lig,0)} lig. na S${d.semAtual}`,impacto:'+2–4 opps'},
       ].map((a,i)=>`
         <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
           <div style="width:20px;height:20px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px">${i+1}</div>
@@ -2059,7 +2059,7 @@ function buildTimeGestor(pane){
   }
 
   pane.innerHTML=`
-    <div style="font-size:11px;color:var(--text2);margin-bottom:14px">${DATA.semana||'W32 › 07 abr'} · Semana ${DATA.semAtual} de ${DATA.semTotal} · Meta: ${META} opps/BDR</div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:14px">Semana ${DATA.semAtual} de ${DATA.semTotal} · Abril 2026 · Meta: ${META} opps/BDR</div>
 
     <!-- FORECAST CENTRALIZADO -->
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
@@ -2109,25 +2109,7 @@ function buildTimeGestor(pane){
         </table>
       </div>
 
-    <div style="display:flex;align-items:center;gap:6px;margin:14px 0 8px">
-      <div style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div>
-      <span style="font-size:11px;font-weight:500;color:var(--green);text-transform:uppercase;letter-spacing:.06em">Top performers</span>
-    </div>
-    <div id="top-cards"></div>
-    <div style="display:flex;align-items:center;gap:6px;margin:14px 0 8px">
-      <div style="width:10px;height:10px;border-radius:50%;background:var(--red)"></div>
-      <span style="font-size:11px;font-weight:500;color:var(--red);text-transform:uppercase;letter-spacing:.06em">Precisam de atenção</span>
-    </div>
-    <div id="bot-cards"></div>
     </div>`;
-
-  // Top 3
-  const topEl=document.getElementById('top-cards');
-  top3.forEach((b,i)=>{ topEl.innerHTML+=bdrCard(b,i+1); });
-
-  // Bottom 3
-  const botEl=document.getElementById('bot-cards');
-  bot3.forEach((b)=>{ const rank=scored.findIndex(x=>x.id===b.id)+1; botEl.innerHTML+=bdrCard(b,rank); });
 
   // Ranking table
   const rkEl=document.getElementById('ranking-rows');
@@ -4524,101 +4506,87 @@ function buildPerformanceBDR(pane, bdr){
   // ── Render with collapsible + draggable blocks ──
   var perfBlocks=[
     {
-      id:'perf-tab',
-      title:'Meta vs Realizado',
+      id:'perf-ind',
+      title:'Resultados & Indicadores',
       subtitle:'últimos 3 meses',
       open:true,
       html:function(){
-        var t='<table style="width:100%;border-collapse:collapse">'
+        // Meta vs Realizado
+        var metaTable='<div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Meta vs Realizado</div>'
+          +'<table style="width:100%;border-collapse:collapse;margin-bottom:16px">'
           +'<thead><tr style="border-bottom:1.5px solid var(--border)">'
-          +'<th style="text-align:left;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;font-family:\'Inter\',sans-serif">Mês</th>'
-          +'<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Inter\',sans-serif">Meta</th>'
-          +'<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Inter\',sans-serif">Real</th>'
-          +'<th style="text-align:center;font-size:9px;color:var(--accent);padding:5px 6px;text-transform:uppercase;font-weight:700;font-family:\'Inter\',sans-serif">Ating.</th>'
+          +'<th style="text-align:left;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600">Mês</th>'
+          +'<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600">Meta</th>'
+          +'<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600">Real</th>'
+          +'<th style="text-align:center;font-size:9px;color:var(--accent);padding:5px 6px;text-transform:uppercase;font-weight:700">Ating.</th>'
           +'</tr></thead><tbody>'
           +meses.map(function(m,i){
             var p=pcts[i];
             var c=p>=100?'var(--green)':p>=70?'var(--amber)':'var(--red)';
             var bg=p>=100?'var(--green-bg)':p>=70?'var(--amber-bg)':'var(--red-bg)';
             return '<tr style="border-bottom:1px solid var(--border)">'
-              +'<td style="padding:8px 6px;font-size:11px;font-weight:600;color:var(--text);font-family:\'Inter\',sans-serif">'+m+'</td>'
-              +'<td style="padding:8px 6px;text-align:center;font-size:11px;font-family:\'Inter\',sans-serif;color:var(--text3)">'+meta+'</td>'
-              +'<td style="padding:8px 6px;text-align:center;font-size:11px;font-family:\'Inter\',sans-serif;color:var(--text)">'+months[i].opps+'</td>'
+              +'<td style="padding:8px 6px;font-size:11px;font-weight:600;color:var(--text)">'+m+'</td>'
+              +'<td style="padding:8px 6px;text-align:center;font-size:11px;color:var(--text3)">'+meta+'</td>'
+              +'<td style="padding:8px 6px;text-align:center;font-size:11px;color:var(--text)">'+months[i].opps+'</td>'
               +'<td style="padding:8px 6px;text-align:center">'
-              +'<span style="font-size:11px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+c+';background:'+bg+';padding:2px 8px;border-radius:8px">'+p+'%</span>'
+              +'<span style="font-size:11px;font-weight:700;color:'+c+';background:'+bg+';padding:2px 8px;border-radius:8px">'+p+'%</span>'
               +(i>0?(function(pi,pj){var d=pi-pj;return '<span style="font-size:13px;color:'+(d>0?'var(--green)':d<0?'var(--red)':'var(--text3)')+';margin-left:4px">'+(d>0?'↑':d<0?'↓':'→')+'</span>';}(p,pcts[i-1])):'')
-              +'</td>'
-              +'</tr>';
+              +'</td></tr>';
           }).join('')
           +'</tbody></table>';
-        return t;
-      }
-    },
-
-    {
-      id:'perf-perfil',
-      title:'Perfil de performance',
-      subtitle:null,
-      open:true,
-      html:function(){
-        var levels=[
-          {label:'Alta Performance Consistente', col:'#22c55e', desc:'Entrega acima da meta com regularidade'},
-          {label:'Bom com Margem de Crescimento',col:'#3b82f6', desc:'Entrega sólida, pequenos ajustes trazem grandes ganhos'},
-          {label:'Inconsistente com Picos',       col:'#f59e0b', desc:'Tem capacidade mas não sustenta o ritmo'},
-          {label:'Em Desenvolvimento',             col:'#f59e0b', desc:'Alta variação e resultado abaixo da meta'},
-          {label:'Consistente Abaixo da Meta',     col:'#ef4444', desc:'Regularidade negativa, revisão estrutural necessária'},
-        ];
-        var levelsHtml=levels.map(function(l){
-          var isCurrent=l.label===profile;
-          return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05)'+(isCurrent?';background:rgba(0,0,0,0.03);margin:0 -12px;padding:5px 12px;border-radius:4px':'')+'">'+
-            '<div style="width:7px;height:7px;border-radius:50%;background:'+l.col+';flex-shrink:0"></div>'+
-            '<span style="font-size:11px;font-family:\'Inter\',sans-serif;font-weight:'+(isCurrent?'700':'400')+';color:'+(isCurrent?'#111':'#555e6b')+'">'+l.label+'</span>'+
-            (isCurrent?'<span style="margin-left:auto;font-size:9px;font-weight:700;color:'+l.col+';font-family:\'Inter\',sans-serif">← você</span>':'')
-          +'</div>';
-        }).join('');
-
-        return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
-          +'<div style="width:10px;height:10px;border-radius:50%;background:'+profileCol+';flex-shrink:0"></div>'
-          +'<div style="position:relative;display:inline-block">'
-          +'<span style="font-size:13px;font-weight:700;color:'+profileCol+';font-family:\'Inter\',sans-serif;cursor:help;border-bottom:1px dashed '+profileCol+'" '
-          +'onmouseenter="(function(el,e){var t=document.getElementById(\'perf-lvl-tooltip\');if(t){t.style.display=\'block\';var r=el.getBoundingClientRect();t.style.top=(r.bottom+6)+\'px\';t.style.left=r.left+\'px\';};})(this,event)" '
-          +'onmouseleave="(function(){var t=document.getElementById(\'perf-lvl-tooltip\');if(t)t.style.display=\'none\';})()">'+profile+'</span>'
-          +'<div id="perf-lvl-tooltip" style="display:none;position:fixed;background:#fff;border:1px solid rgba(0,0,0,0.12);border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:260px;z-index:9999">'
-          +'<div style="font-size:9px;font-weight:700;color:#8892a0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;font-family:\'Inter\',sans-serif">Níveis de performance</div>'
-          +levelsHtml
-          +'</div>'
-          +'</div>'
-          +'<div style="margin-left:auto;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(0,0,0,0.05);color:'+consistencyCol+';font-family:\'Inter\',sans-serif">'+consistency+'</div>'
-          +'</div>'
-          +'<div style="font-size:12px;color:#555e6b;font-family:\'Inter\',sans-serif;line-height:1.5">'+profileDesc+'</div>';
-      }
-    },
-    {
-      id:'perf-ind',
-      title:'Evolução de indicadores',
-      subtitle:null,
-      open:false,
-      html:function(){
-        return '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:300px">'
+        // Evolução de indicadores
+        var indTable='<div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Evolução de indicadores</div>'
+          +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:300px">'
           +'<thead><tr style="border-bottom:1.5px solid var(--border)">'
-          +'<th style="text-align:left;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Inter\',sans-serif">Ind.</th>'
-          +meses.map(function(m){return '<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Inter\',sans-serif">'+m+'</th>';}).join('')
-          +'<th style="text-align:center;font-size:9px;color:var(--accent);padding:5px 6px;text-transform:uppercase;font-weight:600;font-family:\'Inter\',sans-serif">Bench</th>'
+          +'<th style="text-align:left;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600">Ind.</th>'
+          +meses.map(function(m){return '<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600">'+m+'</th>';}).join('')
+          +'<th style="text-align:center;font-size:9px;color:var(--accent);padding:5px 6px;text-transform:uppercase;font-weight:600">Bench</th>'
           +'<th style="text-align:center;font-size:9px;padding:5px 6px">Tend.</th>'
+          +'<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600">Meta</th>'
+          +'<th style="text-align:center;font-size:9px;color:var(--text3);padding:5px 6px;text-transform:uppercase;font-weight:600">Real</th>'
+          +'<th style="text-align:center;font-size:9px;color:var(--accent);padding:5px 6px;text-transform:uppercase;font-weight:700">Ating.</th>'
           +'</tr></thead><tbody>'
           +indicators.map(function(ind){
             var tnd=ind.lower?(ind.vals[2]<ind.vals[0]?'↓':'↑'):(ind.vals[2]>ind.vals[0]?'↑':ind.vals[2]<ind.vals[0]?'↓':'→');
             var tndC=ind.lower?(tnd==='↓'?'var(--green)':'var(--red)'):(tnd==='↑'?'var(--green)':tnd==='↓'?'var(--red)':'var(--text3)');
             return '<tr style="border-bottom:1px solid var(--border)">'
-              +'<td style="padding:7px 6px;font-size:11px;font-weight:600;color:var(--text);font-family:\'Inter\',sans-serif">'+ind.label+'</td>'
-              +ind.vals.map(function(v){return '<td style="padding:7px 6px;text-align:center;font-size:12px;font-family:\'Inter\',sans-serif;font-weight:600;color:var(--text)">'+v+(ind.unit||'')+'</td>';}).join('')
-              +'<td style="padding:7px 6px;text-align:center;font-size:11px;font-family:\'Inter\',sans-serif;color:var(--text3)">'+ind.bench+(ind.unit||'')+'</td>'
+              +'<td style="padding:7px 6px;font-size:11px;font-weight:600;color:var(--text)">'+ind.label+'</td>'
+              +ind.vals.map(function(v){return '<td style="padding:7px 6px;text-align:center;font-size:12px;font-weight:600;color:var(--text)">'+v+(ind.unit||'')+'</td>';}).join('')
+              +'<td style="padding:7px 6px;text-align:center;font-size:11px;color:var(--text3)">'+ind.bench+(ind.unit||'')+'</td>'
               +'<td style="padding:7px 6px;text-align:center;font-size:14px;font-weight:700;color:'+tndC+'">'+tnd+'</td>'
+              +'<td style="padding:7px 6px;text-align:center;font-size:10px;color:var(--text3)">—</td>'
+              +'<td style="padding:7px 6px;text-align:center;font-size:10px;color:var(--text3)">—</td>'
+              +'<td style="padding:7px 6px;text-align:center;font-size:10px;color:var(--text3)">—</td>'
               +'</tr>';
           }).join('')
+          // OP row — meta x real x atingimento per month
+          +(function(){
+            var opMeta=meta;
+            var opVals=months.map(function(m){return m.opps;});
+            var tnd=opVals[2]>opVals[0]?'↑':opVals[2]<opVals[0]?'↓':'→';
+            var tndC=tnd==='↑'?'var(--green)':tnd==='↓'?'var(--red)':'var(--text3)';
+            // Atingimento: last month (most recent = m3)
+            var lastReal=opVals[opVals.length-1];
+            var atng=opMeta>0?Math.round((lastReal/opMeta)*100):0;
+            var atngC=atng>=100?'var(--green)':atng>=70?'var(--amber)':'var(--red)';
+            var atngBg=atng>=100?'var(--green-bg)':atng>=70?'var(--amber-bg)':'var(--red-bg)';
+            return '<tr style="border-bottom:1px solid var(--border);background:rgba(0,60,253,0.03)">'
+              +'<td style="padding:7px 6px;font-size:11px;font-weight:700;color:var(--accent)">Opps</td>'
+              +opVals.map(function(v,i){
+                var c=opMeta>0&&v>=opMeta?'var(--green)':v>0?'var(--amber)':'var(--red)';
+                return '<td style="padding:7px 6px;text-align:center;font-size:12px;font-weight:700;color:'+c+'">'+v+'</td>';
+              }).join('')
+              +'<td style="padding:7px 6px;text-align:center;font-size:11px;color:var(--text3)">'+opMeta+'</td>'
+              +'<td style="padding:7px 6px;text-align:center;font-size:14px;font-weight:700;color:'+tndC+'">'+tnd+'</td>'
+              +'<td style="padding:7px 6px;text-align:center;font-size:11px;color:var(--text3)">'+opMeta+'</td>'
+              +'<td style="padding:7px 6px;text-align:center;font-size:11px;font-weight:700;color:var(--text)">'+lastReal+'</td>'
+              +'<td style="padding:7px 6px;text-align:center"><span style="font-size:11px;font-weight:700;color:'+atngC+';background:'+atngBg+';padding:2px 8px;border-radius:8px">'+atng+'%</span></td>'
+              +'</tr>';
+          })()
           +'</tbody></table></div>'
           +'<button onclick="(function(){var btns=document.querySelectorAll(\'.nav-item\');btns.forEach(function(b){if(b.querySelector(\'.nav-label\')&&b.querySelector(\'.nav-label\').textContent===\'Funil\')b.click();});})()" '
-          +'style="margin-top:10px;font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:8px;padding:5px 12px;cursor:pointer;font-family:\'Inter\',sans-serif">Ver meu funil →</button>';
+          +'style="margin-top:10px;font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:8px;padding:5px 12px;cursor:pointer">Ver meu funil →</button>';
+        return indTable;
       }
     },
     {
@@ -4637,63 +4605,6 @@ function buildPerformanceBDR(pane, bdr){
           +'<div style="font-size:12px;color:var(--text);font-family:\'Inter\',sans-serif;line-height:1.5">'+badPatt+'</div>'
           +'</div>'
           +'</div>';
-      }
-    },
-    {
-      id:'perf-gap',
-      title:'Gap estrutural',
-      subtitle:null,
-      open:false,
-      html:function(){
-        return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-          +'<div><div style="font-size:15px;font-weight:700;color:var(--text);font-family:\'Inter\',sans-serif">'+mainGap.label+'</div>'
-          +'<div style="font-size:11px;color:#8892a0;font-family:\'Inter\',sans-serif">Maior gap vs benchmark</div></div>'
-          +'<div style="text-align:right"><div style="font-size:26px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--red)">'+mainGap.avgVal+mainGap.unit+'</div>'
-          +'<div style="font-size:10px;color:var(--text3)">bench: '+mainGap.bench+mainGap.unit+'</div></div>'
-          +'</div>'
-          +'<div style="height:5px;background:#eef0f3;border-radius:3px;overflow:hidden;margin-bottom:8px;position:relative">'
-          +'<div style="position:absolute;left:0;top:0;height:100%;width:'+Math.min(100,Math.round((mainGap.bench/Math.max(mainGap.bench,mainGap.avgVal+5))*100))+'%;background:rgba(59,130,246,0.25);border-radius:3px"></div>'
-          +'<div style="width:'+Math.min(100,Math.round((mainGap.avgVal/Math.max(mainGap.bench,mainGap.avgVal+5))*100))+'%;height:100%;background:var(--red);border-radius:3px"></div>'
-          +'</div>'
-          +'<div style="font-size:12px;color:var(--text2);font-family:\'Inter\',sans-serif">'
-          +'Gap de <strong>'+Math.abs(mainGap.gap)+'pp</strong>. '
-          +'<span style="color:var(--accent);font-weight:600;cursor:pointer;border-bottom:1px dashed var(--accent)" '
-          +'onmouseenter="this.nextElementSibling.style.display=\'block\'" '
-          +'onmouseleave="this.nextElementSibling.style.display=\'none\'">Corrigindo isso</span>'
-          +' você ganha +'+Math.round(Math.abs(mainGap.gap)*0.15)+' opps/mês.'
-          +'<div style="display:none;margin-top:8px;padding:10px 12px;background:#f4f5f7;border-radius:var(--radius-sm);border:1px solid var(--border2)">'
-          +'<div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;margin-bottom:6px;font-family:\'Inter\',sans-serif">O que fazer:</div>'
-          +(pdcaMap[mainGap.label]||baseActions).map(function(a,i){
-            return '<div style="font-size:11px;color:var(--text);padding:4px 0;border-bottom:1px solid var(--border);font-family:\'Inter\',sans-serif"><span style="color:var(--accent);font-weight:700">'+(i+1)+'.</span> '+a+'</div>';
-          }).join('')
-          +'</div>'
-          +'</div>';
-      }
-    },
-    {
-      id:'perf-pdca',
-      title:'PDCA estratégico',
-      subtitle:'30 dias',
-      open:false,
-      html:function(){
-        var pdcaSteps=[
-          {letter:'P',name:'Planejar',desc:'Definir meta semanal para '+mainGap.label+' e bloquear tempo no calendário'},
-          {letter:'D',name:'Executar',desc:'Aplicar ações por 4 semanas consecutivas sem interrupção'},
-          {letter:'C',name:'Checar',  desc:'Revisar resultado toda sexta com o gestor'},
-          {letter:'A',name:'Ajustar', desc:'Manter o que funcionou, descartar o que não gerou resultado'},
-        ];
-        return '<div style="font-size:11px;color:var(--text2);margin-bottom:10px;font-family:\'Inter\',sans-serif">Foco: <strong>'+mainGap.label+'</strong></div>'
-          +pdcaSteps.map(function(s){
-            return '<div style="border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;overflow:hidden">'
-              +'<div onclick="(function(el){var b=el.nextElementSibling;var open=b.style.display!==\'none\';b.style.display=open?\'none\':\'block\';el.querySelector(\'.pc\').textContent=open?\'▾\':\'▴\';})(this)" '
-              +'style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none;border-bottom:1px solid rgba(0,0,0,0.04)">'
-              +'<div style="width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:\'Inter\',sans-serif">'+s.letter+'</div>'
-              +'<span style="font-size:12px;font-weight:700;color:var(--text);flex:1;font-family:\'Inter\',sans-serif">'+s.name+'</span>'
-              +'<span class="pc" style="font-size:13px;color:var(--text3)">▾</span>'
-              +'</div>'
-              +'<div style="display:none;padding:10px 14px;background:var(--bg2);font-size:12px;color:#555e6b;font-family:\'Inter\',sans-serif;line-height:1.5">'+s.desc+'</div>'
-              +'</div>';
-          }).join('');
       }
     },
     {
