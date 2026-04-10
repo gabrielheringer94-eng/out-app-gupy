@@ -5024,7 +5024,8 @@ async function loadDataFromSupabase(){
   });
   DATA.raPendentes={};
   bdrsDB.forEach(row=>{ DATA.raPendentes[row.bdr_id]=row.ra_pendentes||0; });
-  DATA.ultimaAtualizacao=sem.created_at||new Date().toISOString();
+  var supaTs=sem.created_at||'';
+  if(!DATA.ultimaAtualizacao||supaTs>DATA.ultimaAtualizacao) DATA.ultimaAtualizacao=supaTs||new Date().toISOString();
   console.log('✓ Supabase — semana:',sem.semana);
 }
 
