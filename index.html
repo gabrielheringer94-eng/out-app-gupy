@@ -1529,22 +1529,26 @@ function buildResultadoGestor(pane){
       return supaFetch('gp_forecast','semana_id=eq.'+semId);
     }).then(function(forecasts){
       if(!forecasts) return;
-      var totalFcst=forecasts.reduce(function(s,f){return s+(f.fcst_op||0);},0);
+      var totalFcstOp=forecasts.reduce(function(s,f){return s+(f.fcst_op||0);},0);
+      var totalFcstRa=forecasts.reduce(function(s,f){return s+(f.fcst_ra||0);},0);
       var semRestantes=semTotal-semAtual;
-      var opsNecessarias=metaMes-oppsAcum;
-      var fcstSuficiente=totalFcst>=opsNecessarias;
-      var gap=totalFcst-opsNecessarias;
-      var cor=fcstSuficiente?'var(--green)':'var(--red)';
+      var opsNecessarias=Math.max(0,metaMes-oppsAcum);
+      var paceMtd=Math.round((metaMes/semTotal)*semAtual);
+      var gapPace=oppsAcum-paceMtd;
+      var opsNeedWeek=semRestantes>0?Math.ceil(opsNecessarias/semRestantes):opsNecessarias;
+      var rasNeedWeek=Math.ceil(opsNeedWeek/0.3); // ~30% RA→OP
+      var fcstSuficiente=totalFcstOp>=opsNeedWeek;
+      var gap=totalFcstOp-opsNeedWeek;
       var icone=fcstSuficiente?'✅':'⚠️';
-      var msg=fcstSuficiente
-        ?'Forecast do time está em linha com a meta. Projeção total: '+totalFcst+' opps (need: '+opsNecessarias+').'
-        :'Forecast abaixo do necessário. Gap de '+Math.abs(gap)+' opps. Precisam de '+Math.ceil(opsNecessarias/Math.max(forecasts.length,1))+' opps/BDR em média nas próximas '+semRestantes+' semanas.';
+      var paceMsg=gapPace>=0
+        ?'No pace ('+oppsAcum+'/'+paceMtd+' MTD). Precisa de <strong>'+opsNeedWeek+' opps/semana</strong> para manter.'
+        :'Abaixo do pace (<strong>'+oppsAcum+'/'+paceMtd+' MTD</strong>). Precisa de <strong>'+opsNeedWeek+' opps</strong> ou <strong>'+rasNeedWeek+' RAs</strong> no forecast semanal para voltar ao pace (meta: '+metaMes+').';
 
       // Find BDRs with low forecast
       var lowFcstBdrs=[];
       DATA.bdrs.forEach(function(bdr){
         var f=forecasts.find(function(x){return x.bdr_id===bdr.id;});
-        var needPerBdr=Math.ceil((metaMes/DATA.bdrs.length)-bdr.opps);
+        var needPerBdr=Math.max(0,Math.ceil(opsNeedWeek/DATA.bdrs.length));
         if(!f||(f.fcst_op||0)<needPerBdr){
           lowFcstBdrs.push(bdr.name.split(' ')[0]+(f?(' (fcst '+f.fcst_op+')'):'(sem forecast)'));
         }
@@ -1552,10 +1556,10 @@ function buildResultadoGestor(pane){
 
       totalFcstEl.innerHTML='<div style="border-radius:var(--radius-sm);padding:12px 14px;background:'+(fcstSuficiente?'var(--green-bg)':'var(--red-bg)')+';border:1px solid '+(fcstSuficiente?'rgba(22,163,74,0.2)':'rgba(220,38,38,0.2)')+';">'
         +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
-        +'<div style="font-size:12px;font-weight:700;color:'+(fcstSuficiente?'var(--green)':'var(--red)')+'">'+icone+' Forecast do time</div>'
-        +'<div style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+(fcstSuficiente?'var(--green)':'var(--red)')+'">'+totalFcst+' opps</div>'
+        +'<div style="font-size:12px;font-weight:700;color:'+(fcstSuficiente?'var(--green)':'var(--red)')+'">'+icone+' Forecast semanal do time</div>'
+        +'<div style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+(fcstSuficiente?'var(--green)':'var(--red)')+'">'+totalFcstOp+' opps · '+totalFcstRa+' RAs</div>'
         +'</div>'
-        +'<div style="font-size:11px;color:var(--text);line-height:1.5;margin-bottom:'+(lowFcstBdrs.length>0?'8':'0')+'px">'+msg+'</div>'
+        +'<div style="font-size:11px;color:var(--text);line-height:1.5;margin-bottom:'+(lowFcstBdrs.length>0?'8':'0')+'px">'+paceMsg+'</div>'
         +(lowFcstBdrs.length>0?'<div style="font-size:10px;color:'+(fcstSuficiente?'var(--green)':'var(--red)')+'">BDRs abaixo: '+lowFcstBdrs.join(', ')+'</div>':'')
         +'</div>';
     }).catch(function(){
@@ -1673,32 +1677,38 @@ function buildResultadoGestor(pane){
           el.innerHTML='<span style="font-size:9px;color:var(--text3)">fcst:</span> <strong>'+totalFcst+'</strong>';
         }
       }
-      // WoW funil table
+      // WoW funil — visual por colunas (semanas)
       var wowEl=document.getElementById('res-wow-funil');
       if(!wowEl||allSems.length<1) return;
       var stages=['abordagem_iniciada','lead_conectado','reuniao_agendada','oportunidades','desqualificados'];
-      var labels=['AI','LC','RA','OP','Desq'];
-      var html='<table style="width:100%;border-collapse:collapse;font-family:\'Inter\',sans-serif">';
-      html+='<tr><th style="text-align:left;font-size:10px;color:var(--text3);padding:4px 6px"></th>';
-      allSems.forEach(function(s){html+='<th style="text-align:center;font-size:10px;color:var(--text3);padding:4px 6px">S'+s.sem_atual+'</th>';});
-      html+='</tr>';
-      stages.forEach(function(stage,idx){
-        html+='<tr style="border-bottom:1px solid var(--border)">';
-        html+='<td style="font-size:11px;font-weight:600;color:var(--text);padding:6px">'+labels[idx]+'</td>';
-        var prev=null;
-        allSems.forEach(function(s){
+      var labels=['Abord. Iniciada','Lead Conectado','Reunião Ag.','Oportunidades','Desqualificados'];
+      var colors=['#2563eb','#0891b2','#f59e0b','#22c55e','#374151'];
+      // Find max value across all semanas for bar sizing
+      var maxVal=1;
+      allSems.forEach(function(s){stages.forEach(function(st){if((s[st]||0)>maxVal) maxVal=s[st];});});
+      var html='<div style="display:grid;grid-template-columns:repeat('+allSems.length+',1fr);gap:8px">';
+      allSems.forEach(function(s,si){
+        var isCurrent=s.sem_atual===DATA.semAtual;
+        html+='<div style="border-radius:var(--radius-sm);padding:10px 8px;background:var(--bg2);border:'+(isCurrent?'2px solid var(--accent)':'1px solid var(--border)')+'">';
+        html+='<div style="font-size:11px;font-weight:700;color:'+(isCurrent?'var(--accent)':'var(--text2)')+';text-align:center;margin-bottom:8px">S'+s.sem_atual+'</div>';
+        stages.forEach(function(stage,idx){
           var val=s[stage]||0;
-          var col='var(--text)';
-          if(prev!==null){
-            col=val>prev?'var(--green)':val<prev?'var(--red)':'var(--text2)';
-          }
-          var arrow=prev!==null?(val>prev?' ▲':val<prev?' ▼':''):'';
-          html+='<td style="text-align:center;font-size:12px;font-weight:700;color:'+col+';padding:6px">'+val+'<span style="font-size:8px">'+arrow+'</span></td>';
-          prev=val;
+          var pct=Math.round((val/maxVal)*100);
+          var prevVal=si>0?(allSems[si-1][stage]||0):null;
+          var arrow=prevVal!==null?(val>prevVal?' ▲':val<prevVal?' ▼':''):'';
+          var arrowCol=prevVal!==null?(val>prevVal?'var(--green)':val<prevVal?'var(--red)':'var(--text3)'):'';
+          html+='<div style="margin-bottom:6px">';
+          html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">';
+          html+='<span style="font-size:9px;color:var(--text3)">'+labels[idx].split(' ')[0]+'</span>';
+          html+='<span style="font-size:11px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">'+val+'<span style="font-size:8px;color:'+arrowCol+'">'+arrow+'</span></span>';
+          html+='</div>';
+          html+='<div style="height:4px;background:var(--bg3);border-radius:2px;overflow:hidden">';
+          html+='<div style="width:'+Math.max(pct,3)+'%;height:100%;background:'+colors[idx]+';border-radius:2px"></div>';
+          html+='</div></div>';
         });
-        html+='</tr>';
+        html+='</div>';
       });
-      html+='</table>';
+      html+='</div>';
       wowEl.innerHTML=html;
     }catch(e){console.warn('WoW funil:',e);}
   })();
@@ -1837,14 +1847,15 @@ function buildResumo(pane){
         Alertas críticos
       </div>
       ${alertas.map(a=>`
-      <div onclick="(function(){document.querySelectorAll('.nav-item').forEach(function(b){if(b.textContent.trim().indexOf('Funil')>=0||b.textContent.trim().indexOf('Resultado')>=0)b.click();});})()" style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s" onmouseenter="this.style.background='#fee2e2'" onmouseleave="this.style.background='#fff5f5'">
+      <div onclick="(function(){document.querySelectorAll('.nav-item').forEach(function(b){if(b.textContent.trim().indexOf('Funil')>=0||b.textContent.trim().indexOf('Resultado')>=0)b.click();});})()" style="border-bottom:1px solid var(--border);padding:8px 0;cursor:pointer;transition:opacity .15s" onmouseenter="this.style.opacity='.7'" onmouseleave="this.style.opacity='1'">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <div style="font-size:12px;font-weight:700;color:var(--red)">${a.label}</div>
-          <div style="font-size:11px;color:var(--text2)">${a.antes}% → <strong style="color:var(--red)">${a.agora}%</strong></div>
-          <div style="font-size:10px;font-weight:700;color:var(--red);background:#fee2e2;padding:2px 6px;border-radius:12px">${a.delta}pp</div>
-          <div style="font-size:10px;color:var(--text3);margin-left:auto">${a.msg} →</div>
+          <span style="font-size:12px;font-weight:600;color:var(--text)">${a.label}</span>
+          <span style="font-size:11px;color:var(--text)">${a.antes}%</span>
+          <span style="font-size:11px;color:var(--red)">→ ${a.agora}%</span>
+          <span style="font-size:10px;font-weight:600;color:var(--red)">${a.delta}pp</span>
+          <span style="font-size:10px;color:var(--text3);margin-left:auto">${a.msg} →</span>
         </div>
-        <div style="display:flex;gap:12px;margin-top:4px;font-size:10px">
+        <div style="display:flex;gap:12px;margin-top:3px;font-size:10px">
           <span style="color:var(--red)">▼ ${a.bdrDown}</span>
           <span style="color:var(--green)">▲ ${a.bdrUp}</span>
         </div>
@@ -2080,19 +2091,25 @@ function buildTimeGestor(pane){
   pane.innerHTML=`
     <div style="font-size:11px;color:var(--text2);margin-bottom:14px">Semana ${DATA.semAtual} de ${DATA.semTotal} · Abril 2026 · Meta: ${META} opps/BDR</div>
 
-    <!-- FORECAST CENTRALIZADO -->
+    <!-- FORECAST — estilo Meu Resultado com S's -->
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
       <div style="width:10px;height:10px;border-radius:50%;background:var(--accent)"></div>
-      <span style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em">Forecast do time — enviado pelos BDRs</span>
+      <span style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em">Forecast do time — por semana</span>
     </div>
+    <div id="forecast-semanas-grid" class="card" style="margin-bottom:14px;padding:12px">
+      <div style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Carregando...</div>
+    </div>
+    <!-- Tabela detalhada por BDR -->
     <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">
-      <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;min-width:480px">
+      <div style="padding:8px 12px;background:var(--bg3);border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="var tb=document.getElementById('forecast-table-wrap');tb.style.display=tb.style.display==='none'?'block':'none'">
+        <span style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Detalhes por BDR + Status</span>
+        <span style="font-size:14px;color:var(--text3)">▾</span>
+      </div>
+      <div id="forecast-table-wrap" style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;min-width:460px">
           <thead>
             <tr style="background:var(--bg3);border-bottom:1px solid var(--border)">
               <th style="padding:8px 12px;text-align:left;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">BDR</th>
-              <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">LC fcst</th>
-              <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">RA fcst</th>
               <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">OP fcst</th>
               <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">OP real</th>
               <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Ating.</th>
@@ -2100,7 +2117,7 @@ function buildTimeGestor(pane){
             </tr>
           </thead>
           <tbody id="forecast-table-body">
-            <tr><td colspan="6" style="padding:16px;text-align:center;font-size:12px;color:var(--text3)">Carregando forecasts...</td></tr>
+            <tr><td colspan="5" style="padding:16px;text-align:center;font-size:12px;color:var(--text3)">Carregando...</td></tr>
           </tbody>
         </table>
       </div>
@@ -2192,7 +2209,7 @@ async function loadGestorForecast(){
     const forecasts=await supaFetch('gp_forecast',`semana_id=eq.${semId}&order=bdr_nome.asc`);
 
     if(!forecasts||forecasts.length===0){
-      tbody.innerHTML='<tr><td colspan="7" style="padding:16px;text-align:center;font-size:12px;color:var(--text3)">Nenhum BDR enviou o forecast ainda.</td></tr>';
+      tbody.innerHTML='<tr><td colspan="5" style="padding:16px;text-align:center;font-size:12px;color:var(--text3)">Nenhum BDR enviou o forecast ainda.</td></tr>';
       return;
     }
 
@@ -2217,8 +2234,6 @@ async function loadGestorForecast(){
             ${!f?`<span style="font-size:9px;color:var(--text3);background:var(--bg3);padding:1px 6px;border-radius:10px">pendente</span>`:''}
           </div>
         </td>
-        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:600;color:${f?'var(--text)':'var(--text3)'}">${f?f.fcst_lc:'—'}</td>
-        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:600;color:${f?'var(--text)':'var(--text3)'}">${f?f.fcst_ra:'—'}</td>
         <td style="padding:10px 8px;text-align:center">
           <span style="font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${f?'var(--accent)':'var(--text3)'}">${f?f.fcst_op:'—'}</span>
           ${f&&f.editado_apos_planejamento?'<div style="font-size:8px;font-weight:700;color:var(--amber);margin-top:1px">✎ editado</div>':''}
@@ -2247,13 +2262,55 @@ async function loadGestorForecast(){
     const totalAting=totalFcstOp>0?Math.round((totalRealOp/totalFcstOp)*100):0;
     tbody.innerHTML+=`<tr style="background:var(--bg3);border-top:2px solid var(--border)">
       <td style="padding:10px 12px;font-size:11px;font-weight:700;color:var(--text)">TOTAL</td>
-      <td style="padding:10px 8px;text-align:center">—</td>
-      <td style="padding:10px 8px;text-align:center">—</td>
       <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--accent)">${totalFcstOp}</td>
       <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--green)">${totalRealOp}</td>
       <td style="padding:10px 10px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:${totalAting>=100?'var(--green)':totalAting>=70?'var(--amber)':'var(--red)'}">${totalAting}%</td>
       <td style="padding:10px 6px;text-align:center"></td>
     </tr>`;
+
+    // Render S1-S4 forecast grid (estilo Meu Resultado)
+    var gridEl=document.getElementById('forecast-semanas-grid');
+    if(gridEl){
+      try{
+        var allSems=await supaFetch('gp_semanas','order=id.asc');
+        var allFcsts=[];
+        var allResults=[];
+        for(var s of (allSems||[])){
+          var fc=await supaFetch('gp_forecast','semana_id=eq.'+s.id);
+          var rs=await supaFetch('gp_bdr_resultados','semana_id=eq.'+s.id);
+          allFcsts.push({sem:s,fcsts:fc||[]});
+          allResults.push({sem:s,results:rs||[]});
+        }
+        var semTotal=DATA.semTotal;
+        var gh='<div style="display:grid;grid-template-columns:repeat('+semTotal+',1fr);gap:6px">';
+        for(var si=1;si<=semTotal;si++){
+          var semData=allFcsts.find(x=>x.sem.sem_atual===si);
+          var resData=allResults.find(x=>x.sem.sem_atual===si);
+          var isCurrent=si===DATA.semAtual;
+          var isFuture=si>DATA.semAtual;
+          var totalFcst=semData?semData.fcsts.reduce((s,f)=>s+(f.fcst_op||0),0):0;
+          var totalReal=resData?resData.results.reduce((s,r)=>s+(r.opps||0),0):0;
+          var diff=totalReal-totalFcst;
+          var diffCol=diff>=0?'var(--green)':'var(--red)';
+          gh+='<div style="background:var(--bg2);border-radius:var(--radius-sm);padding:10px 8px;text-align:center;border:'+(isCurrent?'2px solid var(--accent)':'1px solid var(--border)')+'">';
+          gh+='<div style="font-size:11px;font-weight:700;color:'+(isCurrent?'var(--accent)':'var(--text2)')+';margin-bottom:6px">S'+si+'</div>';
+          gh+='<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 4px;text-align:center;margin-bottom:4px">';
+          gh+='<div style="font-size:8px;color:var(--text3);margin-bottom:2px">Fcst</div>';
+          gh+='<div style="font-size:20px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">'+(isFuture&&totalFcst===0?'—':totalFcst)+'</div>';
+          gh+='</div>';
+          gh+='<div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:7px 4px;text-align:center;margin-bottom:4px">';
+          gh+='<div style="font-size:8px;color:var(--text3);margin-bottom:2px">Real</div>';
+          gh+='<div style="font-size:20px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">'+(isFuture?'—':totalReal)+'</div>';
+          gh+='</div>';
+          if(!isFuture){
+            gh+='<div style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+diffCol+'">'+(diff>=0?'+':'')+diff+'</div>';
+          }
+          gh+='</div>';
+        }
+        gh+='</div>';
+        gridEl.innerHTML=gh;
+      }catch(e){gridEl.innerHTML='<div style="font-size:11px;color:var(--text3);text-align:center">Indisponível</div>';}
+    }
 
     // Populate ranking fcst cells
     DATA.bdrs.forEach(function(bdr){
@@ -2320,6 +2377,19 @@ async function loadForecastHistory(){
     html+='</tbody></table>';
     el.innerHTML=html;
   }catch(e){el.innerHTML='Indisponível offline.';console.warn('Forecast history:',e);}
+}
+
+// ── Keep Forecast (BDR chooses to keep after "reflita") ──
+async function keepForecast(forecastId, bdrId){
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/gp_forecast?id=eq.${forecastId}`,{
+      method:'PATCH',
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({status:'aguardando',justificativa:null,status_changed_at:new Date().toISOString(),status_changed_by:bdrId})
+    });
+    var bdr=DATA.bdrs.find(b=>b.id===bdrId);
+    if(bdr) loadBDRForecast(bdr);
+  }catch(e){console.warn('Keep forecast error:',e);}
 }
 
 // ── Forecast Approval Functions ──
@@ -4159,9 +4229,13 @@ async function loadBDRForecast(bdr){
             </div>
             <button onclick="editForecast('${bdr.id}','${bdr.name}',${semId},${f.id})" style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-family:\'Inter\',sans-serif">Editar ✎</button>
           </div>
-          ${fStatus==='reflita'&&f.justificativa?`<div style="margin-top:8px;padding:8px;background:white;border-radius:6px;border:1px solid #fecaca">
-            <div style="font-size:9px;color:var(--red);font-weight:600;margin-bottom:3px">Feedback do gestor:</div>
-            <div style="font-size:11px;color:var(--text);line-height:1.4">${f.justificativa}</div>
+          ${fStatus==='reflita'&&f.justificativa?`<div style="margin-top:8px;padding:10px;background:white;border-radius:8px;border:1px solid #fecaca">
+            <div style="font-size:9px;color:var(--red);font-weight:600;margin-bottom:4px">Feedback do gestor:</div>
+            <div style="font-size:11px;color:var(--text);line-height:1.4;margin-bottom:10px">${f.justificativa}</div>
+            <div style="display:flex;gap:8px">
+              <button onclick="editForecast('${bdr.id}','${bdr.name}',${semId},${f.id})" style="flex:1;font-size:11px;font-weight:600;color:white;background:var(--accent);border:none;border-radius:8px;padding:8px;cursor:pointer;font-family:'Inter',sans-serif">Ajustar Forecast</button>
+              <button onclick="keepForecast(${f.id},'${bdr.id}')" style="flex:1;font-size:11px;font-weight:600;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;font-family:'Inter',sans-serif">Manter esse</button>
+            </div>
           </div>`:''}
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
