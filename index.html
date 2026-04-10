@@ -1563,47 +1563,22 @@ function buildResultadoGestor(pane){
     });
   }
 
-  // Semanas breakdown
-  var semsHtml='';
+  // Semanas breakdown — colunas lado a lado
+  var semsHtml='<div style="display:grid;grid-template-columns:repeat('+mes.semanas.length+',1fr);gap:6px">';
   mes.semanas.forEach(function(s){
     var p=metaMes>0?Math.round((s.opps/(metaMes/semTotal))*100):0;
     var c=p>=100?'var(--green)':p>=60?'var(--amber)':'var(--red)';
-    semsHtml+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'
-      +'<div style="display:flex;align-items:center;gap:8px">'
-      +'<div style="width:6px;height:6px;border-radius:50%;background:'+c+'"></div>'
-      +'<span style="font-size:12px;color:var(--text2)">'+s.label+'</span>'
-      +'</div>'
-      +'<div style="display:flex;align-items:center;gap:10px">'
-      +'<span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+c+'">'+s.opps+'</span>'
-      +'<span style="font-size:10px;color:var(--text3)">opps</span>'
-      +'</div>'
+    var isFuture=s.sem>semAtual;
+    var isCurrent=s.sem===semAtual;
+    semsHtml+='<div style="background:var(--bg2);border-radius:var(--radius-sm);padding:10px 8px;text-align:center;border:'+(isCurrent?'2px solid var(--accent)':'1px solid var(--border)');+'">'
+      +'<div style="font-size:11px;font-weight:700;color:'+(isCurrent?'var(--accent)':'var(--text2)')+';margin-bottom:2px">'+s.label+'</div>'
+      +'<div style="font-size:9px;color:var(--text3);margin-bottom:8px">'+s.datas+'</div>'
+      +'<div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+(isFuture?'var(--text3)':c)+';line-height:1">'+s.opps+'</div>'
+      +'<div style="font-size:9px;color:var(--text3);margin-top:2px">opps</div>'
+      +'<div id="sem-fcst-'+s.sem+'" style="margin-top:6px;font-size:10px;color:var(--accent)"></div>'
       +'</div>';
   });
-
-  // Ranking bdr mini — com forecast + realizado
-  var ranked=[...d.bdrs].sort(function(a,b){return b.opps-a.opps;});
-  var rankHtml='<div style="display:grid;grid-template-columns:14px auto 1fr auto auto auto;align-items:center;gap:6px;padding:6px 0;border-bottom:2px solid var(--border)">'
-    +'<span></span><span></span>'
-    +'<span style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">BDR</span>'
-    +'<span style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;text-align:center">Real</span>'
-    +'<span style="font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;text-align:center">Fcst</span>'
-    +'<span style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;text-align:right">Meta</span>'
-    +'</div>';
-  ranked.forEach(function(b,i){
-    var pc=Math.round((b.opps/d.metaBDR)*100);
-    var col=pc>=70?'var(--green)':pc>=30?'var(--amber)':'var(--red)';
-    var fcstEl='<span style="font-size:9px;color:var(--text3)" id="res-rank-fcst-'+b.id+'">…</span>';
-    rankHtml+='<div style="display:grid;grid-template-columns:14px auto 1fr auto auto auto;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--border)">'
-      +'<span style="font-size:10px;color:var(--text3);font-weight:600">'+(i+1)+'</span>'
-      +(b.photo?'<img src="'+b.photo+'" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0">':'<div style="width:24px;height:24px;border-radius:50%;background:'+b.bg+';color:'+b.color+';display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0">'+b.id+'</div>')
-      +'<span style="font-size:12px;font-weight:600;color:var(--text)">'+b.name.split(' ')[0]+'</span>'
-      +'<span style="font-size:14px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+col+';text-align:center">'+b.opps+'</span>'
-      +'<span id="res-rank-fcst-'+b.id+'" style="font-size:13px;font-weight:600;font-family:\'Inter\',sans-serif;color:var(--accent);text-align:center">…</span>'
-      +'<div style="display:flex;flex-direction:column;align-items:flex-end">'
-      +'<span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;background:'+(pc>=70?'var(--green-bg)':pc>=30?'var(--amber-bg)':'var(--red-bg)')+';color:'+col+'">'+pc+'%</span>'
-      +'</div>'
-      +'</div>';
-  });
+  semsHtml+='</div>';
 
   pane.innerHTML='<div style="font-size:11px;color:var(--text3);margin-bottom:12px;font-family:\'Inter\',sans-serif">Abril 2026 · Semana '+semAtual+' de '+semTotal+'</div>'
 
@@ -1637,13 +1612,10 @@ function buildResultadoGestor(pane){
     +'<div id="res-sems" style="margin-top:12px">'+semsHtml+'</div>'
     +'</div>'
 
-    // ── Ranking ──
+    // ── WoW Funil Table ──
     +'<div class="card" style="margin-bottom:12px">'
-    +'<div class="collapsible-header" onclick="toggleCard(\'\1\',this)" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">'
-    +'<div class="card-title" style="margin-bottom:0">🏆 Ranking — bata o olho</div>'
-    +'<span class="collapse-icon" style="font-size:16px;color:var(--text3)">▾</span>'
-    +'</div>'
-    +'<div id="res-rank" style="margin-top:12px">'+rankHtml+'</div>'
+    +'<div class="card-title" style="margin-bottom:8px">📊 Funil WoW — Time</div>'
+    +'<div id="res-wow-funil" style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Carregando...</div>'
     +'</div>'
 
     // ── Funil do mês ──
@@ -1686,26 +1658,50 @@ function buildResultadoGestor(pane){
     {name:'Desqualificados',  val:d.funil.desqualificados,   max:d.funil.desqualificados||1, color:'#374151'},
   ]);
 
-  // Populate ranking fcst cells
-  supaFetch('gp_semanas','order=id.desc&limit=1').then(function(sems){
-    if(!sems||!sems[0]) return null;
-    return supaFetch('gp_forecast','semana_id=eq.'+sems[0].id);
-  }).then(function(forecasts){
-    if(!forecasts) return;
-    DATA.bdrs.forEach(function(b){
-      var f=forecasts.find(function(x){return x.bdr_id===b.id;});
-      var el=document.getElementById('res-rank-fcst-'+b.id);
-      if(!el) return;
-      if(f){
-        var diff=b.opps-(f.fcst_op||0);
-        var col=diff>=0?'var(--green)':diff>=-1?'var(--amber)':'var(--red)';
-        el.textContent=f.fcst_op||0;
-        el.style.color=col;
-      } else {
-        el.textContent='—';
+  // Populate semanas forecast + WoW funil table
+  (async function(){
+    try{
+      var allSems=await supaFetch('gp_semanas','order=id.asc');
+      if(!allSems||allSems.length===0) return;
+      // Forecast per semana
+      for(var si=0;si<allSems.length;si++){
+        var sem=allSems[si];
+        var fcsts=await supaFetch('gp_forecast','semana_id=eq.'+sem.id);
+        var totalFcst=fcsts?fcsts.reduce(function(s,f){return s+(f.fcst_op||0);},0):0;
+        var el=document.getElementById('sem-fcst-'+sem.sem_atual);
+        if(el&&totalFcst>0){
+          el.innerHTML='<span style="font-size:9px;color:var(--text3)">fcst:</span> <strong>'+totalFcst+'</strong>';
+        }
       }
-    });
-  }).catch(function(){});
+      // WoW funil table
+      var wowEl=document.getElementById('res-wow-funil');
+      if(!wowEl||allSems.length<1) return;
+      var stages=['abordagem_iniciada','lead_conectado','reuniao_agendada','oportunidades','desqualificados'];
+      var labels=['AI','LC','RA','OP','Desq'];
+      var html='<table style="width:100%;border-collapse:collapse;font-family:\'Inter\',sans-serif">';
+      html+='<tr><th style="text-align:left;font-size:10px;color:var(--text3);padding:4px 6px"></th>';
+      allSems.forEach(function(s){html+='<th style="text-align:center;font-size:10px;color:var(--text3);padding:4px 6px">S'+s.sem_atual+'</th>';});
+      html+='</tr>';
+      stages.forEach(function(stage,idx){
+        html+='<tr style="border-bottom:1px solid var(--border)">';
+        html+='<td style="font-size:11px;font-weight:600;color:var(--text);padding:6px">'+labels[idx]+'</td>';
+        var prev=null;
+        allSems.forEach(function(s){
+          var val=s[stage]||0;
+          var col='var(--text)';
+          if(prev!==null){
+            col=val>prev?'var(--green)':val<prev?'var(--red)':'var(--text2)';
+          }
+          var arrow=prev!==null?(val>prev?' ▲':val<prev?' ▼':''):'';
+          html+='<td style="text-align:center;font-size:12px;font-weight:700;color:'+col+';padding:6px">'+val+'<span style="font-size:8px">'+arrow+'</span></td>';
+          prev=val;
+        });
+        html+='</tr>';
+      });
+      html+='</table>';
+      wowEl.innerHTML=html;
+    }catch(e){console.warn('WoW funil:',e);}
+  })();
 
   // Load forecast analysis async
   buildForecastAnalysis();
@@ -1737,24 +1733,35 @@ function buildResumo(pane){
 
   // ── Alerta: conversão caiu >5pp vs histórico ──
   const alertas=[];
+  const bf=d.bdrFunil||{};
   if(conv.lcRa.hist-conv.lcRa.real>=5){
     const impacto=Math.round((conv.lcRa.hist-conv.lcRa.real)/100*d.funil.leadConectado);
+    // Per-BDR LC->RA conversion
+    const bdrConvs=d.bdrs.map(b=>{const f=bf[b.id]||{};const lc=f.lc||0;return{name:b.name.split(' ')[0],conv:lc>0?Math.round((b.ras/lc)*100):0};}).sort((a,b)=>a.conv-b.conv);
+    const bottom2=bdrConvs.slice(0,2).map(b=>`${b.name} (${b.conv}%)`).join(', ');
+    const top2=bdrConvs.slice(-2).reverse().map(b=>`${b.name} (${b.conv}%)`).join(', ');
     alertas.push({
-      tipo:'LC→RA',label:'Conversão LC → RA caiu',
+      tipo:'LC→RA',label:'LC → RA',
       antes:conv.lcRa.hist,agora:conv.lcRa.real,
       delta:-(conv.lcRa.hist-conv.lcRa.real),
       impacto:-impacto,
-      msg:`Impacto estimado: −${impacto} oportunidades no mês`
+      msg:`−${impacto} opps estimadas`,
+      bdrDown:bottom2,bdrUp:top2
     });
   }
   if(conv.raOp.hist-conv.raOp.real>=5){
     const impacto=Math.round((conv.raOp.hist-conv.raOp.real)/100*d.funil.reuniaoAgendada);
+    const bdrConvs=d.bdrs.filter(b=>b.ras>0).map(b=>({name:b.name.split(' ')[0],conv:Math.round((b.opps/b.ras)*100)})).sort((a,b)=>a.conv-b.conv);
+    const bdrZero=d.bdrs.filter(b=>b.ras>0&&b.opps===0).map(b=>b.name.split(' ')[0]);
+    const bottom2=(bdrZero.length>0?bdrZero:bdrConvs.slice(0,2).map(b=>b.name)).slice(0,2).join(', ');
+    const top2=bdrConvs.slice(-2).reverse().map(b=>`${b.name} (${b.conv}%)`).join(', ');
     alertas.push({
-      tipo:'RA→OP',label:'Conversão RA → OP caiu',
+      tipo:'RA→OP',label:'RA → OP',
       antes:conv.raOp.hist,agora:conv.raOp.real,
       delta:-(conv.raOp.hist-conv.raOp.real),
       impacto:-impacto,
-      msg:`Impacto estimado: −${impacto} oportunidades no mês`
+      msg:`−${impacto} opps estimadas`,
+      bdrDown:bottom2,bdrUp:top2
     });
   }
 
@@ -1768,10 +1775,11 @@ function buildResumo(pane){
     .slice(0,3);
 
   // ── Alavancas ──
+  const totalLig=d.bdrs.reduce((s,b)=>s+b.lig,0);
   const alavancas=[
-    {label:'+10% LC→RA',opps:Math.round(d.funil.leadConectado*0.10*0.3),cor:'var(--green)'},
-    {label:'+15% volume lig.',opps:Math.round(d.bdrs.reduce((s,b)=>s+b.lig,0)*0.15*0.26*0.3),cor:'var(--accent)'},
-    {label:'−10% desqualif.',opps:Math.round(d.funil.desqualificados*0.10*0.15),cor:'var(--teal)'},
+    {label:'+10% LC→RA',detail:`(${conv.lcRa.real}% → ${conv.lcRa.real+10}%)`,opps:Math.round(d.funil.leadConectado*0.10*0.3),cor:'var(--green)'},
+    {label:'+15% volume lig.',detail:`(${totalLig} → ${totalLig+Math.round(totalLig*0.15)} ligações)`,opps:Math.round(totalLig*0.15*0.26*0.3),cor:'var(--accent)'},
+    {label:'−10% desqualif.',detail:`(${d.funil.desqualificados} → ${d.funil.desqualificados-Math.round(d.funil.desqualificados*0.10)})`,opps:Math.round(d.funil.desqualificados*0.10*0.15),cor:'var(--teal)'},
   ].sort((a,b)=>b.opps-a.opps);
 
   // ── Funil conversões ──
@@ -1784,9 +1792,9 @@ function buildResumo(pane){
 
   pane.innerHTML=`
 
-    <!-- ═══ BLOCO 1: META & STATUS HERO ═══ -->
-    <div style="display:flex;justify-content:center;margin-bottom:14px">
-    <div style="background:linear-gradient(135deg,${gapProj>=0?'#16a34a':'#dc2626'} 0%,${gapProj>=0?'#15803d':'#b91c1c'} 100%);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-lg);width:100%;max-width:400px">
+    <!-- ═══ BLOCO 1: META & FORECAST HERO ═══ -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <div style="background:linear-gradient(135deg,${gapProj>=0?'#16a34a':'#dc2626'} 0%,${gapProj>=0?'#15803d':'#b91c1c'} 100%);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-lg)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.07em">Meta Abril · ${d.meta} opps</div>
         <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.9);background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px">${gapProj>=0?'No pace ▲':'Risco ▼'}</div>
@@ -1814,6 +1822,11 @@ function buildResumo(pane){
         <span>Proj ${pctProj}%</span>
       </div>
     </div>
+    <!-- FORECAST DA SEMANA -->
+    <div style="background:linear-gradient(135deg,var(--accent) 0%,#1e40af 100%);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-lg)">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Forecast · Semana ${d.semAtual}</div>
+      <div id="resumo-fcst-semana" style="text-align:center;color:rgba(255,255,255,.5);font-size:11px">Carregando...</div>
+    </div>
     </div>
 
     <!-- ═══ BLOCO 2: ALERTAS CRÍTICOS ═══ -->
@@ -1824,23 +1837,17 @@ function buildResumo(pane){
         Alertas críticos
       </div>
       ${alertas.map(a=>`
-      <div style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:var(--radius-sm);padding:14px;margin-bottom:8px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <div style="font-size:13px;font-weight:700;color:var(--red)">${a.label}</div>
-          <div style="font-size:11px;font-weight:700;color:var(--red);background:#fee2e2;padding:3px 8px;border-radius:20px">${a.delta}pp</div>
+      <div onclick="(function(){document.querySelectorAll('.nav-item').forEach(function(b){if(b.textContent.trim().indexOf('Funil')>=0||b.textContent.trim().indexOf('Resultado')>=0)b.click();});})()" style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:6px;cursor:pointer;transition:all .15s" onmouseenter="this.style.background='#fee2e2'" onmouseleave="this.style.background='#fff5f5'">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div style="font-size:12px;font-weight:700;color:var(--red)">${a.label}</div>
+          <div style="font-size:11px;color:var(--text2)">${a.antes}% → <strong style="color:var(--red)">${a.agora}%</strong></div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);background:#fee2e2;padding:2px 6px;border-radius:12px">${a.delta}pp</div>
+          <div style="font-size:10px;color:var(--text3);margin-left:auto">${a.msg} →</div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;text-align:center">
-          <div style="background:white;border-radius:8px;padding:8px">
-            <div style="font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text2)">${a.antes}%</div>
-            <div style="font-size:9px;color:var(--text3);margin-top:2px">Histórico</div>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--red)">→</div>
-          <div style="background:white;border-radius:8px;padding:8px">
-            <div style="font-size:18px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--red)">${a.agora}%</div>
-            <div style="font-size:9px;color:var(--text3);margin-top:2px">Agora</div>
-          </div>
+        <div style="display:flex;gap:12px;margin-top:4px;font-size:10px">
+          <span style="color:var(--red)">▼ ${a.bdrDown}</span>
+          <span style="color:var(--green)">▲ ${a.bdrUp}</span>
         </div>
-        <div style="font-size:11px;color:var(--red);font-weight:600">${a.msg}</div>
       </div>`).join('')}
     </div>`:''}
 
@@ -1907,6 +1914,7 @@ function buildResumo(pane){
           <div style="display:flex;align-items:center;gap:8px">
             <div style="width:6px;height:6px;border-radius:50%;background:${a.cor}"></div>
             <span style="font-size:12px;font-weight:500;color:var(--text)">${a.label}</span>
+            <span style="font-size:10px;color:var(--text3)">${a.detail||''}</span>
           </div>
           <span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${a.cor}">+${a.opps} opps</span>
         </div>`).join('')}
@@ -1935,6 +1943,37 @@ function buildResumo(pane){
     </div>`;
 
   // Remove old funnel build if any
+
+  // ── Async: Forecast da Semana card ──
+  (async function(){
+    try{
+      const sems=await supaFetch('gp_semanas','order=id.desc&limit=1');
+      if(!sems||!sems.length) return;
+      const semId=sems[0].id;
+      const fcsts=await supaFetch('gp_forecast',`semana_id=eq.${semId}`);
+      const totalFcst=fcsts?fcsts.reduce((s,f)=>s+(f.fcst_op||0),0):0;
+      const realizado=d.funil.oportunidades;
+      const gap=realizado-totalFcst;
+      const gapCor=gap>=0?'#bbf7d0':'#fecaca';
+      const el=document.getElementById('resumo-fcst-semana');
+      if(!el) return;
+      el.innerHTML=`
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center">
+          <div>
+            <div style="font-size:24px;font-weight:700;font-family:'Inter',sans-serif;color:white;line-height:1">${totalFcst}</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Forecast</div>
+          </div>
+          <div onclick="(function(){document.querySelectorAll('.nav-item').forEach(function(b){if(b.textContent.trim().indexOf('Resultado')>=0)b.click();});})()" style="cursor:pointer;border-left:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2)">
+            <div style="font-size:24px;font-weight:700;font-family:'Inter',sans-serif;color:white;line-height:1;text-decoration:underline;text-decoration-style:dotted">${realizado}</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Realizado</div>
+          </div>
+          <div>
+            <div style="font-size:24px;font-weight:700;font-family:'Inter',sans-serif;color:${gapCor};line-height:1">${gap>=0?'+':''}${gap}</div>
+            <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Gap</div>
+          </div>
+        </div>`;
+    }catch(e){console.warn('Forecast resumo:',e);}
+  })();
 }
 
 
@@ -2057,6 +2096,7 @@ function buildTimeGestor(pane){
               <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">OP fcst</th>
               <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">OP real</th>
               <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Ating.</th>
+              <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Status</th>
             </tr>
           </thead>
           <tbody id="forecast-table-body">
@@ -2064,6 +2104,12 @@ function buildTimeGestor(pane){
           </tbody>
         </table>
       </div>
+    </div>
+
+    <!-- FORECAST HISTORY -->
+    <div class="card" style="margin-bottom:14px;padding:12px">
+      <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📊 Histórico de Forecast WoW</div>
+      <div id="forecast-history-table" style="font-size:11px;color:var(--text3);text-align:center;padding:6px">Carregando...</div>
     </div>
 
     <div style="font-size:12px;font-weight:700;color:var(--text);margin:0 0 10px;padding-bottom:7px;border-bottom:2px solid var(--accent);display:flex;align-items:center;gap:6px">
@@ -2133,6 +2179,7 @@ function buildTimeGestor(pane){
 
   // Load forecast table async
   loadGestorForecast();
+  loadForecastHistory();
 }
 
 async function loadGestorForecast(){
@@ -2145,7 +2192,7 @@ async function loadGestorForecast(){
     const forecasts=await supaFetch('gp_forecast',`semana_id=eq.${semId}&order=bdr_nome.asc`);
 
     if(!forecasts||forecasts.length===0){
-      tbody.innerHTML='<tr><td colspan="6" style="padding:16px;text-align:center;font-size:12px;color:var(--text3)">Nenhum BDR enviou o forecast ainda.</td></tr>';
+      tbody.innerHTML='<tr><td colspan="7" style="padding:16px;text-align:center;font-size:12px;color:var(--text3)">Nenhum BDR enviou o forecast ainda.</td></tr>';
       return;
     }
 
@@ -2182,6 +2229,17 @@ async function loadGestorForecast(){
             ?`<span style="font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:${atingColor}">${ating}%</span>`
             :'<span style="font-size:12px;color:var(--text3)">—</span>'}
         </td>
+        <td style="padding:6px 6px;text-align:center" id="fcst-status-${bdr.id}">
+          ${f?`<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+            <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:${(f.status||'aguardando')==='aprovado'?'var(--green-bg)':((f.status||'aguardando')==='reflita'?'var(--red-bg)':'var(--amber-bg)')};color:${(f.status||'aguardando')==='aprovado'?'var(--green)':((f.status||'aguardando')==='reflita'?'var(--red)':'var(--amber)')}">${(f.status||'aguardando')==='aprovado'?'Aprovado':(f.status||'aguardando')==='reflita'?'Reflita':'Aguardando'}</span>
+            <div style="display:flex;gap:3px">
+              <button onclick="approveForecast(${f.id},'${bdr.id}')" style="font-size:8px;padding:2px 5px;border:1px solid var(--green);color:var(--green);background:transparent;border-radius:6px;cursor:pointer" title="Aprovar">✓</button>
+              <button onclick="showReflectInput(${f.id},'${bdr.id}')" style="font-size:8px;padding:2px 5px;border:1px solid var(--red);color:var(--red);background:transparent;border-radius:6px;cursor:pointer" title="Pedir reflexão">↺</button>
+            </div>
+            ${(f.status||'aguardando')==='reflita'&&f.justificativa?`<div style="font-size:8px;color:var(--red);max-width:80px;word-wrap:break-word;margin-top:2px">"${f.justificativa}"</div>`:''}
+            <div id="reflect-input-${bdr.id}" style="display:none"></div>
+          </div>`:'<span style="font-size:9px;color:var(--text3)">—</span>'}
+        </td>
       </tr>`;
     });
 
@@ -2194,6 +2252,7 @@ async function loadGestorForecast(){
       <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--accent)">${totalFcstOp}</td>
       <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--green)">${totalRealOp}</td>
       <td style="padding:10px 10px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:${totalAting>=100?'var(--green)':totalAting>=70?'var(--amber)':'var(--red)'}">${totalAting}%</td>
+      <td style="padding:10px 6px;text-align:center"></td>
     </tr>`;
 
     // Populate ranking fcst cells
@@ -2222,8 +2281,78 @@ async function loadGestorForecast(){
       document.querySelector('#forecast-table-body')?.closest('.card')?.appendChild(note);
     }
   }catch(e){
-    tbody.innerHTML=`<tr><td colspan="6" style="padding:12px;text-align:center;font-size:12px;color:var(--text3)">Forecast indisponível offline.</td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="7" style="padding:12px;text-align:center;font-size:12px;color:var(--text3)">Forecast indisponível offline.</td></tr>`;
   }
+}
+
+// ── Forecast History WoW ──
+async function loadForecastHistory(){
+  const el=document.getElementById('forecast-history-table');
+  if(!el) return;
+  try{
+    const allSems=await supaFetch('gp_semanas','order=id.asc');
+    if(!allSems||allSems.length===0){el.innerHTML='Sem dados.';return;}
+    // Fetch forecasts and results for all semanas
+    const allData=[];
+    for(const sem of allSems){
+      const fcsts=await supaFetch('gp_forecast',`semana_id=eq.${sem.id}`);
+      const results=await supaFetch('gp_bdr_resultados',`semana_id=eq.${sem.id}`);
+      allData.push({sem,fcsts:fcsts||[],results:results||[]});
+    }
+    var html='<table style="width:100%;border-collapse:collapse;font-family:\'Inter\',sans-serif"><thead><tr>';
+    html+='<th style="text-align:left;font-size:9px;color:var(--text3);padding:4px 6px">BDR</th>';
+    allData.forEach(d=>{ html+=`<th style="text-align:center;font-size:9px;color:var(--text3);padding:4px 4px" colspan="2">S${d.sem.sem_atual}<br><span style="font-size:8px">fcst/real</span></th>`;});
+    html+='</tr></thead><tbody>';
+    DATA.bdrs.forEach(bdr=>{
+      html+=`<tr style="border-bottom:1px solid var(--border)">`;
+      html+=`<td style="font-size:10px;font-weight:600;color:var(--text);padding:5px 6px;white-space:nowrap">${bdr.name.split(' ')[0]}</td>`;
+      allData.forEach(d=>{
+        const f=d.fcsts.find(x=>x.bdr_id===bdr.id);
+        const r=d.results.find(x=>x.bdr_id===bdr.id);
+        const fcst=f?f.fcst_op:null;
+        const real=r?r.opps:null;
+        const col=fcst!==null&&real!==null?(real>=fcst?'var(--green)':'var(--red)'):'var(--text3)';
+        html+=`<td style="text-align:center;font-size:11px;color:var(--accent);padding:5px 2px;font-weight:600">${fcst!==null?fcst:'—'}</td>`;
+        html+=`<td style="text-align:center;font-size:11px;color:${col};padding:5px 2px;font-weight:700">${real!==null?real:'—'}</td>`;
+      });
+      html+='</tr>';
+    });
+    html+='</tbody></table>';
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='Indisponível offline.';console.warn('Forecast history:',e);}
+}
+
+// ── Forecast Approval Functions ──
+async function approveForecast(forecastId, bdrId){
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/gp_forecast?id=eq.${forecastId}`,{
+      method:'PATCH',
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({status:'aprovado',justificativa:null,status_changed_at:new Date().toISOString(),status_changed_by:currentUser?currentUser.id:'GESTOR'})
+    });
+    loadGestorForecast();
+  }catch(e){console.warn('Approve error:',e);}
+}
+
+function showReflectInput(forecastId, bdrId){
+  var el=document.getElementById('reflect-input-'+bdrId);
+  if(!el) return;
+  el.style.display='block';
+  el.innerHTML=`<textarea id="reflect-text-${bdrId}" placeholder="Justificativa..." style="width:80px;height:40px;font-size:9px;border:1px solid var(--border);border-radius:4px;padding:3px;resize:none;font-family:'Inter',sans-serif"></textarea>
+    <button onclick="submitReflection(${forecastId},'${bdrId}')" style="font-size:8px;padding:2px 6px;background:var(--red);color:white;border:none;border-radius:4px;cursor:pointer;margin-top:2px;width:100%">Enviar</button>`;
+}
+
+async function submitReflection(forecastId, bdrId){
+  var text=(document.getElementById('reflect-text-'+bdrId)||{}).value||'';
+  if(!text.trim()){alert('Justificativa obrigatória');return;}
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/gp_forecast?id=eq.${forecastId}`,{
+      method:'PATCH',
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({status:'reflita',justificativa:text.trim(),status_changed_at:new Date().toISOString(),status_changed_by:currentUser?currentUser.id:'GESTOR'})
+    });
+    loadGestorForecast();
+  }catch(e){console.warn('Reflect error:',e);}
 }
 
 // REUNIÕES
@@ -4012,16 +4141,28 @@ async function loadBDRForecast(bdr){
     if(existing&&existing.length>0){
       const f=existing[0];
       const dt=new Date(f.enviado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const fStatus=f.status||'aguardando';
+      const statusBg=fStatus==='aprovado'?'#f0fdf4':fStatus==='reflita'?'#fff5f5':'#fffbeb';
+      const statusBorder=fStatus==='aprovado'?'#bbf7d0':fStatus==='reflita'?'#fecaca':'#fde68a';
+      const statusIcon=fStatus==='aprovado'?'✅':fStatus==='reflita'?'🔄':'⏳';
+      const statusLabel=fStatus==='aprovado'?'Aprovado pela liderança':fStatus==='reflita'?'Liderança pediu reflexão':'Aguardando aprovação da liderança';
+      const statusColor=fStatus==='aprovado'?'var(--green)':fStatus==='reflita'?'var(--red)':'var(--amber)';
       el.innerHTML=`
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius-sm);padding:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="color:var(--green);font-size:18px">✓</span>
-            <div>
-              <div style="font-size:12px;font-weight:700;color:var(--green)">Forecast confirmado — ${dt}</div>
-              <div style="font-size:10px;color:var(--text3);margin-top:1px">Obrigado pelo compromisso com o time.</div>
+        <div style="background:${statusBg};border:1px solid ${statusBorder};border-radius:var(--radius-sm);padding:12px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:18px">${statusIcon}</span>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:${statusColor}">${statusLabel}</div>
+                <div style="font-size:10px;color:var(--text3);margin-top:1px">Forecast enviado — ${dt}</div>
+              </div>
             </div>
+            <button onclick="editForecast('${bdr.id}','${bdr.name}',${semId},${f.id})" style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-family:\'Inter\',sans-serif">Editar ✎</button>
           </div>
-          <button onclick="editForecast('${bdr.id}','${bdr.name}',${semId},${f.id})" style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-family:\'Inter\',sans-serif">Editar ✎</button>
+          ${fStatus==='reflita'&&f.justificativa?`<div style="margin-top:8px;padding:8px;background:white;border-radius:6px;border:1px solid #fecaca">
+            <div style="font-size:9px;color:var(--red);font-weight:600;margin-bottom:3px">Feedback do gestor:</div>
+            <div style="font-size:11px;color:var(--text);line-height:1.4">${f.justificativa}</div>
+          </div>`:''}
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
           ${[['LC',f.fcst_lc],['RA',f.fcst_ra],['OP',f.fcst_op]].map(([l,v])=>`
