@@ -1216,14 +1216,17 @@ function buildLogin(){
 
 function doLogin(){
   if(!currentUser) return;
-  try{localStorage.setItem('gupypulse_session',JSON.stringify({userId:currentUser.id}));}catch(e){}
+  try{
+    localStorage.setItem('gupypulse_session',JSON.stringify({userId:currentUser.id}));
+    if(currentUser.isGestor) sessionStorage.setItem('gupypulse_gestor_auth','true');
+  }catch(e){}
   document.getElementById('screen-login').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
   setupApp();
 }
 
 function doLogout(){
-  try{localStorage.removeItem('gupypulse_session');}catch(e){}
+  try{localStorage.removeItem('gupypulse_session');sessionStorage.removeItem('gupypulse_gestor_auth');}catch(e){}
   currentUser=null;
   document.getElementById('screen-app').classList.remove('active');
   document.getElementById('screen-login').classList.add('active');
@@ -6045,9 +6048,18 @@ async function loadDataFromSupabase(){
       if(s.userId){
         const u=USERS.find(x=>x.id===s.userId);
         if(u){
-          // Gestor session requires fresh login (password-protected)
+          // Gestor session: use sessionStorage to persist across refresh but expire on tab close
           if(u.isGestor){
-            localStorage.removeItem('gupypulse_session');
+            const gestorAuth=sessionStorage.getItem('gupypulse_gestor_auth');
+            if(!gestorAuth){
+              localStorage.removeItem('gupypulse_session');
+            } else {
+              currentUser=u;
+              document.getElementById('screen-login').classList.remove('active');
+              document.getElementById('screen-app').classList.add('active');
+              setupApp();
+              return;
+            }
           } else {
             currentUser=u;
             document.getElementById('screen-login').classList.remove('active');
