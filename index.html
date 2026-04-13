@@ -5808,7 +5808,11 @@ function buildPerformanceBDR(pane, bdr){
     var annualEl=document.createElement('div');
     annualEl.className='card';
     annualEl.style.cssText='margin-top:14px;padding:14px;overflow-x:auto;-webkit-overflow-scrolling:touch';
-    var hdr='<div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📊 Atingimento MoM — '+bdr.name.split(' ')[0]+'</div>';
+    var annualId='hist-anual-'+bdr.id;
+    var hdr='<div class="collapsible-header" onclick="toggleCard(\''+annualId+'\',this)" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none">'
+      +'<div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em">📊 Atingimento de metas 2025</div>'
+      +'<span class="collapse-icon" style="font-size:14px;color:var(--text3);transition:transform .2s">▾</span>'
+      +'</div>';
     var tbl='<table style="width:100%;border-collapse:collapse;font-family:\'Inter\',sans-serif;min-width:600px"><thead><tr style="border-bottom:2px solid var(--border)">';
     tbl+='<th style="padding:4px 6px;text-align:left;font-size:9px;color:var(--text3);font-weight:600">Mês</th>';
     ha.meses.forEach(function(m){tbl+='<th style="padding:4px 3px;text-align:center;font-size:8px;color:var(--text3);font-weight:600;white-space:nowrap">'+m.replace('25','').replace('26','')+'</th>';});
@@ -5846,7 +5850,7 @@ function buildPerformanceBDR(pane, bdr){
       bars+='<div style="flex:1;background:'+col+';border-radius:2px 2px 0 0;height:'+Math.max(h,3)+'%;min-height:2px" title="'+ha.meses[i]+': '+v+' opps"></div>';
     });
     bars+='</div>';
-    annualEl.innerHTML=hdr+bars+tbl;
+    annualEl.innerHTML=hdr+'<div id="'+annualId+'" style="margin-top:10px">'+bars+tbl+'</div>';
     pane.appendChild(annualEl);
   }
 }
