@@ -294,13 +294,61 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
 
 /* ── Responsive ── */
 @media(max-width:600px){
-  .cultura-row{flex-direction:column;align-items:flex-start;}
-  .cultura-row .value-name{min-width:auto;margin-bottom:6px;}
-  .rating-options{flex-wrap:wrap;}
-  .rating-btn{min-width:calc(50% - 4px);flex:unset;}
-  .ninebox-grid{max-width:100%;}
-  .person-hero{flex-direction:column;text-align:center;}
+  .jdc-header{padding:28px 16px 24px;}
+  .jdc-header h1{font-size:18px;}
+  .jdc-header p{font-size:11px;}
+  .main-container{padding:12px 10px 100px;}
+  .eval-card{padding:14px 12px;margin-bottom:12px;}
+  .eval-card-header{flex-wrap:wrap;gap:8px;}
+  .eval-card-header h3{font-size:13px;}
+  .eval-card-header .weight{margin-left:0;}
+
+  /* Rating buttons: 2 per row on small screens */
+  .rating-options{flex-wrap:wrap;gap:4px;}
+  .rating-btn{min-width:calc(50% - 3px);flex:unset;padding:8px 4px;font-size:10px;}
+
+  /* Cultura: stack vertically */
+  .cultura-row{flex-direction:column;align-items:flex-start;padding:10px;}
+  .cultura-row .value-name{min-width:auto;margin-bottom:6px;font-size:11px;}
+  .cultura-row .rating-options{width:100%;}
+
+  /* Person hero: stack */
+  .person-hero{flex-direction:column;text-align:center;padding:14px;}
+  .hero-avatar{width:48px;height:48px;font-size:16px;}
+  .hero-info h2{font-size:16px;}
   .hero-9box{margin-left:0;margin-top:8px;}
+
+  /* 9BOX: full width */
+  .ninebox-grid{max-width:100%;}
+  .ninebox-container{padding:14px;}
+  .ninebox-cell{font-size:8px;padding:4px 2px;}
+
+  /* Summary table: horizontal scroll */
+  .summary-table{min-width:700px;}
+  .summary-table th,.summary-table td{padding:8px 8px;font-size:10px;white-space:nowrap;}
+
+  /* Save bar */
+  .save-bar{padding:8px 12px;}
+  .btn{padding:8px 16px;font-size:12px;}
+
+  /* View tabs: scroll horizontal */
+  .view-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;gap:4px;padding:10px 12px;}
+  .view-tab{flex-shrink:0;padding:6px 12px;font-size:11px;}
+
+  /* Person nav chips smaller */
+  .person-chip{padding:6px 10px;font-size:11px;}
+  .person-chip .avatar{width:22px;height:22px;font-size:9px;}
+
+  /* Textarea */
+  .eval-textarea{font-size:12px;padding:10px;min-height:60px;}
+
+  /* Toggle buttons */
+  .toggle-btn{padding:6px 14px;font-size:11px;}
+  .toggle-label{font-size:11px;}
+
+  /* Rating labels */
+  .rating-label{font-size:11px;flex-wrap:wrap;}
+  .rating-label .info{font-size:9px;}
 }
 
 /* ── Resultado Regua Helper ── */
@@ -387,11 +435,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
 
   <!-- Summary View -->
   <div class="summary-view" id="summaryView">
-    <div class="eval-card" style="overflow-x:auto;">
+    <div class="eval-card" style="padding:12px;">
       <div class="eval-card-header">
         <div class="eval-card-icon" style="background:var(--accent-light);color:var(--accent);">&#128202;</div>
         <div><h3>Resumo Consolidado</h3><div class="subtitle">Visao geral de todas as avaliacoes</div></div>
       </div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -12px;padding:0 12px;">
       <table class="summary-table" id="summaryTable">
         <thead>
           <tr>
@@ -409,6 +458,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
         </thead>
         <tbody id="summaryBody"></tbody>
       </table>
+      </div>
     </div>
   </div>
 
