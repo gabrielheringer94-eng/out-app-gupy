@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>JDC 2026 · Avaliação de Desempenho</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f7fa; --bg2:#ffffff; --bg3:#f0f2f6; --bg4:#e8ecf2;
+  --border:rgba(0,18,47,0.08); --border2:rgba(0,18,47,0.14);
+  --text:#00122f; --text2:#3d5077; --text3:#7a8eaa;
+  --accent:#003cfd; --accent-light:rgba(0,60,253,0.08); --accent-mid:rgba(0,60,253,0.14);
+  --navy:#00122f; --navy-light:rgba(0,18,47,0.06);
+  --green:#16a34a; --green-bg:rgba(22,163,74,0.08);
+  --amber:#d97706; --amber-bg:rgba(217,119,6,0.08);
+  --red:#dc2626; --red-bg:rgba(220,38,38,0.08);
+  --purple:#7c3aed; --purple-bg:rgba(124,58,237,0.08);
+  --teal:#0d9488;
+  --gupy-green:#cdff82; --gupy-lilac:#9e88ff; --gupy-orange:#ff5c1d;
+  --shadow:0 1px 4px rgba(0,18,47,0.06),0 4px 16px rgba(0,18,47,0.06);
+  --shadow-sm:0 1px 3px rgba(0,18,47,0.08);
+  --shadow-lg:0 4px 24px rgba(0,60,253,0.12);
+  --radius:16px; --radius-sm:12px; --radius-xs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{height:100%;scroll-behavior:smooth;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100%;}
+
+/* ── Header ── */
+.jdc-header{
+  background:linear-gradient(135deg,#003cfd 0%,#00122f 60%,#1e3a8a 100%);
+  color:#fff;padding:40px 24px 32px;text-align:center;
+}
+.jdc-header h1{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px;}
+.jdc-header p{font-size:13px;opacity:.75;font-weight:400;}
+.jdc-badge{
+  display:inline-block;background:var(--gupy-green);color:var(--navy);
+  font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;
+}
+
+/* ── Navigation ── */
+.person-nav{
+  display:flex;gap:8px;padding:16px 20px;overflow-x:auto;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:90;
+  -webkit-overflow-scrolling:touch;
+}
+.person-nav::-webkit-scrollbar{display:none;}
+.person-chip{
+  flex-shrink:0;display:flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:24px;
+  background:var(--bg3);border:1.5px solid var(--border);
+  font-size:12px;font-weight:600;color:var(--text2);
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.person-chip:hover{border-color:var(--accent);color:var(--accent);}
+.person-chip.active{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+  box-shadow:0 2px 8px rgba(0,60,253,.25);
+}
+.person-chip .avatar{
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;
+  background:rgba(0,18,47,0.08);color:var(--text2);
+}
+.person-chip.active .avatar{background:rgba(255,255,255,.25);color:#fff;}
+.chip-status{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--border2);flex-shrink:0;
+}
+.chip-status.done{background:var(--green);}
+.chip-status.partial{background:var(--amber);}
+
+/* ── Main container ── */
+.main-container{max-width:860px;margin:0 auto;padding:20px 16px 100px;}
+
+/* ── Person Section ── */
+.person-section{display:none;}
+.person-section.active{display:block;}
+
+.person-hero{
+  display:flex;align-items:center;gap:16px;
+  background:var(--bg2);border-radius:var(--radius);
+  padding:20px;margin-bottom:20px;
+  box-shadow:var(--shadow);border:1px solid var(--border);
+}
+.hero-avatar{
+  width:56px;height:56px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;color:#fff;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(0,60,253,.2);
+}
+.hero-info h2{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.01em;}
+.hero-info p{font-size:12px;color:var(--text3);margin-top:2px;}
+.hero-9box{
+  margin-left:auto;text-align:center;
+  background:var(--bg3);border-radius:var(--radius-xs);
+  padding:8px 14px;min-width:80px;
+}
+.hero-9box .label{font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;}
+.hero-9box .quad{font-size:16px;font-weight:800;color:var(--accent);margin-top:2px;}
+
+/* ── Section Card ── */
+.eval-card{
+  background:var(--bg2);border-radius:var(--radius);
+  padding:20px;margin-bottom:16px;
+  box-shadow:var(--shadow-sm);border:1px solid var(--border);
+}
+.eval-card-header{
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+  padding-bottom:12px;border-bottom:1px solid var(--border);
+}
+.eval-card-icon{
+  width:36px;height:36px;border-radius:var(--radius-xs);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+}
+.eval-card-header h3{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.01em;}
+.eval-card-header .subtitle{font-size:11px;color:var(--text3);margin-top:1px;}
+.eval-card-header .weight{
+  margin-left:auto;font-size:10px;font-weight:700;
+  padding:3px 10px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:.04em;
+}
+
+/* ── Rating Scale ── */
+.rating-group{margin-bottom:20px;}
+.rating-group:last-child{margin-bottom:0;}
+.rating-label{
+  font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;
+  display:flex;align-items:center;gap:6px;
+}
+.rating-label .info{
+  font-size:10px;font-weight:400;color:var(--text3);
+  background:var(--bg3);padding:2px 8px;border-radius:10px;
+}
+.rating-options{display:flex;gap:6px;flex-wrap:wrap;}
+.rating-btn{
+  flex:1;min-width:0;
+  padding:10px 6px;border-radius:var(--radius-xs);
+  background:var(--bg3);border:1.5px solid var(--border);
+  font-size:11px;font-weight:500;color:var(--text2);
+  cursor:pointer;transition:all .2s;text-align:center;
+  line-height:1.3;
+}
+.rating-btn:hover{border-color:var(--accent);background:var(--accent-light);}
+.rating-btn.selected-red{background:var(--red-bg);border-color:var(--red);color:var(--red);font-weight:700;}
+.rating-btn.selected-amber{background:var(--amber-bg);border-color:var(--amber);color:var(--amber);font-weight:700;}
+.rating-btn.selected-green{background:var(--green-bg);border-color:var(--green);color:var(--green);font-weight:700;}
+.rating-btn.selected-purple{background:var(--purple-bg);border-color:var(--purple);color:var(--purple);font-weight:700;}
+
+/* ── Cultura Value Row ── */
+.cultura-grid{display:flex;flex-direction:column;gap:12px;}
+.cultura-row{
+  display:flex;align-items:center;gap:12px;
+  padding:12px;background:var(--bg);border-radius:var(--radius-xs);
+}
+.cultura-row .value-name{
+  font-size:12px;font-weight:600;color:var(--text);
+  min-width:140px;flex-shrink:0;
+}
+.cultura-row .rating-options{flex:1;}
+
+/* ── Text Area ── */
+.eval-textarea{
+  width:100%;min-height:80px;padding:12px 14px;
+  background:var(--bg);border:1.5px solid var(--border);
+  border-radius:var(--radius-xs);font-family:'Inter',sans-serif;
+  font-size:13px;color:var(--text);resize:vertical;
+  transition:border-color .2s;line-height:1.5;
+}
+.eval-textarea:focus{outline:none;border-color:var(--accent);background:var(--bg2);}
+.eval-textarea::placeholder{color:var(--text3);}
+
+/* ── Toggle (Yes/No) ── */
+.toggle-group{display:flex;gap:12px;margin-bottom:16px;}
+.toggle-group:last-child{margin-bottom:0;}
+.toggle-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;display:block;}
+.toggle-options{display:flex;gap:8px;}
+.toggle-btn{
+  padding:8px 20px;border-radius:20px;
+  background:var(--bg3);border:1.5px solid var(--border);
+  font-size:12px;font-weight:600;color:var(--text2);
+  cursor:pointer;transition:all .2s;
+}
+.toggle-btn:hover{border-color:var(--accent);}
+.toggle-btn.yes-selected{background:var(--red-bg);border-color:var(--red);color:var(--red);}
+.toggle-btn.no-selected{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+
+/* ── 9BOX Grid ── */
+.ninebox-container{
+  background:var(--bg2);border-radius:var(--radius);
+  padding:20px;margin-bottom:16px;
+  box-shadow:var(--shadow-sm);border:1px solid var(--border);
+}
+.ninebox-title{
+  font-size:14px;font-weight:700;color:var(--text);
+  margin-bottom:4px;display:flex;align-items:center;gap:8px;
+}
+.ninebox-subtitle{font-size:11px;color:var(--text3);margin-bottom:16px;}
+.ninebox-wrapper{display:flex;gap:8px;align-items:stretch;}
+.ninebox-y-label{
+  writing-mode:vertical-lr;transform:rotate(180deg);
+  font-size:10px;font-weight:700;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.08em;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 4px;
+}
+.ninebox-grid{
+  flex:1;display:grid;grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);gap:4px;
+  aspect-ratio:3/3;max-width:400px;
+}
+.ninebox-cell{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border-radius:var(--radius-xs);font-size:9px;font-weight:600;
+  color:var(--text3);text-align:center;padding:6px 4px;
+  line-height:1.2;transition:all .3s;position:relative;
+}
+.ninebox-cell.q7{background:#fef2f2;}
+.ninebox-cell.q4{background:#fef9ee;}
+.ninebox-cell.q1{background:#f0fdf4;}
+.ninebox-cell.q8{background:#fef9ee;}
+.ninebox-cell.q5{background:#f0f2f6;}
+.ninebox-cell.q2{background:#fff7ed;}
+.ninebox-cell.q9{background:#f0fdf4;}
+.ninebox-cell.q6{background:#ecfdf5;}
+.ninebox-cell.q3{background:#f0fdf4;}
+.ninebox-cell.highlighted{
+  box-shadow:0 0 0 3px var(--accent),0 4px 16px rgba(0,60,253,.2);
+  z-index:1;transform:scale(1.05);
+}
+.ninebox-cell .cell-person{
+  font-size:10px;font-weight:700;color:var(--accent);margin-top:2px;
+}
+.ninebox-x-labels{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:4px;
+  margin-top:6px;padding-left:20px;
+}
+.ninebox-x-label{
+  font-size:9px;font-weight:600;color:var(--text3);text-align:center;
+  text-transform:uppercase;letter-spacing:.04em;
+}
+
+/* ── Summary Table ── */
+.summary-table{
+  width:100%;border-collapse:collapse;font-size:12px;
+}
+.summary-table th{
+  background:var(--bg3);color:var(--text2);font-weight:600;
+  padding:10px 12px;text-align:left;font-size:11px;
+  text-transform:uppercase;letter-spacing:.04em;
+  border-bottom:2px solid var(--border2);
+}
+.summary-table td{
+  padding:10px 12px;border-bottom:1px solid var(--border);
+  color:var(--text);
+}
+.summary-table tr:hover td{background:var(--accent-light);}
+
+/* ── Pills ── */
+.pill{
+  display:inline-block;padding:3px 10px;border-radius:20px;
+  font-size:10px;font-weight:700;letter-spacing:.02em;
+}
+.pill-red{background:var(--red-bg);color:var(--red);}
+.pill-amber{background:var(--amber-bg);color:var(--amber);}
+.pill-green{background:var(--green-bg);color:var(--green);}
+.pill-purple{background:var(--purple-bg);color:var(--purple);}
+.pill-blue{background:var(--accent-light);color:var(--accent);}
+
+/* ── Save Bar ── */
+.save-bar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg2);border-top:1px solid var(--border);
+  padding:12px 20px;display:flex;gap:10px;justify-content:center;
+  box-shadow:0 -2px 12px rgba(0,18,47,0.08);z-index:100;
+}
+.btn{
+  padding:10px 24px;border-radius:var(--radius-xs);
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:700;
+  border:none;cursor:pointer;transition:all .2s;
+}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:var(--shadow-lg);}
+.btn-primary:hover{filter:brightness(1.1);}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border2);}
+.btn-secondary:hover{background:var(--bg4);}
+.btn-export{background:var(--navy);color:#fff;}
+.btn-export:hover{filter:brightness(1.2);}
+
+/* ── Responsive ── */
+@media(max-width:600px){
+  .cultura-row{flex-direction:column;align-items:flex-start;}
+  .cultura-row .value-name{min-width:auto;margin-bottom:6px;}
+  .rating-options{flex-wrap:wrap;}
+  .rating-btn{min-width:calc(50% - 4px);flex:unset;}
+  .ninebox-grid{max-width:100%;}
+  .person-hero{flex-direction:column;text-align:center;}
+  .hero-9box{margin-left:0;margin-top:8px;}
+}
+
+/* ── Resultado Regua Helper ── */
+.regua-hint{
+  display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;
+}
+.regua-hint span{
+  font-size:9px;padding:2px 8px;border-radius:10px;
+  background:var(--bg3);color:var(--text3);
+}
+
+/* ── Section Divider ── */
+.section-divider{
+  display:flex;align-items:center;gap:10px;
+  margin:24px 0 16px;
+}
+.section-divider .line{flex:1;height:1px;background:var(--border2);}
+.section-divider .label{
+  font-size:10px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.08em;
+}
+
+/* ── Summary View ── */
+.summary-view{display:none;}
+.summary-view.active{display:block;}
+.eval-view{display:block;}
+.eval-view.hidden{display:none;}
+
+/* ── Tab Switcher ── */
+.view-tabs{
+  display:flex;gap:4px;padding:12px 20px;
+  background:var(--bg2);border-bottom:1px solid var(--border);
+}
+.view-tab{
+  padding:8px 16px;border-radius:20px;
+  font-size:12px;font-weight:600;color:var(--text2);
+  background:var(--bg3);border:1px solid transparent;
+  cursor:pointer;transition:all .2s;
+}
+.view-tab.active{background:var(--navy);color:#fff;}
+
+/* Print */
+@media print{
+  .jdc-header,.person-nav,.save-bar,.view-tabs{display:none!important;}
+  .main-container{padding:0;max-width:100%;}
+  .person-section{display:block!important;page-break-after:always;}
+  .eval-card{break-inside:avoid;box-shadow:none;border:1px solid #ddd;}
+}
+
+/* ── Progress Ring ── */
+.progress-indicator{
+  display:flex;align-items:center;gap:6px;margin-left:auto;
+}
+.progress-text{font-size:10px;font-weight:600;color:var(--text3);}
+.progress-bar-mini{
+  width:60px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;
+}
+.progress-bar-mini .fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="jdc-header">
+  <div class="jdc-badge">Gupy OS</div>
+  <h1>Jornada de Crescimento 2.0</h1>
+  <p>Avaliacao de Desempenho · Ciclo Jan-Dez 2025 · Pre-Vendas Outbound</p>
+</div>
+
+<!-- ── VIEW TABS ── -->
+<div class="view-tabs">
+  <div class="view-tab active" onclick="switchView('eval')">Avaliacoes Individuais</div>
+  <div class="view-tab" onclick="switchView('summary')">Resumo Geral</div>
+  <div class="view-tab" onclick="switchView('9box')">9BOX do Time</div>
+</div>
+
+<!-- ── PERSON NAV ── -->
+<div class="person-nav" id="personNav"></div>
+
+<!-- ── MAIN ── -->
+<div class="main-container">
+  <!-- Eval View -->
+  <div class="eval-view" id="evalView"></div>
+
+  <!-- Summary View -->
+  <div class="summary-view" id="summaryView">
+    <div class="eval-card" style="overflow-x:auto;">
+      <div class="eval-card-header">
+        <div class="eval-card-icon" style="background:var(--accent-light);color:var(--accent);">&#128202;</div>
+        <div><h3>Resumo Consolidado</h3><div class="subtitle">Visao geral de todas as avaliacoes</div></div>
+      </div>
+      <table class="summary-table" id="summaryTable">
+        <thead>
+          <tr>
+            <th>Pessoa</th>
+            <th>Autonomia</th>
+            <th>Complexidade</th>
+            <th>Impacto</th>
+            <th>Solidez</th>
+            <th>Resultado</th>
+            <th>Cultura</th>
+            <th>Performance</th>
+            <th>9BOX</th>
+            <th>Risco</th>
+          </tr>
+        </thead>
+        <tbody id="summaryBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 9BOX Team View -->
+  <div class="summary-view" id="nineboxView">
+    <div class="ninebox-container">
+      <div class="ninebox-title">&#127919; 9BOX do Time</div>
+      <div class="ninebox-subtitle">Performance (60% Resultado + 40% Cultura) x Solidez no Nivel</div>
+      <div class="ninebox-wrapper">
+        <div class="ninebox-y-label">Solidez no Nivel &#8593;</div>
+        <div style="flex:1;">
+          <div class="ninebox-grid" id="teamNinebox">
+            <div class="ninebox-cell q7" data-q="q7"><div style="font-size:8px;">Perf. Abaixo<br>+ Excedendo</div><div class="cell-people" data-q="q7"></div></div>
+            <div class="ninebox-cell q8" data-q="q8"><div style="font-size:8px;">Perf. Dentro<br>+ Excedendo</div><div class="cell-people" data-q="q8"></div></div>
+            <div class="ninebox-cell q9" data-q="q9"><div style="font-size:8px;">Perf. Acima<br>+ Excedendo</div><div class="cell-people" data-q="q9"></div></div>
+            <div class="ninebox-cell q4" data-q="q4"><div style="font-size:8px;">Perf. Abaixo<br>+ Solido</div><div class="cell-people" data-q="q4"></div></div>
+            <div class="ninebox-cell q5" data-q="q5"><div style="font-size:8px;">Perf. Dentro<br>+ Solido</div><div class="cell-people" data-q="q5"></div></div>
+            <div class="ninebox-cell q6" data-q="q6"><div style="font-size:8px;">Perf. Acima<br>+ Solido</div><div class="cell-people" data-q="q6"></div></div>
+            <div class="ninebox-cell q1" data-q="q1"><div style="font-size:8px;">Perf. Abaixo<br>+ Em Desenv.</div><div class="cell-people" data-q="q1"></div></div>
+            <div class="ninebox-cell q2" data-q="q2"><div style="font-size:8px;">Perf. Dentro<br>+ Em Desenv.</div><div class="cell-people" data-q="q2"></div></div>
+            <div class="ninebox-cell q3" data-q="q3"><div style="font-size:8px;">Perf. Acima<br>+ Em Desenv.</div><div class="cell-people" data-q="q3"></div></div>
+          </div>
+          <div class="ninebox-x-labels">
+            <div class="ninebox-x-label">Abaixo do Esperado</div>
+            <div class="ninebox-x-label">Dentro do Esperado</div>
+            <div class="ninebox-x-label">Acima do Esperado</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SAVE BAR ── -->
+<div class="save-bar">
+  <button class="btn btn-secondary" onclick="clearAll()">Limpar Tudo</button>
+  <button class="btn btn-primary" onclick="saveData()">Salvar Rascunho</button>
+  <button class="btn btn-export" onclick="exportData()">Exportar JSON</button>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   DATA & CONFIG
+   ══════════════════════════════════════════════════ */
+const PEOPLE = [
+  {id:'juliana',name:'Juliana Sant\'Anna',role:'BDR',level:'',color:'#003cfd'},
+  {id:'victoria',name:'Victoria Eilers',role:'BDR',level:'',color:'#7c3aed'},
+  {id:'jeanne',name:'Jeanne Rodrigues',role:'BDR',level:'',color:'#0d9488'},
+  {id:'ariane',name:'Ariane Mesquita',role:'BDR',level:'',color:'#d97706'},
+  {id:'pedro',name:'Pedro Souza',role:'BDR',level:'',color:'#dc2626'},
+  {id:'adhara',name:'Adhara Goncalves',role:'BDR',level:'',color:'#16a34a'},
+  {id:'giovanna',name:'Giovanna Faceto',role:'BDR',level:'',color:'#9e88ff'},
+  {id:'mydoha',name:'Mydoha Seydo',role:'BDR',level:'',color:'#ff5c1d'},
+];
+
+const SOLIDEZ_SCALE = [
+  {value:1,label:'Nao aderente',cls:'selected-red'},
+  {value:2,label:'Em desenvolvimento',cls:'selected-amber'},
+  {value:3,label:'Solido no nivel',cls:'selected-green'},
+  {value:4,label:'Excedendo o nivel',cls:'selected-purple'},
+];
+
+const RESULTADO_SCALE = [
+  {value:1,label:'Abaixo (<60%)',cls:'selected-red'},
+  {value:2,label:'Em desenv. (61-80%)',cls:'selected-amber'},
+  {value:3,label:'Consistente (81-90%)',cls:'selected-green'},
+  {value:4,label:'Excedendo (>90%)',cls:'selected-purple'},
+];
+
+const CULTURA_VALUES = [
+  'Agilidade para resultado',
+  'Fazer mais com menos',
+  'Juntos!',
+  'Paixao por inovar',
+  'Obsessao pelo cliente',
+];
+
+const CULTURA_SCALE = [
+  {value:1,label:'Abaixo',cls:'selected-red'},
+  {value:2,label:'Em desenv.',cls:'selected-amber'},
+  {value:3,label:'Dentro',cls:'selected-green'},
+  {value:4,label:'Acima',cls:'selected-purple'},
+];
+
+// State
+let evalData = {};
+let activePerson = PEOPLE[0].id;
+let activeView = 'eval';
+
+/* ══════════════════════════════════════════════════
+   INIT
+   ══════════════════════════════════════════════════ */
+function init() {
+  // Load saved data
+  const saved = localStorage.getItem('jdc2026_data');
+  if (saved) {
+    try { evalData = JSON.parse(saved); } catch(e) { evalData = {}; }
+  }
+  // Init empty structures
+  PEOPLE.forEach(p => {
+    if (!evalData[p.id]) {
+      evalData[p.id] = {
+        solidez: { autonomia: null, complexidade: null, impacto: null, final: null },
+        resultado: { nota: null, entregas: '' },
+        cultura: {
+          agilidade: null, fazer_mais: null, juntos: null,
+          paixao: null, obsessao: null, comentario: ''
+        },
+        carreira: { prioridade: '', desenvolvimento: '' },
+        risco: { saida: null, to_indesejavel: null },
+      };
+    }
+  });
+  renderNav();
+  renderAllSections();
+  showPerson(activePerson);
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER NAV
+   ══════════════════════════════════════════════════ */
+function renderNav() {
+  const nav = document.getElementById('personNav');
+  nav.innerHTML = PEOPLE.map(p => {
+    const initials = p.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+    const status = getCompletionStatus(p.id);
+    const statusCls = status === 'done' ? 'done' : status === 'partial' ? 'partial' : '';
+    return `<div class="person-chip ${p.id===activePerson?'active':''}" onclick="showPerson('${p.id}')">
+      <div class="avatar">${initials}</div>
+      ${p.name.split(' ')[0]}
+      <div class="chip-status ${statusCls}"></div>
+    </div>`;
+  }).join('');
+}
+
+function getCompletionStatus(id) {
+  const d = evalData[id];
+  if (!d) return '';
+  const fields = [
+    d.solidez.autonomia, d.solidez.complexidade, d.solidez.impacto, d.solidez.final,
+    d.resultado.nota, d.cultura.agilidade, d.cultura.fazer_mais,
+    d.cultura.juntos, d.cultura.paixao, d.cultura.obsessao,
+  ];
+  const filled = fields.filter(f => f !== null).length;
+  if (filled === fields.length) return 'done';
+  if (filled > 0) return 'partial';
+  return '';
+}
+
+/* ══════════════════════════════════════════════════
+   RENDER SECTIONS
+   ══════════════════════════════════════════════════ */
+function renderAllSections() {
+  const container = document.getElementById('evalView');
+  container.innerHTML = PEOPLE.map(p => renderPersonSection(p)).join('');
+}
+
+function renderPersonSection(p) {
+  const d = evalData[p.id];
+  const initials = p.name.split(' ').map(w=>w[0]).join('').slice(0,2);
+  const q = calc9box(p.id);
+
+  return `<div class="person-section" id="section-${p.id}" data-person="${p.id}">
+    <!-- Hero -->
+    <div class="person-hero">
+      <div class="hero-avatar" style="background:${p.color};">${initials}</div>
+      <div class="hero-info">
+        <h2>${p.name}</h2>
+        <p>${p.role}${p.level?' · Nivel '+p.level:''} · Ciclo Jan-Dez 2025</p>
+      </div>
+      <div class="hero-9box">
+        <div class="label">9BOX</div>
+        <div class="quad" id="quad-${p.id}">${q||'—'}</div>
+      </div>
+    </div>
+
+    <!-- SOLIDEZ NO NIVEL -->
+    <div class="eval-card">
+      <div class="eval-card-header">
+        <div class="eval-card-icon" style="background:var(--purple-bg);color:var(--purple);">&#127919;</div>
+        <div><h3>Pilar 1 · Solidez no Nivel</h3><div class="subtitle">Aderencia ao grau de exigencia do nivel atual</div></div>
+        <div class="weight" style="background:var(--purple-bg);color:var(--purple);">Eixo Y</div>
+      </div>
+
+      ${renderRating(p.id,'solidez','autonomia','Autonomia','Grau de independencia para tomar decisoes',SOLIDEZ_SCALE)}
+      ${renderRating(p.id,'solidez','complexidade','Complexidade','Grau de dificuldade das tarefas que resolve',SOLIDEZ_SCALE)}
+      ${renderRating(p.id,'solidez','impacto','Impacto','Importancia e alcance dos resultados gerados',SOLIDEZ_SCALE)}
+
+      <div class="section-divider"><div class="line"></div><div class="label">Classificacao Final do Eixo</div><div class="line"></div></div>
+
+      ${renderRating(p.id,'solidez','final','Solidez Final no Nivel','Avaliacao integrada: precisa ser Solido+ nos 3 pilares para ser Solido+',SOLIDEZ_SCALE)}
+    </div>
+
+    <!-- PERFORMANCE: RESULTADO -->
+    <div class="eval-card">
+      <div class="eval-card-header">
+        <div class="eval-card-icon" style="background:var(--green-bg);color:var(--green);">&#128200;</div>
+        <div><h3>Pilar 2 · Performance — Resultado</h3><div class="subtitle">"O que" entregou no ultimo ciclo</div></div>
+        <div class="weight" style="background:var(--green-bg);color:var(--green);">60%</div>
+      </div>
+
+      ${renderRating(p.id,'resultado','nota','Resultado no ultimo ano','Atingimento de metas + impacto individual + consistencia',RESULTADO_SCALE)}
+
+      <div class="rating-group">
+        <div class="rating-label">Principais entregas e impacto para o time/Gupy</div>
+        <textarea class="eval-textarea" placeholder="Descreva as principais entregas..."
+          oninput="updateText('${p.id}','resultado','entregas',this.value)">${d.resultado.entregas||''}</textarea>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE: CULTURA -->
+    <div class="eval-card">
+      <div class="eval-card-header">
+        <div class="eval-card-icon" style="background:var(--amber-bg);color:var(--amber);">&#128150;</div>
+        <div><h3>Pilar 2 · Performance — Cultura</h3><div class="subtitle">"Como" entregou — Valores Gupy</div></div>
+        <div class="weight" style="background:var(--amber-bg);color:var(--amber);">40%</div>
+      </div>
+
+      <div class="cultura-grid">
+        ${CULTURA_VALUES.map((v,i) => {
+          const key = ['agilidade','fazer_mais','juntos','paixao','obsessao'][i];
+          return renderCulturaRow(p.id,key,v,CULTURA_SCALE);
+        }).join('')}
+      </div>
+
+      <div class="rating-group" style="margin-top:16px;">
+        <div class="rating-label">Valor forte e valor a fortalecer — comentario</div>
+        <textarea class="eval-textarea" placeholder="Qual valor e ponto forte? Qual precisa ser fortalecido?"
+          oninput="updateText('${p.id}','cultura','comentario',this.value)">${d.cultura.comentario||''}</textarea>
+      </div>
+    </div>
+
+    <!-- CARREIRA & DESENVOLVIMENTO -->
+    <div class="eval-card">
+      <div class="eval-card-header">
+        <div class="eval-card-icon" style="background:var(--accent-light);color:var(--accent);">&#128640;</div>
+        <div><h3>Pilar 3 · Carreira & Desenvolvimento</h3><div class="subtitle">Direcionamento para o futuro</div></div>
+      </div>
+
+      <div class="rating-group">
+        <div class="rating-label">Prioridade de carreira nos proximos 12 meses</div>
+        <textarea class="eval-textarea" placeholder="Qual a principal prioridade de carreira dentro da Gupy?"
+          oninput="updateText('${p.id}','carreira','prioridade',this.value)">${d.carreira.prioridade||''}</textarea>
+      </div>
+      <div class="rating-group">
+        <div class="rating-label">Principais pontos de desenvolvimento</div>
+        <textarea class="eval-textarea" placeholder="Quais os principais pontos de desenvolvimento?"
+          oninput="updateText('${p.id}','carreira','desenvolvimento',this.value)">${d.carreira.desenvolvimento||''}</textarea>
+      </div>
+    </div>
+
+    <!-- RISCO DE SAIDA -->
+    <div class="eval-card">
+      <div class="eval-card-header">
+        <div class="eval-card-icon" style="background:var(--red-bg);color:var(--red);">&#9888;&#65039;</div>
+        <div><h3>Pilar 4 · Risco de Saida & TO Indesejavel</h3><div class="subtitle">Percepcao de retencao</div></div>
+      </div>
+
+      <div class="rating-group">
+        <div class="toggle-label">Existe alto risco de que esta pessoa deixe a empresa nos proximos 3 meses?</div>
+        <div class="toggle-options">
+          <div class="toggle-btn ${d.risco.saida===true?'yes-selected':''}" onclick="updateToggle('${p.id}','risco','saida',true,this)">Sim</div>
+          <div class="toggle-btn ${d.risco.saida===false?'no-selected':''}" onclick="updateToggle('${p.id}','risco','saida',false,this)">Nao</div>
+        </div>
+      </div>
+
+      <div class="rating-group">
+        <div class="toggle-label">Se demonstrasse sinais de insatisfacao, voce criaria uma estrategia para rete-lo(a)?</div>
+        <div class="toggle-options">
+          <div class="toggle-btn ${d.risco.to_indesejavel===true?'yes-selected':''}" onclick="updateToggle('${p.id}','risco','to_indesejavel',true,this)">Sim (TO Indesejavel)</div>
+          <div class="toggle-btn ${d.risco.to_indesejavel===false?'no-selected':''}" onclick="updateToggle('${p.id}','risco','to_indesejavel',false,this)">Nao</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderRating(personId, section, field, label, hint, scale) {
+  const current = evalData[personId][section][field];
+  return `<div class="rating-group">
+    <div class="rating-label">${label} <span class="info">${hint}</span></div>
+    <div class="rating-options">
+      ${scale.map(s => `<div class="rating-btn ${current===s.value?s.cls:''}"
+        onclick="updateRating('${personId}','${section}','${field}',${s.value},'${s.cls}',this)">${s.label}</div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderCulturaRow(personId, key, valueName, scale) {
+  const current = evalData[personId].cultura[key];
+  return `<div class="cultura-row">
+    <div class="value-name">${valueName}</div>
+    <div class="rating-options">
+      ${scale.map(s => `<div class="rating-btn ${current===s.value?s.cls:''}"
+        onclick="updateRating('${personId}','cultura','${key}',${s.value},'${s.cls}',this)">${s.label}</div>`).join('')}
+    </div>
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════════
+   INTERACTIONS
+   ══════════════════════════════════════════════════ */
+function showPerson(id) {
+  activePerson = id;
+  document.querySelectorAll('.person-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.person-chip').forEach(c => c.classList.remove('active'));
+  const section = document.getElementById('section-'+id);
+  if (section) section.classList.add('active');
+  document.querySelectorAll('.person-chip').forEach(c => {
+    if (c.textContent.trim().includes(PEOPLE.find(p=>p.id===id).name.split(' ')[0])) c.classList.add('active');
+  });
+  renderNav();
+}
+
+function updateRating(personId, section, field, value, cls, el) {
+  // Toggle: if same value, deselect
+  if (evalData[personId][section][field] === value) {
+    evalData[personId][section][field] = null;
+  } else {
+    evalData[personId][section][field] = value;
+  }
+  // Re-render the parent rating-options
+  const parent = el.parentElement;
+  parent.querySelectorAll('.rating-btn').forEach(btn => {
+    btn.className = 'rating-btn';
+  });
+  if (evalData[personId][section][field] !== null) {
+    const scale = parent.querySelectorAll('.rating-btn');
+    const scaleArr = section === 'cultura' ? CULTURA_SCALE :
+                     section === 'resultado' ? RESULTADO_SCALE : SOLIDEZ_SCALE;
+    scale.forEach((btn,i) => {
+      if (scaleArr[i].value === evalData[personId][section][field]) {
+        btn.classList.add(scaleArr[i].cls);
+      }
+    });
+  }
+  update9box(personId);
+  autoSave();
+}
+
+function updateText(personId, section, field, value) {
+  evalData[personId][section][field] = value;
+  autoSave();
+}
+
+function updateToggle(personId, section, field, value, el) {
+  // Toggle
+  if (evalData[personId][section][field] === value) {
+    evalData[personId][section][field] = null;
+  } else {
+    evalData[personId][section][field] = value;
+  }
+  const parent = el.parentElement;
+  parent.querySelectorAll('.toggle-btn').forEach(b => {
+    b.className = 'toggle-btn';
+  });
+  if (evalData[personId][section][field] === true) {
+    parent.querySelector('.toggle-btn:first-child').classList.add('yes-selected');
+  } else if (evalData[personId][section][field] === false) {
+    parent.querySelector('.toggle-btn:last-child').classList.add('no-selected');
+  }
+  autoSave();
+}
+
+/* ══════════════════════════════════════════════════
+   9BOX CALCULATION
+   ══════════════════════════════════════════════════ */
+function calc9box(personId) {
+  const d = evalData[personId];
+  if (!d) return null;
+
+  // Performance axis (X): Resultado 60% + Cultura 40%
+  const res = d.resultado.nota;
+  const cultValues = [d.cultura.agilidade, d.cultura.fazer_mais, d.cultura.juntos, d.cultura.paixao, d.cultura.obsessao];
+  const cultFilled = cultValues.filter(v => v !== null);
+  if (!res || cultFilled.length === 0) {
+    // Check solidez
+    const sol = d.solidez.final;
+    if (!sol) return null;
+    return null; // Need both axes
+  }
+  const cultAvg = cultFilled.reduce((a,b) => a+b, 0) / cultFilled.length;
+  const perfScore = (res * 0.6) + (cultAvg * 0.4);
+
+  // Solidez axis (Y)
+  const sol = d.solidez.final;
+  if (!sol) return null;
+
+  // Map to 3-level axes
+  let perfLevel; // 1=abaixo, 2=dentro, 3=acima
+  if (perfScore < 2) perfLevel = 1;
+  else if (perfScore < 3) perfLevel = 2;
+  else perfLevel = 3;
+
+  let solLevel; // 1=em desenv, 2=solido, 3=excedendo
+  if (sol <= 2) solLevel = 1;
+  else if (sol === 3) solLevel = 2;
+  else solLevel = 3;
+
+  // 9box quadrant: Q1-Q9
+  // Grid: rows (top to bottom) = Excedendo, Solido, Em Desenv
+  //        cols (left to right) = Abaixo, Dentro, Acima
+  const qMap = {
+    '3-1':'Q7','3-2':'Q8','3-3':'Q9',
+    '2-1':'Q4','2-2':'Q5','2-3':'Q6',
+    '1-1':'Q1','1-2':'Q2','1-3':'Q3',
+  };
+  return qMap[`${solLevel}-${perfLevel}`] || null;
+}
+
+function update9box(personId) {
+  const q = calc9box(personId);
+  const el = document.getElementById('quad-'+personId);
+  if (el) el.textContent = q || '—';
+}
+
+/* ══════════════════════════════════════════════════
+   VIEW SWITCHING
+   ══════════════════════════════════════════════════ */
+function switchView(view) {
+  activeView = view;
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view-tab').forEach(t => {
+    if ((view==='eval' && t.textContent.includes('Individual')) ||
+        (view==='summary' && t.textContent.includes('Resumo')) ||
+        (view==='9box' && t.textContent.includes('9BOX'))) {
+      t.classList.add('active');
+    }
+  });
+
+  document.getElementById('evalView').style.display = view==='eval' ? 'block' : 'none';
+  document.getElementById('summaryView').style.display = view==='summary' ? 'block' : 'none';
+  document.getElementById('nineboxView').style.display = view==='9box' ? 'block' : 'none';
+  document.getElementById('personNav').style.display = view==='eval' ? 'flex' : 'none';
+
+  if (view==='summary') renderSummary();
+  if (view==='9box') renderTeamNinebox();
+}
+
+function renderSummary() {
+  const tbody = document.getElementById('summaryBody');
+  tbody.innerHTML = PEOPLE.map(p => {
+    const d = evalData[p.id];
+    const solidezLabel = getSolidezLabel(d.solidez.final);
+    const resLabel = getResultadoLabel(d.resultado.nota);
+    const cultAvg = calcCulturaAvg(d);
+    const cultLabel = getCulturaLabel(cultAvg);
+    const perfLabel = calcPerfLabel(d);
+    const q = calc9box(p.id);
+    const risco = d.risco.saida === true ? '<span class="pill pill-red">Sim</span>' :
+                  d.risco.saida === false ? '<span class="pill pill-green">Nao</span>' : '—';
+
+    return `<tr>
+      <td><strong>${p.name}</strong></td>
+      <td>${getPillForValue(d.solidez.autonomia, SOLIDEZ_SCALE)}</td>
+      <td>${getPillForValue(d.solidez.complexidade, SOLIDEZ_SCALE)}</td>
+      <td>${getPillForValue(d.solidez.impacto, SOLIDEZ_SCALE)}</td>
+      <td>${solidezLabel}</td>
+      <td>${resLabel}</td>
+      <td>${cultLabel}</td>
+      <td>${perfLabel}</td>
+      <td><strong>${q||'—'}</strong></td>
+      <td>${risco}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTeamNinebox() {
+  // Clear people
+  document.querySelectorAll('.cell-people').forEach(c => c.innerHTML = '');
+  document.querySelectorAll('.ninebox-cell').forEach(c => c.classList.remove('highlighted'));
+
+  PEOPLE.forEach(p => {
+    const q = calc9box(p.id);
+    if (!q) return;
+    const cell = document.querySelector(`.cell-people[data-q="${q.toLowerCase()}"]`);
+    if (cell) {
+      const name = p.name.split(' ')[0];
+      cell.innerHTML += `<div class="cell-person" style="color:${p.color};">${name}</div>`;
+      cell.closest('.ninebox-cell').classList.add('highlighted');
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════════════════ */
+function getSolidezLabel(val) {
+  if (!val) return '—';
+  const map = {1:'pill-red',2:'pill-amber',3:'pill-green',4:'pill-purple'};
+  const labels = {1:'Nao aderente',2:'Em desenv.',3:'Solido',4:'Excedendo'};
+  return `<span class="pill ${map[val]}">${labels[val]}</span>`;
+}
+function getResultadoLabel(val) {
+  if (!val) return '—';
+  const map = {1:'pill-red',2:'pill-amber',3:'pill-green',4:'pill-purple'};
+  const labels = {1:'Abaixo',2:'Em desenv.',3:'Consistente',4:'Excedendo'};
+  return `<span class="pill ${map[val]}">${labels[val]}</span>`;
+}
+function calcCulturaAvg(d) {
+  const vals = [d.cultura.agilidade, d.cultura.fazer_mais, d.cultura.juntos, d.cultura.paixao, d.cultura.obsessao];
+  const filled = vals.filter(v => v !== null);
+  if (filled.length === 0) return null;
+  return filled.reduce((a,b)=>a+b,0)/filled.length;
+}
+function getCulturaLabel(avg) {
+  if (avg === null) return '—';
+  if (avg < 1.5) return '<span class="pill pill-red">Abaixo</span>';
+  if (avg < 2.5) return '<span class="pill pill-amber">Em desenv.</span>';
+  if (avg < 3.5) return '<span class="pill pill-green">Dentro</span>';
+  return '<span class="pill pill-purple">Acima</span>';
+}
+function calcPerfLabel(d) {
+  const res = d.resultado.nota;
+  const cultAvg = calcCulturaAvg(d);
+  if (!res || cultAvg === null) return '—';
+  const score = (res * 0.6) + (cultAvg * 0.4);
+  if (score < 2) return '<span class="pill pill-red">Abaixo</span>';
+  if (score < 3) return '<span class="pill pill-amber">Dentro</span>';
+  return '<span class="pill pill-green">Acima</span>';
+}
+function getPillForValue(val, scale) {
+  if (!val) return '—';
+  const s = scale.find(s => s.value === val);
+  if (!s) return '—';
+  const pillMap = {'selected-red':'pill-red','selected-amber':'pill-amber','selected-green':'pill-green','selected-purple':'pill-purple'};
+  return `<span class="pill ${pillMap[s.cls]}">${s.label}</span>`;
+}
+
+/* ══════════════════════════════════════════════════
+   SAVE / EXPORT
+   ══════════════════════════════════════════════════ */
+let saveTimer = null;
+function autoSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    localStorage.setItem('jdc2026_data', JSON.stringify(evalData));
+    renderNav(); // Update status indicators
+  }, 500);
+}
+
+function saveData() {
+  localStorage.setItem('jdc2026_data', JSON.stringify(evalData));
+  alert('Rascunho salvo com sucesso!');
+}
+
+function exportData() {
+  const exportObj = {};
+  PEOPLE.forEach(p => {
+    const d = evalData[p.id];
+    const cultAvg = calcCulturaAvg(d);
+    const q = calc9box(p.id);
+    exportObj[p.name] = {
+      ...d,
+      _calculated: {
+        cultura_media: cultAvg ? Math.round(cultAvg*100)/100 : null,
+        performance_score: d.resultado.nota && cultAvg ?
+          Math.round((d.resultado.nota*0.6 + cultAvg*0.4)*100)/100 : null,
+        quadrante_9box: q,
+      }
+    };
+  });
+  const blob = new Blob([JSON.stringify(exportObj, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'jdc2026_avaliacoes.json';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function clearAll() {
+  if (!confirm('Tem certeza que deseja limpar todas as avaliacoes?')) return;
+  localStorage.removeItem('jdc2026_data');
+  evalData = {};
+  init();
+}
+
+// Boot
+init();
+</script>
+</body>
+</html>

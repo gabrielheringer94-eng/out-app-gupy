@@ -455,6 +455,21 @@ body, button, input, select, textarea {
   color: var(--text2);
 }
 
+/* JDC Tooltips */
+.jdc-tooltip{
+  position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:var(--navy);color:#fff;font-size:11px;font-weight:400;
+  line-height:1.4;padding:10px 14px;border-radius:10px;
+  width:260px;max-width:80vw;z-index:200;
+  box-shadow:0 4px 16px rgba(0,18,47,0.25);pointer-events:none;
+  opacity:0;transition:opacity .15s;
+}
+.jdc-tooltip.visible{opacity:1;}
+.jdc-tooltip::before{
+  content:'';position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+  border:6px solid transparent;border-bottom-color:var(--navy);
+}
+
 /* Cards — refined */
 .card {
   background: #ffffff;
@@ -1186,7 +1201,14 @@ function buildLogin(){
       </div>`;
     card.addEventListener('touchstart',()=>{ card.style.transform='scale(.96)'; card.style.borderColor='var(--accent)'; },{passive:true});
     card.addEventListener('touchend',()=>{ card.style.transform=''; card.style.borderColor=''; },{passive:true});
-    card.onclick=()=>{ currentUser=u; doLogin(); };
+    card.onclick=()=>{
+      if(u.isGestor){
+        var pw=prompt('🔒 Acesso restrito — digite a senha:');
+        if(!pw) return;
+        if(pw!=='\u004C\u006F\u0062\u0078\u0073\u0032\u0030\u0032\u0036') { alert('Senha incorreta.'); return; }
+      }
+      currentUser=u; doLogin();
+    };
     grid.appendChild(card);
   });
   content.appendChild(grid);
@@ -1333,11 +1355,11 @@ function buildTicker(user){
 // ─── TAB BUILDER (Bottom Nav) ─────────────────────────────────
 const NAV_ICONS={
   resumo:'◈',time:'◉',mrr:'◆',reunioes:'◷',noticias:'◉',analise:'◎',
-  hoje:'⌂',semana:'↗',funil:'▽',mrr_bdr:'◆',time_bdr:'◉',pdi:'◈'
+  hoje:'⌂',semana:'↗',funil:'▽',mrr_bdr:'◆',time_bdr:'◉',pdi:'◈',jdc:'★'
 };
 const NAV_LABELS={
   resumo:'Resumo',time:'Time',base:'Base',reunioes:'Agenda',weekly:'Weekly',analise:'Análise',
-  hoje:'Início',resultado:'Meu Resultado',performance:'Performance',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI'
+  hoje:'Início',resultado:'Meu Resultado',performance:'Performance',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI',jdc:'JDC'
 };
 
 
@@ -1534,7 +1556,8 @@ function buildGestorApp(){
     {id:'base',     label:'Base'},
     {id:'reunioes', label:'Agenda'},
     {id:'weekly',   label:'Weekly'},
-  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildKnowledgeBase,buildReunioes,buildWeekly]);
+    {id:'jdc',      label:'JDC'},
+  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildKnowledgeBase,buildReunioes,buildWeekly,buildJDC]);
 }
 
 
@@ -1562,9 +1585,10 @@ function buildResultadoGestor(pane){
   function buildForecastAnalysis(){
     var totalFcstEl=document.getElementById('fcst-resultado-total');
     if(!totalFcstEl) return;
-    supaFetch('gp_semanas','order=id.desc&limit=1').then(function(sems){
-      if(!sems||!sems[0]) return;
-      var semId=sems[0].id;
+    supaFetch('gp_semanas','order=id.asc').then(function(sems){
+      if(!sems||!sems.length) return;
+      var curSem=sems.find(function(s){return s.sem_atual===DATA.semAtual;});
+      var semId=curSem?curSem.id:sems[sems.length-1].id;
       return supaFetch('gp_forecast','semana_id=eq.'+semId);
     }).then(function(forecasts){
       if(!forecasts) return;
@@ -6021,11 +6045,16 @@ async function loadDataFromSupabase(){
       if(s.userId){
         const u=USERS.find(x=>x.id===s.userId);
         if(u){
-          currentUser=u;
-          document.getElementById('screen-login').classList.remove('active');
-          document.getElementById('screen-app').classList.add('active');
-          setupApp();
-          return;
+          // Gestor session requires fresh login (password-protected)
+          if(u.isGestor){
+            localStorage.removeItem('gupypulse_session');
+          } else {
+            currentUser=u;
+            document.getElementById('screen-login').classList.remove('active');
+            document.getElementById('screen-app').classList.add('active');
+            setupApp();
+            return;
+          }
         }
       }
     }
@@ -6362,6 +6391,444 @@ function applyUserPrefs(userId){
 
 
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+
+// ═══════════════════════════════════════════════════════════════
+// JDC 2026 — Jornada de Crescimento (Avaliação de Desempenho)
+// ═══════════════════════════════════════════════════════════════
+(function(){
+var JDC_PEOPLE=[
+  {id:'juliana',name:'Juliana Sant\'Anna',color:'#003cfd'},
+  {id:'victoria',name:'Victória Eilers',color:'#7c3aed'},
+  {id:'jeanne',name:'Jeanne Rodrigues',color:'#0d9488'},
+  {id:'ariane',name:'Ariane Mesquita',color:'#d97706'},
+  {id:'pedro',name:'Pedro Souza',color:'#dc2626'},
+  {id:'adhara',name:'Adhara Gonçalves',color:'#16a34a'},
+  {id:'giovanna',name:'Giovanna Faceto',color:'#9e88ff'},
+  {id:'mydoha',name:'Mydoha Seydo',color:'#ff5c1d'},
+];
+var JDC_SOL_SCALE=[
+  {v:1,l:'Não aderente',c:'red',tip:'Ainda não demonstra o domínio esperado para o nível atual. Encontra dificuldade para sustentar o desempenho esperado do nível.'},
+  {v:2,l:'Em desenvolvimento',c:'amber',tip:'Demonstra o domínio esperado parcialmente para o nível atual, mas ainda possui pontos importantes de evolução para atingir plena solidez.'},
+  {v:3,l:'Sólido no nível',c:'green',tip:'Demonstra o domínio esperado para o seu nível, mantendo constância nas entregas e decisões esperadas.'},
+  {v:4,l:'Excedendo o nível',c:'purple',tip:'Apresenta solidez e domínio acima do nível atual, demonstrando prontidão para desafios e responsabilidades de uma senioridade superior.'}
+];
+var JDC_RES_SCALE=[
+  {v:1,l:'Abaixo (<60%)',c:'red',tip:'Atinge menos de 60% da meta. Entregas abaixo do esperado com pouca consistência ao longo do ciclo.'},
+  {v:2,l:'Em desenv. (61-80%)',c:'amber',tip:'Entrega entre 61% e 80% dos resultados. Demonstra esforço e avanço, mas ainda em fase de consolidação.'},
+  {v:3,l:'Consistente (81-90%)',c:'green',tip:'Entrega entre 81% e 90% dos resultados. Cumpre com qualidade e constância as metas do ciclo.'},
+  {v:4,l:'Excedendo (>90%)',c:'purple',tip:'Entrega 90% ou mais dos resultados. Supera metas com consistência, ampliando impacto além da sua responsabilidade direta.'}
+];
+var JDC_CULT_VALS=['Agilidade para resultado','Fazer mais com menos','Juntos!','Paixão por inovar','Obsessão pelo cliente'];
+var JDC_CULT_KEYS=['agilidade','fazer_mais','juntos','paixao','obsessao'];
+var JDC_CULT_SCALE=[
+  {v:1,l:'Abaixo',c:'red',tip:'Comportamentos abaixo do esperado para os valores da cultura Gupy.'},
+  {v:2,l:'Em desenv.',c:'amber',tip:'Demonstra os valores parcialmente, com pontos de evolução relevantes.'},
+  {v:3,l:'Dentro',c:'green',tip:'Demonstra os comportamentos esperados dos valores com consistência.'},
+  {v:4,l:'Acima',c:'purple',tip:'Referência nos comportamentos do valor, influenciando positivamente o time.'}
+];
+
+var jdcData={};
+var jdcActive='juliana';
+var jdcView='eval';
+
+function jdcInit(){
+  var saved=localStorage.getItem('jdc2026_data');
+  if(saved){try{jdcData=JSON.parse(saved);}catch(e){jdcData={};}}
+  JDC_PEOPLE.forEach(function(p){
+    if(!jdcData[p.id]) jdcData[p.id]={
+      solidez:{autonomia:null,complexidade:null,impacto:null,final:null},
+      resultado:{nota:null,entregas:''},
+      cultura:{agilidade:null,fazer_mais:null,juntos:null,paixao:null,obsessao:null,comentario:''},
+      carreira:{prioridade:'',desenvolvimento:''},
+      risco:{saida:null,to_indesejavel:null}
+    };
+  });
+}
+jdcInit();
+
+function jdcSave(){localStorage.setItem('jdc2026_data',JSON.stringify(jdcData));}
+
+function jdcColorBg(c){
+  return c==='red'?'var(--red-bg)':c==='amber'?'var(--amber-bg)':c==='green'?'var(--green-bg)':'var(--purple-bg)';
+}
+function jdcColorFg(c){
+  return c==='red'?'var(--red)':c==='amber'?'var(--amber)':c==='green'?'var(--green)':'var(--purple)';
+}
+
+function jdcInitials(name){return name.split(' ').map(function(w){return w[0];}).join('').slice(0,2);}
+
+function jdcCompStatus(id){
+  var d=jdcData[id];if(!d)return '';
+  var flds=[d.solidez.autonomia,d.solidez.complexidade,d.solidez.impacto,d.solidez.final,
+    d.resultado.nota,d.cultura.agilidade,d.cultura.fazer_mais,d.cultura.juntos,d.cultura.paixao,d.cultura.obsessao];
+  var n=flds.filter(function(f){return f!==null;}).length;
+  return n===flds.length?'done':n>0?'partial':'';
+}
+
+function jdcCalc9box(id){
+  var d=jdcData[id];if(!d)return null;
+  var res=d.resultado.nota;
+  var cVals=[d.cultura.agilidade,d.cultura.fazer_mais,d.cultura.juntos,d.cultura.paixao,d.cultura.obsessao];
+  var cF=cVals.filter(function(v){return v!==null;});
+  if(!res||cF.length===0)return null;
+  var cAvg=cF.reduce(function(a,b){return a+b;},0)/cF.length;
+  var perf=(res*0.6)+(cAvg*0.4);
+  var sol=d.solidez.final;if(!sol)return null;
+  var pL=perf<2?1:perf<3?2:3;
+  var sL=sol<=2?1:sol===3?2:3;
+  var m={'3-1':'Q7','3-2':'Q8','3-3':'Q9','2-1':'Q4','2-2':'Q5','2-3':'Q6','1-1':'Q1','1-2':'Q2','1-3':'Q3'};
+  return m[sL+'-'+pL]||null;
+}
+
+function jdcRatingHtml(pid,section,field,label,hint,scale){
+  var cur=jdcData[pid][section][field];
+  var btns=scale.map(function(s){
+    var sel=cur===s.v;
+    var bg=sel?jdcColorBg(s.c):'var(--bg3)';
+    var brd=sel?jdcColorFg(s.c):'var(--border)';
+    var col=sel?jdcColorFg(s.c):'var(--text2)';
+    var fw=sel?'700':'500';
+    var tipAttr=s.tip?' data-tip="'+s.tip.replace(/"/g,'&quot;')+'"':'';
+    return '<div data-v="'+s.v+'" data-c="'+s.c+'" data-pid="'+pid+'" data-sec="'+section+'" data-fld="'+field+'"'+tipAttr+' '
+      +'class="jdc-rbtn jdc-has-tip" style="flex:1;min-width:0;padding:10px 6px;border-radius:8px;background:'+bg+';'
+      +'border:1.5px solid '+brd+';font-size:11px;font-weight:'+fw+';color:'+col+';cursor:pointer;text-align:center;line-height:1.3;transition:all .2s;position:relative">'
+      +s.l+'</div>';
+  }).join('');
+  return '<div style="margin-bottom:16px">'
+    +'<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:6px">'+label
+    +(hint?' <span style="font-size:10px;font-weight:400;color:var(--text3);background:var(--bg3);padding:2px 8px;border-radius:10px">'+hint+'</span>':'')
+    +'</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+btns+'</div></div>';
+}
+
+function jdcCulturaRowHtml(pid,key,valName){
+  var cur=jdcData[pid].cultura[key];
+  var btns=JDC_CULT_SCALE.map(function(s){
+    var sel=cur===s.v;
+    var bg=sel?jdcColorBg(s.c):'var(--bg3)';
+    var brd=sel?jdcColorFg(s.c):'var(--border)';
+    var col=sel?jdcColorFg(s.c):'var(--text2)';
+    var fw=sel?'700':'500';
+    var tipAttr=s.tip?' data-tip="'+s.tip.replace(/"/g,'&quot;')+'"':'';
+    return '<div data-v="'+s.v+'" data-c="'+s.c+'" data-pid="'+pid+'" data-sec="cultura" data-fld="'+key+'"'+tipAttr+' '
+      +'class="jdc-rbtn jdc-has-tip" style="flex:1;padding:8px 4px;border-radius:8px;background:'+bg+';'
+      +'border:1.5px solid '+brd+';font-size:10px;font-weight:'+fw+';color:'+col+';cursor:pointer;text-align:center;transition:all .2s;position:relative">'
+      +s.l+'</div>';
+  }).join('');
+  return '<div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--bg);border-radius:8px;margin-bottom:8px">'
+    +'<div style="font-size:12px;font-weight:600;color:var(--text);min-width:130px;flex-shrink:0">'+valName+'</div>'
+    +'<div style="display:flex;gap:6px;flex:1">'+btns+'</div></div>';
+}
+
+function jdcToggleHtml(pid,field,question){
+  var cur=jdcData[pid].risco[field];
+  var yBg=cur===true?'var(--red-bg)':'var(--bg3)';var yBrd=cur===true?'var(--red)':'var(--border)';var yCol=cur===true?'var(--red)':'var(--text2)';
+  var nBg=cur===false?'var(--green-bg)':'var(--bg3)';var nBrd=cur===false?'var(--green)':'var(--border)';var nCol=cur===false?'var(--green)':'var(--text2)';
+  return '<div style="margin-bottom:16px">'
+    +'<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">'+question+'</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<div class="jdc-toggle" data-pid="'+pid+'" data-fld="'+field+'" data-val="true" style="padding:8px 20px;border-radius:20px;background:'+yBg+';border:1.5px solid '+yBrd+';font-size:12px;font-weight:600;color:'+yCol+';cursor:pointer;transition:all .2s">Sim</div>'
+    +'<div class="jdc-toggle" data-pid="'+pid+'" data-fld="'+field+'" data-val="false" style="padding:8px 20px;border-radius:20px;background:'+nBg+';border:1.5px solid '+nBrd+';font-size:12px;font-weight:600;color:'+nCol+';cursor:pointer;transition:all .2s">Não</div>'
+    +'</div></div>';
+}
+
+function jdcPillHtml(val,scale){
+  if(!val)return '—';
+  var s=scale.find(function(x){return x.v===val;});
+  if(!s)return '—';
+  return '<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:'+jdcColorBg(s.c)+';color:'+jdcColorFg(s.c)+'">'+s.l+'</span>';
+}
+
+function jdcCardHtml(icon,title,subtitle,weightLabel,weightColor,content){
+  return '<div class="card" style="margin-bottom:12px;padding:0;overflow:hidden">'
+    +'<div style="display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--border)">'
+    +'<div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;background:'+jdcColorBg(weightColor)+';color:'+jdcColorFg(weightColor)+'">'+icon+'</div>'
+    +'<div><div style="font-size:13px;font-weight:700;color:var(--text)">'+title+'</div>'
+    +(subtitle?'<div style="font-size:11px;color:var(--text3)">'+subtitle+'</div>':'')+'</div>'
+    +(weightLabel?'<div style="margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:'+jdcColorBg(weightColor)+';color:'+jdcColorFg(weightColor)+'">'+weightLabel+'</div>':'')
+    +'</div><div style="padding:16px">'+content+'</div></div>';
+}
+
+function jdcBuildPerson(pid){
+  var p=JDC_PEOPLE.find(function(x){return x.id===pid;});
+  var d=jdcData[pid];
+  var q=jdcCalc9box(pid);
+  var ini=jdcInitials(p.name);
+
+  // Hero
+  var hero='<div class="card" style="display:flex;align-items:center;gap:16px;margin-bottom:12px">'
+    +'<div style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;background:'+p.color+';box-shadow:0 2px 8px rgba(0,60,253,.2)">'+ini+'</div>'
+    +'<div><div style="font-size:16px;font-weight:700;color:var(--text)">'+p.name+'</div>'
+    +'<div style="font-size:11px;color:var(--text3)">BDR · Ciclo Jan-Dez 2025</div></div>'
+    +'<div style="margin-left:auto;text-align:center;background:var(--bg3);border-radius:8px;padding:6px 12px">'
+    +'<div style="font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">9BOX</div>'
+    +'<div style="font-size:15px;font-weight:800;color:var(--accent);margin-top:2px" id="jdc-q-'+pid+'">'+(q||'—')+'</div></div></div>';
+
+  // Solidez
+  var solContent=jdcRatingHtml(pid,'solidez','autonomia','Autonomia','Independência para tomar decisões',JDC_SOL_SCALE)
+    +jdcRatingHtml(pid,'solidez','complexidade','Complexidade','Dificuldade das tarefas que resolve',JDC_SOL_SCALE)
+    +jdcRatingHtml(pid,'solidez','impacto','Impacto','Alcance dos resultados gerados',JDC_SOL_SCALE)
+    +'<div style="display:flex;align-items:center;gap:10px;margin:16px 0"><div style="flex:1;height:1px;background:var(--border2)"></div><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Classificação Final</div><div style="flex:1;height:1px;background:var(--border2)"></div></div>'
+    +jdcRatingHtml(pid,'solidez','final','Solidez Final no Nível','Precisa ser Sólido+ nos 3 pilares para ser Sólido+',JDC_SOL_SCALE);
+
+  // Resultado
+  var resContent=jdcRatingHtml(pid,'resultado','nota','Resultado no último ano','Atingimento + impacto + consistência',JDC_RES_SCALE)
+    +'<div style="margin-bottom:0"><div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">Principais entregas e impacto</div>'
+    +'<textarea class="jdc-text" data-pid="'+pid+'" data-sec="resultado" data-fld="entregas" style="width:100%;min-height:70px;padding:10px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-family:Inter,sans-serif;font-size:12px;color:var(--text);resize:vertical"'
+    +' placeholder="Descreva as principais entregas...">'+(d.resultado.entregas||'')+'</textarea></div>';
+
+  // Cultura
+  var cultContent='';
+  JDC_CULT_VALS.forEach(function(v,i){cultContent+=jdcCulturaRowHtml(pid,JDC_CULT_KEYS[i],v);});
+  cultContent+='<div style="margin-top:12px"><div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">Valor forte e valor a fortalecer</div>'
+    +'<textarea class="jdc-text" data-pid="'+pid+'" data-sec="cultura" data-fld="comentario" style="width:100%;min-height:60px;padding:10px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-family:Inter,sans-serif;font-size:12px;color:var(--text);resize:vertical"'
+    +' placeholder="Qual valor é ponto forte? Qual precisa ser fortalecido?">'+(d.cultura.comentario||'')+'</textarea></div>';
+
+  // Carreira
+  var carContent='<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">Prioridade de carreira nos próximos 12 meses</div>'
+    +'<textarea class="jdc-text" data-pid="'+pid+'" data-sec="carreira" data-fld="prioridade" style="width:100%;min-height:60px;padding:10px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-family:Inter,sans-serif;font-size:12px;color:var(--text);resize:vertical"'
+    +' placeholder="Qual a principal prioridade de carreira?">'+(d.carreira.prioridade||'')+'</textarea></div>'
+    +'<div><div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px">Principais pontos de desenvolvimento</div>'
+    +'<textarea class="jdc-text" data-pid="'+pid+'" data-sec="carreira" data-fld="desenvolvimento" style="width:100%;min-height:60px;padding:10px 12px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-family:Inter,sans-serif;font-size:12px;color:var(--text);resize:vertical"'
+    +' placeholder="Quais os pontos de desenvolvimento?">'+(d.carreira.desenvolvimento||'')+'</textarea></div>';
+
+  // Risco
+  var riskContent=jdcToggleHtml(pid,'saida','Existe alto risco de que esta pessoa deixe a empresa nos próximos 3 meses?')
+    +jdcToggleHtml(pid,'to_indesejavel','Se demonstrasse sinais de insatisfação, você criaria uma estratégia para retê-lo(a)?');
+
+  return hero
+    +jdcCardHtml('🎯','Pilar 1 · Solidez no Nível','Aderência ao grau de exigência do nível atual','EIXO Y','purple',solContent)
+    +jdcCardHtml('📈','Pilar 2 · Performance — Resultado','"O que" entregou no último ciclo','60%','green',resContent)
+    +jdcCardHtml('💖','Pilar 2 · Performance — Cultura','"Como" entregou — Valores Gupy','40%','amber',cultContent)
+    +jdcCardHtml('🚀','Pilar 3 · Carreira & Desenvolvimento','Direcionamento para o futuro','','purple',carContent)
+    +jdcCardHtml('⚠️','Pilar 4 · Risco de Saída & TO Indesejável','Percepção de retenção','','red',riskContent);
+}
+
+function jdcBuildSummary(){
+  var rows=JDC_PEOPLE.map(function(p){
+    var d=jdcData[p.id];var q=jdcCalc9box(p.id);
+    var cVals=[d.cultura.agilidade,d.cultura.fazer_mais,d.cultura.juntos,d.cultura.paixao,d.cultura.obsessao];
+    var cF=cVals.filter(function(v){return v!==null;});
+    var cAvg=cF.length?cF.reduce(function(a,b){return a+b;},0)/cF.length:null;
+    var cPill=cAvg===null?'—':cAvg<1.5?jdcPillHtml(1,JDC_CULT_SCALE):cAvg<2.5?jdcPillHtml(2,JDC_CULT_SCALE):cAvg<3.5?jdcPillHtml(3,JDC_CULT_SCALE):jdcPillHtml(4,JDC_CULT_SCALE);
+    var perf='—';
+    if(d.resultado.nota&&cAvg!==null){var sc=d.resultado.nota*0.6+cAvg*0.4;perf=sc<2?'<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:var(--red-bg);color:var(--red)">Abaixo</span>':sc<3?'<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:var(--amber-bg);color:var(--amber)">Dentro</span>':'<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:var(--green-bg);color:var(--green)">Acima</span>';}
+    var risco=d.risco.saida===true?'<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:var(--red-bg);color:var(--red)">Sim</span>':d.risco.saida===false?'<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:var(--green-bg);color:var(--green)">Não</span>':'—';
+    return '<tr><td style="padding:8px 10px;border-bottom:1px solid var(--border);font-weight:600;font-size:12px">'+p.name+'</td>'
+      +'<td style="padding:8px 6px;border-bottom:1px solid var(--border)">'+jdcPillHtml(d.solidez.final,JDC_SOL_SCALE)+'</td>'
+      +'<td style="padding:8px 6px;border-bottom:1px solid var(--border)">'+jdcPillHtml(d.resultado.nota,JDC_RES_SCALE)+'</td>'
+      +'<td style="padding:8px 6px;border-bottom:1px solid var(--border)">'+cPill+'</td>'
+      +'<td style="padding:8px 6px;border-bottom:1px solid var(--border)">'+perf+'</td>'
+      +'<td style="padding:8px 6px;border-bottom:1px solid var(--border);font-weight:800;color:var(--accent)">'+(q||'—')+'</td>'
+      +'<td style="padding:8px 6px;border-bottom:1px solid var(--border)">'+risco+'</td></tr>';
+  }).join('');
+  return '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">'
+    +'<thead><tr>'
+    +'<th style="padding:8px 10px;background:var(--bg3);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border2);text-align:left">Pessoa</th>'
+    +'<th style="padding:8px 6px;background:var(--bg3);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border2);text-align:left">Solidez</th>'
+    +'<th style="padding:8px 6px;background:var(--bg3);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border2);text-align:left">Resultado</th>'
+    +'<th style="padding:8px 6px;background:var(--bg3);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border2);text-align:left">Cultura</th>'
+    +'<th style="padding:8px 6px;background:var(--bg3);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border2);text-align:left">Perf.</th>'
+    +'<th style="padding:8px 6px;background:var(--bg3);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border2);text-align:left">9BOX</th>'
+    +'<th style="padding:8px 6px;background:var(--bg3);color:var(--text2);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--border2);text-align:left">Risco</th>'
+    +'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+function jdcBuild9box(){
+  var cells=[
+    {q:'q7',l:'Perf. Abaixo<br>+ Excedendo',bg:'#fef2f2'},
+    {q:'q8',l:'Perf. Dentro<br>+ Excedendo',bg:'#fef9ee'},
+    {q:'q9',l:'Perf. Acima<br>+ Excedendo',bg:'#f0fdf4'},
+    {q:'q4',l:'Perf. Abaixo<br>+ Sólido',bg:'#fef9ee'},
+    {q:'q5',l:'Perf. Dentro<br>+ Sólido',bg:'#f0f2f6'},
+    {q:'q6',l:'Perf. Acima<br>+ Sólido',bg:'#ecfdf5'},
+    {q:'q1',l:'Perf. Abaixo<br>+ Em Desenv.',bg:'#fef2f2'},
+    {q:'q2',l:'Perf. Dentro<br>+ Em Desenv.',bg:'#fff7ed'},
+    {q:'q3',l:'Perf. Acima<br>+ Em Desenv.',bg:'#f0fdf4'},
+  ];
+  var placements={};
+  JDC_PEOPLE.forEach(function(p){
+    var q=jdcCalc9box(p.id);
+    if(q){var k=q.toLowerCase();if(!placements[k])placements[k]=[];placements[k].push(p);}
+  });
+  var cellsHtml=cells.map(function(c){
+    var ppl=placements[c.q]||[];
+    var hl=ppl.length>0?'box-shadow:0 0 0 3px var(--accent),0 4px 16px rgba(0,60,253,.2);transform:scale(1.03);z-index:1;':'';
+    var names=ppl.map(function(p){return '<div style="font-size:10px;font-weight:700;color:'+p.color+';margin-top:2px">'+p.name.split(' ')[0]+'</div>';}).join('');
+    return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;'
+      +'background:'+c.bg+';font-size:8px;font-weight:600;color:var(--text3);text-align:center;padding:8px 4px;'
+      +'line-height:1.2;transition:all .3s;position:relative;'+hl+'"><div>'+c.l+'</div>'+names+'</div>';
+  }).join('');
+  return '<div style="display:flex;gap:8px;align-items:stretch">'
+    +'<div style="writing-mode:vertical-lr;transform:rotate(180deg);font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;justify-content:center;padding:0 4px">Solidez no Nível ↑</div>'
+    +'<div style="flex:1"><div style="display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:4px;aspect-ratio:3/3;max-width:360px">'
+    +cellsHtml+'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px;padding-left:0">'
+    +'<div style="font-size:9px;font-weight:600;color:var(--text3);text-align:center;text-transform:uppercase">Abaixo</div>'
+    +'<div style="font-size:9px;font-weight:600;color:var(--text3);text-align:center;text-transform:uppercase">Dentro</div>'
+    +'<div style="font-size:9px;font-weight:600;color:var(--text3);text-align:center;text-transform:uppercase">Acima</div>'
+    +'</div></div></div>';
+}
+
+function jdcBuildMeritPanel(){
+  var promo=[];var merito=[];var atencao=[];var pmp=[];
+  JDC_PEOPLE.forEach(function(p){
+    var q=jdcCalc9box(p.id);if(!q)return;
+    var d=jdcData[p.id];
+    var risco=d.risco.to_indesejavel===true;
+    var obj={name:p.name,color:p.color,q:q,risco:risco};
+    if(q==='Q9') promo.push(obj);
+    else if(q==='Q6'||q==='Q8') merito.push(obj);
+    else if(q==='Q1'||q==='Q4'||q==='Q7') pmp.push(obj);
+    else atencao.push(obj);
+  });
+
+  function personRow(p,tag){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg);border-radius:8px;margin-bottom:6px">'
+      +'<div style="width:8px;height:8px;border-radius:50%;background:'+p.color+';flex-shrink:0"></div>'
+      +'<div style="font-size:12px;font-weight:600;color:var(--text);flex:1">'+p.name+'</div>'
+      +'<div style="font-size:10px;font-weight:700;color:var(--accent)">'+p.q+'</div>'
+      +(p.risco?'<div style="font-size:9px;padding:2px 6px;border-radius:10px;background:var(--red-bg);color:var(--red);font-weight:600">TO Indesejável</div>':'')
+      +'</div>';
+  }
+
+  function section(icon,title,desc,color,people){
+    if(people.length===0) return '<div style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'
+      +'<span style="font-size:14px">'+icon+'</span>'
+      +'<span style="font-size:12px;font-weight:700;color:var(--text)">'+title+'</span></div>'
+      +'<div style="font-size:11px;color:var(--text3);padding:12px;background:var(--bg);border-radius:8px;text-align:center">Nenhum gupier nesta categoria (preencha as avaliações)</div></div>';
+    return '<div style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+      +'<span style="font-size:14px">'+icon+'</span>'
+      +'<span style="font-size:12px;font-weight:700;color:var(--text)">'+title+'</span>'
+      +'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:'+jdcColorBg(color)+';color:'+jdcColorFg(color)+'">'+people.length+'</span></div>'
+      +'<div style="font-size:10px;color:var(--text3);margin-bottom:8px">'+desc+'</div>'
+      +people.map(function(p){return personRow(p);}).join('')+'</div>';
+  }
+
+  var content=section('🚀','Elegíveis para Promoção','Performance acima do esperado + Excedendo o nível (Q9). Prontidão máxima — prioridade para próxima cadeira.','purple',promo)
+    +section('⭐','Elegíveis para Mérito','Performance acima + Sólido (Q6) ou Dentro + Excedendo (Q8). Alta performance ou alta maturidade — reconhecimento salarial.','green',merito)
+    +section('👀','Acompanhamento','Performance dentro do esperado ou em desenvolvimento. Foco em evolução e feedbacks direcionados.','amber',atencao)
+    +section('⚠️','Atenção — Plano de Melhoria (PMP)','Performance abaixo do esperado. Necessário plano de ação imediato e acompanhamento próximo.','red',pmp);
+
+  return jdcCardHtml('🏆','Sugestões de Mérito & Promoção','Baseado nos resultados das avaliações JDC 2026','','green',content);
+}
+
+function jdcRender(pane){
+  // View tabs
+  var viewTabs='<div style="display:flex;gap:4px;margin-bottom:16px">'
+    +'<div class="jdc-vtab'+(jdcView==='eval'?' active':'')+'" data-view="eval" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;'
+    +(jdcView==='eval'?'background:var(--navy);color:#fff':'background:var(--bg3);color:var(--text2)')+'">Avaliações</div>'
+    +'<div class="jdc-vtab'+(jdcView==='summary'?' active':'')+'" data-view="summary" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;'
+    +(jdcView==='summary'?'background:var(--navy);color:#fff':'background:var(--bg3);color:var(--text2)')+'">Resumo</div>'
+    +'<div class="jdc-vtab'+(jdcView==='9box'?' active':'')+'" data-view="9box" style="padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;'
+    +(jdcView==='9box'?'background:var(--navy);color:#fff':'background:var(--bg3);color:var(--text2)')+'">9BOX</div>'
+    +'</div>';
+
+  var html='<div style="margin-bottom:12px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+    +'<span style="display:inline-block;background:var(--gupy-green);color:var(--navy);font-size:9px;font-weight:700;padding:2px 8px;border-radius:12px;text-transform:uppercase;letter-spacing:.06em">GUPY OS</span>'
+    +'<span style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.02em">Jornada de Crescimento 2.0</span></div>'
+    +'<div style="font-size:11px;color:var(--text3)">Avaliação de Desempenho · Ciclo Jan-Dez 2025 · Pré-Vendas Outbound</div></div>';
+
+  html+=viewTabs;
+
+  if(jdcView==='eval'){
+    // Person nav chips
+    var chips=JDC_PEOPLE.map(function(p){
+      var ini=jdcInitials(p.name);
+      var act=p.id===jdcActive;
+      var st=jdcCompStatus(p.id);
+      var dotCol=st==='done'?'var(--green)':st==='partial'?'var(--amber)':'var(--border2)';
+      return '<div class="jdc-chip" data-pid="'+p.id+'" style="flex-shrink:0;display:flex;align-items:center;gap:6px;'
+        +'padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;'
+        +(act?'background:var(--accent);color:#fff;border:1.5px solid var(--accent);box-shadow:0 2px 8px rgba(0,60,253,.25)':'background:var(--bg3);color:var(--text2);border:1.5px solid var(--border)')
+        +'"><div style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;'
+        +(act?'background:rgba(255,255,255,.25);color:#fff':'background:rgba(0,18,47,0.08);color:var(--text2)')+'">'+ini+'</div>'
+        +p.name.split(' ')[0]
+        +'<div style="width:7px;height:7px;border-radius:50%;background:'+dotCol+';flex-shrink:0"></div></div>';
+    }).join('');
+    html+='<div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:16px;padding-bottom:4px;-webkit-overflow-scrolling:touch">'+chips+'</div>';
+    html+='<div id="jdc-person-content">'+jdcBuildPerson(jdcActive)+'</div>';
+  } else if(jdcView==='summary'){
+    html+=jdcCardHtml('📊','Resumo Consolidado','Visão geral de todas as avaliações','','purple',jdcBuildSummary());
+  } else {
+    html+=jdcCardHtml('🎯','9BOX do Time','Performance (60% Resultado + 40% Cultura) x Solidez no Nível','','purple',jdcBuild9box());
+    html+=jdcBuildMeritPanel();
+  }
+
+  // Action buttons
+  html+='<div style="display:flex;gap:8px;margin-top:16px;justify-content:center">'
+    +'<div class="jdc-action" data-act="save" style="padding:8px 20px;border-radius:8px;font-size:12px;font-weight:700;background:var(--accent);color:#fff;cursor:pointer;box-shadow:var(--shadow-lg)">Salvar Rascunho</div>'
+    +'<div class="jdc-action" data-act="export" style="padding:8px 20px;border-radius:8px;font-size:12px;font-weight:700;background:var(--navy);color:#fff;cursor:pointer">Exportar JSON</div>'
+    +'</div>';
+
+  pane.innerHTML=html;
+
+  // Event delegation
+  pane.onclick=function(e){
+    var t=e.target.closest('.jdc-rbtn');
+    if(t){
+      var pid=t.dataset.pid,sec=t.dataset.sec,fld=t.dataset.fld,val=parseInt(t.dataset.v);
+      if(jdcData[pid][sec][fld]===val)jdcData[pid][sec][fld]=null;
+      else jdcData[pid][sec][fld]=val;
+      jdcSave();jdcRender(pane);return;
+    }
+    var tog=e.target.closest('.jdc-toggle');
+    if(tog){
+      var pid2=tog.dataset.pid,fld2=tog.dataset.fld,val2=tog.dataset.val==='true';
+      if(jdcData[pid2].risco[fld2]===val2)jdcData[pid2].risco[fld2]=null;
+      else jdcData[pid2].risco[fld2]=val2;
+      jdcSave();jdcRender(pane);return;
+    }
+    var chip=e.target.closest('.jdc-chip');
+    if(chip){jdcActive=chip.dataset.pid;jdcRender(pane);return;}
+    var vtab=e.target.closest('.jdc-vtab');
+    if(vtab){jdcView=vtab.dataset.view;jdcRender(pane);return;}
+    var act=e.target.closest('.jdc-action');
+    if(act){
+      if(act.dataset.act==='save'){jdcSave();alert('Rascunho salvo!');}
+      if(act.dataset.act==='export'){
+        var exp={};JDC_PEOPLE.forEach(function(p){var d=jdcData[p.id];var q=jdcCalc9box(p.id);exp[p.name]={...d,_9box:q};});
+        var blob=new Blob([JSON.stringify(exp,null,2)],{type:'application/json'});
+        var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='jdc2026_avaliacoes.json';a.click();URL.revokeObjectURL(url);
+      }
+    }
+  };
+  // Textarea change handlers
+  pane.querySelectorAll('.jdc-text').forEach(function(ta){
+    ta.oninput=function(){
+      var pid=ta.dataset.pid,sec=ta.dataset.sec,fld=ta.dataset.fld;
+      jdcData[pid][sec][fld]=ta.value;jdcSave();
+    };
+  });
+
+  // Tooltip hover handlers
+  var activeTip=null;
+  pane.addEventListener('mouseenter',function(e){
+    var btn=e.target.closest('.jdc-has-tip');
+    if(!btn||!btn.dataset.tip)return;
+    // Remove existing
+    if(activeTip){activeTip.remove();activeTip=null;}
+    var tip=document.createElement('div');
+    tip.className='jdc-tooltip';
+    tip.textContent=btn.dataset.tip;
+    btn.appendChild(tip);
+    // Force reflow then show
+    tip.offsetHeight;
+    tip.classList.add('visible');
+    activeTip=tip;
+  },true);
+  pane.addEventListener('mouseleave',function(e){
+    var btn=e.target.closest('.jdc-has-tip');
+    if(!btn)return;
+    if(activeTip){activeTip.remove();activeTip=null;}
+  },true);
+}
+
+window.buildJDC=function(pane){jdcRender(pane);};
+})();
+
+
 </script>
 </body>
 </html>
