@@ -708,6 +708,14 @@ function calcSemAtual(){
 const DATA = {
   meta:84, metaBDR:12, semAtual:calcSemAtual(), semTotal:4,
   ultimaAtualizacao:'2026-04-12T21:50:00',
+  // Oportunidades detalhadas (opps mundo TA+TM)
+  oppsDetalhe:[
+    {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Poli Soluções Digitais',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'09/04'},
+    {bdr:'JS',bdrNome:"Juliana Sant'Anna",empresa:'SIMM SOLUCOES',mundo:1,tipo:'TA',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'10/04'},
+    {bdr:'JS',bdrNome:"Juliana Sant'Anna",empresa:'TUDOR BATERIAS',mundo:1,tipo:'TA',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'07/04'},
+    {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'VR Software',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Andrea Ferraz',data:'10/04'},
+    {bdr:'VE',bdrNome:'Victoria Eilers',empresa:'Divinissimo Alimentos',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'08/04'},
+  ],
   // Acumulado do mês (Abril 2026) — atualizado manualmente a cada semana
   mesAbril:{
     opps:9,    // acumulado até S2 (opps mundo)
@@ -1600,7 +1608,7 @@ function buildResultadoGestor(pane){
     +'<div style="background:linear-gradient(145deg,'+(gapProj>=0?'#16a34a 0%,#0f766e 50%,#15803d':'#dc2626 0%,#991b1b 50%,#7f1d1d')+' 100%);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow-lg)">'
     +'<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Resultado do mês — Abril 2026</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
-    +'<div style="text-align:center"><div style="font-size:32px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">'+oppsAcum+'</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Atual</div></div>'
+    +'<div style="text-align:center"><div onclick="showOppsModal()" style="cursor:pointer;font-size:32px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">'+oppsAcum+'</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Atual</div></div>'
     +'<div style="text-align:center;border-left:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2)"><div style="font-size:32px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">'+proj+'</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Projeção</div></div>'
     +'<div style="text-align:center"><div style="font-size:32px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+(gapProj>=0?'#bbf7d0':'#fecaca')+';line-height:1">'+(gapProj>=0?'+':'')+gapProj+'</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Gap</div></div>'
     +'</div>'
@@ -1827,7 +1835,7 @@ function buildResumo(pane){
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;text-align:center">
         <div>
-          <div style="font-size:24px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">${oppsAcumMes}</div>
+          <div onclick="showOppsModal()" style="cursor:pointer;font-size:24px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">${oppsAcumMes}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Atual (mês)</div>
         </div>
         <div style="border-left:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2)">
@@ -2804,7 +2812,7 @@ function buildWeekly(pane){
       <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">A semana em números</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:16px;text-align:center">
         <div>
-          <div style="font-size:28px;font-weight:700;font-family:'Inter',sans-serif;color:white;line-height:1">${totalOpps}</div>
+          <div onclick="showOppsModal()" style="cursor:pointer;font-size:28px;font-weight:700;font-family:'Inter',sans-serif;color:white;line-height:1;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">${totalOpps}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:3px">Opps MTD</div>
         </div>
         <div>
@@ -2841,8 +2849,8 @@ function buildWeekly(pane){
             <div style="font-size:14px;font-weight:700;color:var(--text)">${topBdr.name.split(' ')[0]}</div>
             <div style="font-size:11px;color:var(--text3);margin-top:2px">${topBdr.opps} opps · ${topBdr.ras} RAs · ${topBdr.lig} lig</div>
           </div>
-          <div style="text-align:center;padding:8px 12px;background:var(--green-bg);border-radius:8px">
-            <div style="font-size:18px;font-weight:700;color:var(--green);font-family:'Inter',sans-serif">${topBdr.opps}</div>
+          <div onclick="showOppsModal('${topBdr.id}')" style="cursor:pointer;text-align:center;padding:8px 12px;background:var(--green-bg);border-radius:8px;transition:opacity .15s" onmouseenter="this.style.opacity='.8'" onmouseleave="this.style.opacity='1'">
+            <div style="font-size:18px;font-weight:700;color:var(--green);font-family:'Inter',sans-serif;text-decoration:underline;text-decoration-style:dotted">${topBdr.opps}</div>
             <div style="font-size:8px;color:var(--green)">OPPS</div>
           </div>
         </div>
@@ -4838,6 +4846,41 @@ async function saveEditForecast(bdrId,forecastId,semId){
 }
 
 // ─── COLLAPSIBLE CARDS ────────────────────────────────────────
+// ── Modal de Oportunidades ──
+function showOppsModal(bdrFilter){
+  // Remove modal existente
+  var old=document.getElementById('opps-modal-overlay');
+  if(old) old.remove();
+  var opps=DATA.oppsDetalhe||[];
+  if(bdrFilter) opps=opps.filter(o=>o.bdr===bdrFilter);
+  var overlay=document.createElement('div');
+  overlay.id='opps-modal-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .15s';
+  overlay.onclick=function(e){if(e.target===overlay) overlay.remove();};
+  var total=opps.reduce(function(s,o){return s+o.mundo;},0);
+  var html='<div style="background:white;border-radius:16px;padding:20px;max-width:380px;width:100%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">';
+  html+='<div style="font-size:14px;font-weight:700;color:var(--text)">Oportunidades'+(bdrFilter?' — '+bdrFilter:'')+'</div>';
+  html+='<button onclick="document.getElementById(\'opps-modal-overlay\').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3)">✕</button>';
+  html+='</div>';
+  html+='<div style="font-size:11px;color:var(--text3);margin-bottom:12px">'+total+' opps mundo · '+opps.length+' empresa(s)</div>';
+  opps.forEach(function(o){
+    var tipoCor=o.tipo==='TA+TM'?'var(--accent)':o.tipo==='TA'?'var(--teal)':'var(--amber)';
+    html+='<div style="padding:10px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px">';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">';
+    html+='<div style="font-size:13px;font-weight:700;color:var(--text)">'+o.empresa+'</div>';
+    html+='<span style="font-size:9px;font-weight:700;color:'+tipoCor+';background:rgba(0,0,0,.04);padding:2px 6px;border-radius:8px">'+o.tipo+' · '+o.mundo+' opp'+(o.mundo>1?'s':'')+'</span>';
+    html+='</div>';
+    html+='<div style="font-size:11px;color:var(--text2)">BDR: '+o.bdrNome.split(' ')[0]+' · AE: '+o.ae.split(' ')[0]+' · '+o.data+'</div>';
+    html+='<div style="font-size:10px;color:var(--text3);margin-top:2px">'+o.etapa+'</div>';
+    html+='</div>';
+  });
+  if(opps.length===0) html+='<div style="text-align:center;padding:20px;color:var(--text3);font-size:12px">Nenhuma oportunidade'+(bdrFilter?' para este BDR':'')+'.</div>';
+  html+='</div>';
+  overlay.innerHTML=html;
+  document.body.appendChild(overlay);
+}
+
 function toggleCard(bodyId,headerEl){
   const body=document.getElementById(bodyId);
   if(!body) return;
