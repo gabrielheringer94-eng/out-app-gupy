@@ -2238,14 +2238,16 @@ function buildTimeGestor(pane){
           <thead>
             <tr style="background:var(--bg3);border-bottom:1px solid var(--border)">
               <th style="padding:8px 12px;text-align:left;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">BDR</th>
-              <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">OP fcst</th>
-              <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">OP real</th>
-              <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Ating.</th>
-              <th style="padding:8px 10px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Status</th>
+              <th style="padding:8px 6px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">LC</th>
+              <th style="padding:8px 6px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">RA</th>
+              <th style="padding:8px 6px;text-align:center;font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;font-weight:600">OP fcst</th>
+              <th style="padding:8px 6px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">OP real</th>
+              <th style="padding:8px 6px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Ating.</th>
+              <th style="padding:8px 6px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Status</th>
             </tr>
           </thead>
           <tbody id="forecast-table-body">
-            <tr><td colspan="5" style="padding:16px;text-align:center;font-size:12px;color:var(--text3)">Carregando...</td></tr>
+            <tr><td colspan="7" style="padding:16px;text-align:center;font-size:12px;color:var(--text3)">Carregando...</td></tr>
           </tbody>
         </table>
       </div>
@@ -2346,17 +2348,17 @@ async function loadGestorForecast(forceSemId){
     const forecasts=await supaFetch('gp_forecast',`semana_id=eq.${semId}&order=bdr_nome.asc`);
 
     if(!forecasts||forecasts.length===0){
-      tbody.innerHTML='<tr><td colspan="5" style="padding:16px;text-align:center;font-size:12px;color:var(--text3)">Nenhum BDR enviou o forecast ainda.</td></tr>';
+      tbody.innerHTML='<tr><td colspan="7" style="padding:16px;text-align:center;font-size:12px;color:var(--text3)">Nenhum BDR enviou o forecast ainda.</td></tr>';
       return;
     }
 
     // Map real opps from DATA
     tbody.innerHTML='';
-    let totalFcstOp=0, totalRealOp=0;
+    let totalFcstOp=0, totalFcstLc=0, totalFcstRa=0, totalRealOp=0;
     DATA.bdrs.forEach(bdr=>{
       const f=forecasts.find(x=>x.bdr_id===bdr.id);
       const realOp=bdr.opps||0;
-      if(f) totalFcstOp+=f.fcst_op||0;
+      if(f){ totalFcstOp+=f.fcst_op||0; totalFcstLc+=f.fcst_lc||0; totalFcstRa+=f.fcst_ra||0; }
       totalRealOp+=realOp;
       const ating=f&&f.fcst_op>0?Math.round((realOp/f.fcst_op)*100):null;
       const atingColor=ating===null?'var(--text3)':ating>=100?'var(--green)':ating>=70?'var(--amber)':'var(--red)';
@@ -2371,11 +2373,13 @@ async function loadGestorForecast(forceSemId){
             ${!f?`<span style="font-size:9px;color:var(--text3);background:var(--bg3);padding:1px 6px;border-radius:10px">pendente</span>`:''}
           </div>
         </td>
-        <td style="padding:10px 8px;text-align:center">
+        <td style="padding:8px 6px;text-align:center;font-size:12px;font-family:\'Inter\',sans-serif;font-weight:600;color:${f&&f.fcst_lc?'var(--text)':'var(--text3)'}">${f?f.fcst_lc||'—':'—'}</td>
+        <td style="padding:8px 6px;text-align:center;font-size:12px;font-family:\'Inter\',sans-serif;font-weight:600;color:${f&&f.fcst_ra?'var(--teal)':'var(--text3)'}">${f?f.fcst_ra||'—':'—'}</td>
+        <td style="padding:8px 6px;text-align:center">
           <span style="font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${f?'var(--accent)':'var(--text3)'}">${f?f.fcst_op:'—'}</span>
-          ${f&&f.editado_apos_planejamento?'<div style="font-size:8px;font-weight:700;color:var(--amber);margin-top:1px">✎ editado</div>':''}
+          ${f&&f.editado_apos_planejamento?'<div style="font-size:8px;font-weight:700;color:var(--amber);margin-top:1px">✎</div>':''}
         </td>
-        <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${realOp>0?'var(--green)':'var(--text3)'}">${realOp||'—'}</td>
+        <td style="padding:8px 6px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${realOp>0?'var(--green)':'var(--text3)'}">${realOp||'—'}</td>
         <td style="padding:10px 10px;text-align:center">
           ${ating!==null
             ?`<span style="font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:${atingColor}">${ating}%</span>`
@@ -2399,11 +2403,13 @@ async function loadGestorForecast(forceSemId){
     // Total row
     const totalAting=totalFcstOp>0?Math.round((totalRealOp/totalFcstOp)*100):0;
     tbody.innerHTML+=`<tr style="background:var(--bg3);border-top:2px solid var(--border)">
-      <td style="padding:10px 12px;font-size:11px;font-weight:700;color:var(--text)">TOTAL</td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--accent)">${totalFcstOp}</td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--green)">${totalRealOp}</td>
-      <td style="padding:10px 10px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:${totalAting>=100?'var(--green)':totalAting>=70?'var(--amber)':'var(--red)'}">${totalAting}%</td>
-      <td style="padding:10px 6px;text-align:center"></td>
+      <td style="padding:8px 12px;font-size:11px;font-weight:700;color:var(--text)">TOTAL</td>
+      <td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">${totalFcstLc}</td>
+      <td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--teal)">${totalFcstRa}</td>
+      <td style="padding:8px 6px;text-align:center;font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--accent)">${totalFcstOp}</td>
+      <td style="padding:8px 6px;text-align:center;font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--green)">${totalRealOp}</td>
+      <td style="padding:8px 6px;text-align:center;font-size:12px;font-weight:700;font-family:\'Inter\',sans-serif;color:${totalAting>=100?'var(--green)':totalAting>=70?'var(--amber)':'var(--red)'}">${totalAting}%</td>
+      <td style="padding:8px 6px;text-align:center"></td>
     </tr>`;
 
     // Render S1-S4 forecast grid (estilo Meu Resultado)
