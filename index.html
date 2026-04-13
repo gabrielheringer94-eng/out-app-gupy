@@ -1597,7 +1597,7 @@ function buildResultadoGestor(pane){
   pane.innerHTML='<div style="font-size:11px;color:var(--text3);margin-bottom:12px;font-family:\'Inter\',sans-serif">Abril 2026 · Semana '+semAtual+' de '+semTotal+'</div>'
 
     // ── Hero: resultado do mês ──
-    +'<div style="background:linear-gradient(135deg,'+(gapProj>=0?'#16a34a':'#dc2626')+','+(gapProj>=0?'#15803d':'#b91c1c')+');border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow-lg)">'
+    +'<div style="background:linear-gradient(145deg,'+(gapProj>=0?'#16a34a 0%,#0f766e 50%,#15803d':'#dc2626 0%,#991b1b 50%,#7f1d1d')+' 100%);border-radius:var(--radius);padding:18px;margin-bottom:12px;box-shadow:var(--shadow-lg)">'
     +'<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">Resultado do mês — Abril 2026</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
     +'<div style="text-align:center"><div style="font-size:32px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">'+oppsAcum+'</div><div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:2px">Atual</div></div>'
@@ -1734,16 +1734,17 @@ function buildResultadoGestor(pane){
 function buildResumo(pane){
   const d=DATA;
 
-  // ── Cálculos base ──
+  // ── Cálculos base (usa acumulado do mês, não da semana) ──
+  const oppsAcumMes=d.mesAbril?d.mesAbril.opps:d.funil.oportunidades;
   const diasPassados=DATA.semAtual*7;  // semanas corridas
   const diasTotais=30;
   const diasRestantes=diasTotais-diasPassados;
   const diasUteisRestantes=21;   // estimativa dias úteis restantes
-  const mediaDiaria=d.funil.oportunidades/diasPassados;
+  const mediaDiaria=oppsAcumMes/Math.max(diasPassados,1);
   const proj=Math.round(mediaDiaria*diasTotais);
-  const gap=d.funil.oportunidades-d.meta;
+  const gap=oppsAcumMes-d.meta;
   const gapProj=proj-d.meta;
-  const pctAtual=Math.min(Math.round((d.funil.oportunidades/d.meta)*100),100);
+  const pctAtual=Math.min(Math.round((oppsAcumMes/d.meta)*100),100);
   const pctProj=Math.min(Math.round((proj/d.meta)*100),100);
   const paceEsp=Math.round((d.meta/diasTotais)*diasPassados);
 
@@ -1817,15 +1818,15 @@ function buildResumo(pane){
 
     <!-- ═══ BLOCO 1: META & FORECAST HERO ═══ -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-    <div style="background:linear-gradient(135deg,${gapProj>=0?'#16a34a':'#dc2626'} 0%,${gapProj>=0?'#15803d':'#b91c1c'} 100%);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-lg)">
+    <div style="background:linear-gradient(145deg,${gapProj>=0?'#16a34a 0%,#0f766e 50%,#15803d':'#dc2626 0%,#991b1b 50%,#7f1d1d'} 100%);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-lg)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.07em">Meta Abril · ${d.meta} opps</div>
         <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.9);background:rgba(255,255,255,.2);padding:2px 8px;border-radius:20px">${gapProj>=0?'No pace ▲':'Risco ▼'}</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;text-align:center">
         <div>
-          <div style="font-size:24px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">${d.funil.oportunidades}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Atual</div>
+          <div style="font-size:24px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">${oppsAcumMes}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Atual (mês)</div>
         </div>
         <div style="border-left:1px solid rgba(255,255,255,.2);border-right:1px solid rgba(255,255,255,.2)">
           <div style="font-size:24px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">${proj}</div>
@@ -1846,7 +1847,7 @@ function buildResumo(pane){
       </div>
     </div>
     <!-- FORECAST DA SEMANA -->
-    <div style="background:linear-gradient(135deg,var(--accent) 0%,#1e40af 100%);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-lg)">
+    <div style="background:linear-gradient(145deg,#2563eb 0%,#1e40af 40%,#1e3a5f 100%);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-lg)">
       <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Forecast · Semana ${d.semAtual}</div>
       <div id="resumo-fcst-semana" style="text-align:center;color:rgba(255,255,255,.5);font-size:11px">Carregando...</div>
     </div>
@@ -5325,27 +5326,33 @@ async function supaFetch(table,params=''){
 }
 
 async function loadDataFromSupabase(){
-  const semanas=await supaFetch('gp_semanas','order=id.desc&limit=1');
-  if(!semanas||semanas.length===0) throw new Error('Sem dados');
-  const sem=semanas[0];
+  // Busca a semana mais recente COM dados (não zerada)
+  const allSemanas=await supaFetch('gp_semanas','order=id.desc');
+  if(!allSemanas||allSemanas.length===0) throw new Error('Sem dados');
+  // Prioriza semana com dados reais; se todas zeradas, usa a mais recente
+  const sem=allSemanas.find(s=>s.oportunidades>0||s.abordagem_iniciada>0)||allSemanas[0];
   const bdrsDB=await supaFetch('gp_bdr_resultados',`semana_id=eq.${sem.id}&order=opps.desc`);
   const meetroxDB=await supaFetch('gp_meetrox',`semana_id=eq.${sem.id}`);
 
   // Atualiza DATA com valores do Supabase (mantém fotos/cores estáticas)
   DATA.meta=sem.meta; DATA.metaBDR=sem.meta_bdr;
-  DATA.semAtual=sem.sem_atual; DATA.semTotal=sem.sem_total;
+  // semAtual vem de calcSemAtual(), não do Supabase — para não regredir
+  DATA.semTotal=sem.sem_total;
   DATA.semana=sem.semana||''; DATA.periodo=sem.periodo||''; DATA.mes=sem.mes||'';
-  DATA.funil={
-    novoLead:sem.novo_lead, abordagemIniciada:sem.abordagem_iniciada,
-    leadConectado:sem.lead_conectado, reuniaoAgendada:sem.reuniao_agendada,
-    oportunidades:sem.oportunidades, desqualificados:sem.desqualificados,
-  };
-  DATA.conversoes={
-    aiLc:{real:sem.conv_ai_lc,meta:sem.conv_ai_lc_meta},
-    lcRa:{real:sem.conv_lc_ra,meta:sem.conv_lc_ra_meta},
-    raOp:{real:sem.conv_ra_op,meta:sem.conv_ra_op_meta},
-  };
-  bdrsDB.forEach(row=>{
+  // Funil: só sobrescreve se Supabase tem dados
+  if(sem.abordagem_iniciada>0||sem.oportunidades>0){
+    DATA.funil={
+      novoLead:sem.novo_lead, abordagemIniciada:sem.abordagem_iniciada,
+      leadConectado:sem.lead_conectado, reuniaoAgendada:sem.reuniao_agendada,
+      oportunidades:sem.oportunidades, desqualificados:sem.desqualificados,
+    };
+    DATA.conversoes={
+      aiLc:{real:sem.conv_ai_lc,meta:sem.conv_ai_lc_meta},
+      lcRa:{real:sem.conv_lc_ra,meta:sem.conv_lc_ra_meta},
+      raOp:{real:sem.conv_ra_op,meta:sem.conv_ra_op_meta},
+    };
+  }
+  if(bdrsDB&&bdrsDB.length>0) bdrsDB.forEach(row=>{
     const b=DATA.bdrs.find(b=>b.id===row.bdr_id);
     if(!b) return;
     b.opps=row.opps; b.ras=row.ras; b.lig=row.ligacoes;
