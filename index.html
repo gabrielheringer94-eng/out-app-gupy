@@ -2082,8 +2082,8 @@ function buildTimeGestor(pane){
       <div id="${cid}" style="display:none;padding:0 12px 12px">
       <div style="margin-bottom:8px"></div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px">
-        <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px">
-          <div style="font-size:16px;font-weight:600;font-family:\'Inter\',sans-serif;color:${b.opps>0?'var(--green)':'var(--red)'}">${b.opps||'0'}</div>
+        <div onclick="showOppsModal('${b.id}')" style="cursor:pointer;text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px;transition:opacity .15s" onmouseenter="this.style.opacity='.7'" onmouseleave="this.style.opacity='1'">
+          <div style="font-size:16px;font-weight:600;font-family:\'Inter\',sans-serif;color:${b.opps>0?'var(--green)':'var(--red)'};text-decoration:underline;text-decoration-style:dotted">${b.opps||'0'}</div>
           <div style="font-size:9px;color:var(--text3);margin-top:1px">Opps</div>
         </div>
         <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px">
@@ -2225,7 +2225,7 @@ function buildTimeGestor(pane){
           <span style="font-size:12px;font-weight:600;color:${isTop?'var(--green)':isBot?'var(--red)':'var(--text)'}">${b.name.split(' ')[0]}</span>
         </div>
       </td>
-      <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${b.opps>0?'var(--green)':'var(--text3)'}">${b.opps||'—'}</td>
+      <td onclick="showOppsModal('${b.id}')" style="cursor:pointer;padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${b.opps>0?'var(--green)':'var(--text3)'};text-decoration:${b.opps>0?'underline':'none'};text-decoration-style:dotted">${b.opps||'—'}</td>
       <td style="padding:10px 8px;text-align:center" id="fcst-rank-${b.id}"><span style="font-size:10px;color:var(--text3)">…</span></td>
       <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${b.ras>=3?'var(--green)':b.ras>=1?'var(--amber)':'var(--red)'}">${b.ras}</td>
       <td style="padding:10px 8px;text-align:center;font-size:13px;font-family:\'Inter\',sans-serif;font-weight:700;color:${raPend>0?'var(--amber)':'var(--text3)'}">${raPend>0?raPend:'—'}</td>
@@ -4349,10 +4349,10 @@ function buildHoje(pane, bdr){
         <div style="width:${pctMetaBDR}%;height:100%;background:#fff;border-radius:4px"></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button onclick="(function(){document.querySelectorAll('.nav-item').forEach(function(b){if(b.querySelector('.nav-label')&&b.querySelector('.nav-label').textContent==='Meu Resultado'){b.click();}});})()"
+        <button onclick="showOppsModal('${bdr.id}')"
           style="background:rgba(255,255,255,.15);border:none;border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:background .15s;font-family:inherit"
           onmouseenter="this.style.background='rgba(255,255,255,.25)'" onmouseleave="this.style.background='rgba(255,255,255,.15)'">
-          <div style="font-size:26px;font-weight:700;font-family:\'Inter\',sans-serif;color:#fff">${bdr.opps||'0'}</div>
+          <div style="font-size:26px;font-weight:700;font-family:\'Inter\',sans-serif;color:#fff;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">${bdr.opps||'0'}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Opps ↗</div>
         </button>
         <button onclick="(function(){document.querySelectorAll('.nav-item').forEach(function(b){if(b.querySelector('.nav-label')&&b.querySelector('.nav-label').textContent==='Meu Resultado'){b.click();}});})()"
