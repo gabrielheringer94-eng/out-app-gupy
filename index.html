@@ -2842,12 +2842,12 @@ function buildWeekly(pane){
       </div>
       <div id="weekly-highlights" style="margin-top:10px">
         <!-- Top Performer -->
-        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:linear-gradient(135deg,rgba(22,163,74,0.06),rgba(22,163,74,0.02));border-radius:var(--radius-sm);border:1px solid rgba(22,163,74,0.15);margin-bottom:10px">
-          ${topBdr.photo?`<img src="${topBdr.photo}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:3px solid var(--green)">`:`<div style="width:48px;height:48px;border-radius:50%;background:${topBdr.bg};color:${topBdr.color};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;border:3px solid var(--green)">${topBdr.id}</div>`}
+        <div style="display:flex;align-items:center;gap:16px;padding:14px;background:linear-gradient(135deg,rgba(22,163,74,0.08),rgba(22,163,74,0.02));border-radius:12px;border:1px solid rgba(22,163,74,0.15);margin-bottom:10px">
+          ${topBdr.photo?`<img src="${topBdr.photo}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--green);box-shadow:0 4px 12px rgba(22,163,74,0.25)">`:`<div style="width:72px;height:72px;border-radius:50%;background:${topBdr.bg};color:${topBdr.color};display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;border:3px solid var(--green)">${topBdr.id}</div>`}
           <div style="flex:1">
-            <div style="font-size:9px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Top Performer</div>
-            <div style="font-size:14px;font-weight:700;color:var(--text)">${topBdr.name.split(' ')[0]}</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:2px">${topBdr.opps} opps · ${topBdr.ras} RAs · ${topBdr.lig} lig</div>
+            <div style="font-size:9px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">⭐ Top Performer da Semana</div>
+            <div style="font-size:16px;font-weight:700;color:var(--text)">${topBdr.name}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:3px">${topBdr.opps} opps · ${topBdr.ras} RAs · ${topBdr.lig} ligações</div>
           </div>
           <div onclick="showOppsModal('${topBdr.id}')" style="cursor:pointer;text-align:center;padding:8px 12px;background:var(--green-bg);border-radius:8px;transition:opacity .15s" onmouseenter="this.style.opacity='.8'" onmouseleave="this.style.opacity='1'">
             <div style="font-size:18px;font-weight:700;color:var(--green);font-family:'Inter',sans-serif;text-decoration:underline;text-decoration-style:dotted">${topBdr.opps}</div>
@@ -2922,6 +2922,28 @@ function buildWeekly(pane){
       </div>
     </div>
 
+    <!-- ═══ SLIDE 4.5: AGENDA & EVENTOS DA SEMANA ═══ -->
+    <div class="card" style="margin-bottom:14px;border-left:3px solid #8b5cf6">
+      <div class="collapsible-header" onclick="toggleCard('weekly-agenda',this)" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:10px;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.08em">📅 Agenda & Eventos</div>
+        <span class="collapse-icon" style="font-size:14px;color:var(--text3)">▾</span>
+      </div>
+      <div id="weekly-agenda" style="margin-top:10px">
+        <!-- Eventos salvos -->
+        <div id="weekly-events-list"></div>
+
+        <!-- Adicionar evento -->
+        <div style="border:1.5px dashed var(--border);border-radius:10px;padding:10px;margin-top:8px">
+          <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">Adicionar evento</div>
+          <div style="display:flex;gap:6px;margin-bottom:6px">
+            <input id="weekly-event-date" type="date" style="flex:0 0 130px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg2)">
+            <input id="weekly-event-text" type="text" placeholder="Ex: Weekly do time, 1:1 com Mydoha, Treinamento pitch..." style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg2)">
+          </div>
+          <button onclick="addWeeklyEvent()" style="width:100%;padding:7px;background:#8b5cf6;color:white;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">+ Adicionar</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ SLIDE 5: AÇÕES DA PRÓXIMA SEMANA ═══ -->
     <div class="card" style="margin-bottom:14px;border-left:3px solid var(--accent)">
       <div class="collapsible-header" onclick="toggleCard('weekly-actions',this)" style="display:flex;align-items:center;justify-content:space-between">
@@ -2972,6 +2994,9 @@ function buildWeekly(pane){
         }).join('')}
       </div>
     </div>`;
+
+  // Render events from localStorage
+  renderWeeklyEvents();
 
   // Load forecast detail async
   (async function(){
@@ -4846,6 +4871,53 @@ async function saveEditForecast(bdrId,forecastId,semId){
 }
 
 // ─── COLLAPSIBLE CARDS ────────────────────────────────────────
+// ── Agenda/Eventos Weekly ──
+function getWeeklyEvents(){
+  return JSON.parse(localStorage.getItem('weekly_events')||'[]');
+}
+function saveWeeklyEvents(events){
+  localStorage.setItem('weekly_events',JSON.stringify(events));
+}
+function addWeeklyEvent(){
+  var dateEl=document.getElementById('weekly-event-date');
+  var textEl=document.getElementById('weekly-event-text');
+  if(!textEl||!textEl.value.trim()){alert('Descreva o evento.');return;}
+  var events=getWeeklyEvents();
+  var dateStr=dateEl&&dateEl.value?dateEl.value:'';
+  var formatted='';
+  if(dateStr){
+    var parts=dateStr.split('-');
+    formatted=parts[2]+'/'+parts[1];
+  }
+  events.push({id:Date.now(),date:dateStr,dateFormatted:formatted,text:textEl.value.trim()});
+  events.sort(function(a,b){return(a.date||'9999')>(b.date||'9999')?1:-1;});
+  saveWeeklyEvents(events);
+  textEl.value='';
+  if(dateEl) dateEl.value='';
+  renderWeeklyEvents();
+}
+function removeWeeklyEvent(id){
+  var events=getWeeklyEvents().filter(function(e){return e.id!==id;});
+  saveWeeklyEvents(events);
+  renderWeeklyEvents();
+}
+function renderWeeklyEvents(){
+  var el=document.getElementById('weekly-events-list');
+  if(!el) return;
+  var events=getWeeklyEvents();
+  if(events.length===0){el.innerHTML='<div style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Nenhum evento adicionado.</div>';return;}
+  el.innerHTML=events.map(function(e){
+    var isPast=e.date&&new Date(e.date)<new Date(new Date().toDateString());
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:'+(isPast?'var(--bg3)':'rgba(139,92,246,0.06)')+';border:1px solid '+(isPast?'var(--border)':'rgba(139,92,246,0.15)')+'">'
+      +'<div style="flex-shrink:0;width:40px;text-align:center">'
+      +(e.dateFormatted?'<div style="font-size:13px;font-weight:700;color:'+(isPast?'var(--text3)':'#8b5cf6')+';font-family:\'Inter\',sans-serif">'+e.dateFormatted+'</div>':'<div style="font-size:11px;color:var(--text3)">—</div>')
+      +'</div>'
+      +'<div style="flex:1;font-size:12px;font-weight:500;color:'+(isPast?'var(--text3)':'var(--text)')+';'+(isPast?'text-decoration:line-through':'')+'">'+e.text+'</div>'
+      +'<button onclick="removeWeeklyEvent('+e.id+')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--text3);padding:2px 4px" title="Remover">✕</button>'
+      +'</div>';
+  }).join('');
+}
+
 // ── Modal de Oportunidades ──
 function showOppsModal(bdrFilter){
   // Remove modal existente
