@@ -1734,19 +1734,21 @@ function buildResultadoGestor(pane){
 function buildResumo(pane){
   const d=DATA;
 
-  // ── Cálculos base (usa acumulado do mês, não da semana) ──
+  // ── Cálculos base (usa acumulado do mês + dias úteis) ──
   const oppsAcumMes=d.mesAbril?d.mesAbril.opps:d.funil.oportunidades;
-  const diasPassados=DATA.semAtual*7;  // semanas corridas
-  const diasTotais=30;
-  const diasRestantes=diasTotais-diasPassados;
-  const diasUteisRestantes=21;   // estimativa dias úteis restantes
-  const mediaDiaria=oppsAcumMes/Math.max(diasPassados,1);
-  const proj=Math.round(mediaDiaria*diasTotais);
+  // Dias úteis abril 2026: S1(31mar-4abr)=3du, S2(7-11)=4du, S3(14-17)=4du, S4(22-25)=4du + extras
+  // User conta: 7 dias úteis passados até agora, 21 totais no mês
+  const diasUteisPorSem=[0,3,4,4,4]; // index 0=unused, 1=S1, 2=S2, 3=S3, 4=S4
+  const diasUteisPassados=diasUteisPorSem.slice(1,DATA.semAtual).reduce((s,v)=>s+v,0); // S1+S2=7
+  const diasUteisTotais=21; // dias úteis de abril 2026
+  const diasUteisRestantes=diasUteisTotais-diasUteisPassados;
+  const mediaDiariaUtil=oppsAcumMes/Math.max(diasUteisPassados,1);
+  const proj=Math.round(mediaDiariaUtil*diasUteisTotais);
   const gap=oppsAcumMes-d.meta;
   const gapProj=proj-d.meta;
   const pctAtual=Math.min(Math.round((oppsAcumMes/d.meta)*100),100);
   const pctProj=Math.min(Math.round((proj/d.meta)*100),100);
-  const paceEsp=Math.round((d.meta/diasTotais)*diasPassados);
+  const paceEsp=Math.round((d.meta/diasUteisTotais)*diasUteisPassados);
 
   // ── Conversões reais ──
   const conv={
@@ -1987,7 +1989,9 @@ function buildResumo(pane){
       const semId=sems[0].id;
       const fcsts=await supaFetch('gp_forecast',`semana_id=eq.${semId}`);
       const totalFcst=fcsts?fcsts.reduce((s,f)=>s+(f.fcst_op||0),0):0;
-      const realizado=d.funil.oportunidades;
+      // Realizado da semana atual = opps do gp_bdr_resultados da semana, ou 0 se não tem dados
+      const semResults=await supaFetch('gp_bdr_resultados',`semana_id=eq.${semId}`);
+      const realizado=semResults&&semResults.length>0?semResults.reduce((s,r)=>s+(r.opps||0),0):0;
       const gap=realizado-totalFcst;
       const gapCor=gap>=0?'#bbf7d0':'#fecaca';
       const atingPct=totalFcst>0?Math.min(Math.round((realizado/totalFcst)*100),100):0;
