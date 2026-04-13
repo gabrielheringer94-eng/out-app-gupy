@@ -6616,10 +6616,10 @@ function jdcBuildPerson(pid){
     +jdcCardHtml('🚀','Pilar 3 · Carreira & Desenvolvimento','Direcionamento para o futuro','','purple',carContent)
     +jdcCardHtml('⚠️','Pilar 4 · Risco de Saída & TO Indesejável','Percepção de retenção','','red',riskContent)
     +'<div style="margin:20px 0 40px;display:flex;flex-direction:column;gap:10px">'
-    +'<button onclick="jdcSave();this.textContent=\'Salvo ✓\';this.style.background=\'var(--green)\';var b=this;setTimeout(function(){b.textContent=\'Salvar Avaliação de '+p.name.split("'").join("\\'")+'\';b.style.background=\'var(--accent)\';},2000)" style="width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;box-shadow:var(--shadow-lg);transition:all .2s">Salvar Avaliação de '+p.name+'</button>'
+    +'<button onclick="jdcSave();this.textContent=\'Salvo ✓\';this.style.background=\'var(--green)\'" style="width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;box-shadow:var(--shadow-lg);transition:all .2s">Salvar Avaliação de '+p.name.split("'").join('')+'</button>'
     +'<div style="display:flex;gap:8px">'
-    +'<button onclick="if(confirm(\'Exportar JSON?\'))jdcExport()" style="flex:1;padding:10px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">Exportar JSON</button>'
-    +'<button onclick="(function(){var idx=JDC_PEOPLE.findIndex(function(x){return x.id===\''+p.id+'\';});if(idx<JDC_PEOPLE.length-1){jdcActive=JDC_PEOPLE[idx+1].id;jdcRender(document.querySelector(\'.person-section.active\')?.closest(\'[data-built]\\')||document.getElementById(\'evalView\')?.parentElement);window.scrollTo(0,0);}})()" style="flex:1;padding:10px;background:var(--bg3);color:var(--text);border:1px solid rgba(0,18,47,0.14);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">Próximo BDR →</button>'
+    +'<button onclick="jdcExport()" style="flex:1;padding:10px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">Exportar JSON</button>'
+    +'<button onclick="jdcNextPerson(\''+p.id+'\')" style="flex:1;padding:10px;background:var(--bg3);color:var(--text);border:1px solid rgba(0,18,47,0.14);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">Próximo BDR →</button>'
     +'</div></div>';
 }
 
@@ -6845,6 +6845,15 @@ function jdcRender(pane){
 
 window.buildJDC=function(pane){jdcRender(pane);};
 window.jdcSave=jdcSave;
+window.jdcNextPerson=function(currentId){
+  var idx=JDC_PEOPLE.findIndex(function(x){return x.id===currentId;});
+  if(idx<JDC_PEOPLE.length-1){
+    jdcActive=JDC_PEOPLE[idx+1].id;
+    var pane=document.querySelector('[data-built]');
+    if(pane) jdcRender(pane);
+    window.scrollTo(0,0);
+  }
+};
 window.jdcExport=function(){
   var exp={};JDC_PEOPLE.forEach(function(p){var d=jdcData[p.id];var q=jdcCalc9box(p.id);exp[p.name]={...d,_9box:q};});
   var blob=new Blob([JSON.stringify(exp,null,2)],{type:'application/json'});
