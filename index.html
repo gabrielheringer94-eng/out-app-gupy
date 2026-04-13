@@ -1628,8 +1628,11 @@ function buildResultadoGestor(pane){
 
     // ── WoW Funil Table ──
     +'<div class="card" style="margin-bottom:12px">'
-    +'<div class="card-title" style="margin-bottom:8px">📊 Funil WoW — Time</div>'
-    +'<div id="res-wow-funil" style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Carregando...</div>'
+    +'<div class="collapsible-header" onclick="toggleCard(\'res-wow-funil\',this)" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">'
+    +'<div class="card-title" style="margin-bottom:0">📊 Funil WoW — Time</div>'
+    +'<span class="collapse-icon" style="font-size:16px;color:var(--text3)">▾</span>'
+    +'</div>'
+    +'<div id="res-wow-funil" style="font-size:11px;color:var(--text3);text-align:center;padding:8px;margin-top:10px">Carregando...</div>'
     +'</div>'
 
     // ── Funil do mês ──
@@ -1874,10 +1877,14 @@ function buildResumo(pane){
 
     <!-- ═══ BLOCO 3: DIAGNÓSTICO ═══ -->
     <div class="card" style="margin-bottom:12px;border-left:3px solid var(--amber)">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--amber)"></div>
-        <div style="font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.08em">Diagnóstico</div>
+      <div class="collapsible-header" onclick="toggleCard('res-diag-body',this)" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--amber)"></div>
+          <div style="font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.08em">Diagnóstico</div>
+        </div>
+        <span class="collapse-icon" style="font-size:14px;color:var(--text3)">▾</span>
       </div>
+      <div id="res-diag-body">
 
       <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:8px">BDRs abaixo da média (conv. Lig→RA)</div>
       ${bdrsBaixos.length>0?bdrsBaixos.map(b=>{
@@ -1904,6 +1911,7 @@ function buildResumo(pane){
           </div>
         </div>
       </div>
+      </div>
     </div>
 
     <!-- ═══ BLOCO 4: AÇÃO RECOMENDADA ═══ -->
@@ -1929,7 +1937,11 @@ function buildResumo(pane){
 
     <!-- ═══ BLOCO 5: ALAVANCAS ═══ -->
     <div class="card" style="margin-bottom:12px">
-      <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Alavancas de crescimento</div>
+      <div class="collapsible-header" onclick="toggleCard('res-alav-body',this)" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em">Alavancas de crescimento</div>
+        <span class="collapse-icon" style="font-size:14px;color:var(--text3)">▾</span>
+      </div>
+      <div id="res-alav-body" style="margin-top:8px">
       ${alavancas.map((a,i)=>`
         <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">
           <div style="display:flex;align-items:center;gap:8px">
@@ -1941,6 +1953,7 @@ function buildResumo(pane){
         </div>`).join('')}
       <div style="padding-top:10px;font-size:11px;color:var(--text3);text-align:center">
         Potencial total: +${alavancas.reduce((s,a)=>s+a.opps,0)} oportunidades adicionais
+      </div>
       </div>
     </div>
 
@@ -1976,10 +1989,15 @@ function buildResumo(pane){
       const realizado=d.funil.oportunidades;
       const gap=realizado-totalFcst;
       const gapCor=gap>=0?'#bbf7d0':'#fecaca';
+      const atingPct=totalFcst>0?Math.min(Math.round((realizado/totalFcst)*100),100):0;
+      const submitted=fcsts?fcsts.filter(f=>(f.fcst_op||0)>0).length:0;
+      const totalBdrs=DATA.bdrs.length;
+      const allSubmitted=submitted>=totalBdrs;
+      const allApproved=fcsts&&fcsts.length>0&&fcsts.every(f=>f.status==='aprovado');
       const el=document.getElementById('resumo-fcst-semana');
       if(!el) return;
       el.innerHTML=`
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;margin-bottom:8px">
           <div>
             <div style="font-size:24px;font-weight:700;font-family:'Inter',sans-serif;color:white;line-height:1">${totalFcst}</div>
             <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Forecast</div>
@@ -1992,7 +2010,14 @@ function buildResumo(pane){
             <div style="font-size:24px;font-weight:700;font-family:'Inter',sans-serif;color:${gapCor};line-height:1">${gap>=0?'+':''}${gap}</div>
             <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Gap</div>
           </div>
-        </div>`;
+        </div>
+        <div style="height:4px;background:rgba(255,255,255,.2);border-radius:2px;overflow:hidden;margin-bottom:4px">
+          <div style="width:${atingPct}%;height:100%;background:white;border-radius:2px;transition:width .3s"></div>
+        </div>
+        <div style="font-size:9px;color:rgba(255,255,255,.5);margin-bottom:6px">${atingPct}% atingido · ${submitted}/${totalBdrs} BDRs enviaram</div>
+        ${allSubmitted&&!allApproved?`
+          <button id="btn-approve-all-fcst" onclick="approveAllForecasts(${semId})" style="width:100%;font-size:11px;font-weight:600;color:var(--accent);background:white;border:none;border-radius:8px;padding:8px;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .15s">Aprovar Forecast S${d.semAtual}</button>`
+          :allApproved?`<div style="font-size:10px;color:#bbf7d0;font-weight:600">✅ Forecast aprovado</div>`:''}`;
     }catch(e){console.warn('Forecast resumo:',e);}
   })();
 }
@@ -2260,6 +2285,7 @@ async function loadGestorForecast(){
             <div style="display:flex;gap:3px">
               <button onclick="approveForecast(${f.id},'${bdr.id}')" style="font-size:8px;padding:2px 5px;border:1px solid var(--green);color:var(--green);background:transparent;border-radius:6px;cursor:pointer" title="Aprovar">✓</button>
               <button onclick="showReflectInput(${f.id},'${bdr.id}')" style="font-size:8px;padding:2px 5px;border:1px solid var(--red);color:var(--red);background:transparent;border-radius:6px;cursor:pointer" title="Pedir reflexão">↺</button>
+              <button onclick="resetForecast(${f.id},'${bdr.id}')" style="font-size:8px;padding:2px 5px;border:1px solid var(--text3);color:var(--text3);background:transparent;border-radius:6px;cursor:pointer" title="Zerar forecast">🗑</button>
             </div>
             ${(f.status||'aguardando')==='reflita'&&f.justificativa?`<div style="font-size:8px;color:var(--red);max-width:80px;word-wrap:break-word;margin-top:2px">"${f.justificativa}"</div>`:''}
             <div id="reflect-input-${bdr.id}" style="display:none"></div>
@@ -2366,25 +2392,50 @@ async function loadForecastHistory(){
       const results=await supaFetch('gp_bdr_resultados',`semana_id=eq.${sem.id}`);
       allData.push({sem,fcsts:fcsts||[],results:results||[]});
     }
-    var html='<table style="width:100%;border-collapse:collapse;font-family:\'Inter\',sans-serif"><thead><tr>';
-    html+='<th style="text-align:left;font-size:9px;color:var(--text3);padding:4px 6px">BDR</th>';
-    allData.forEach(d=>{ html+=`<th style="text-align:center;font-size:9px;color:var(--text3);padding:4px 4px" colspan="2">S${d.sem.sem_atual}<br><span style="font-size:8px">fcst/real</span></th>`;});
+    // Score BDRs for ranking
+    const scored=[...DATA.bdrs].map(b=>{
+      let totalFcst=0,totalReal=0;
+      allData.forEach(d=>{
+        const f=d.fcsts.find(x=>x.bdr_id===b.id);
+        const r=d.results.find(x=>x.bdr_id===b.id);
+        if(f) totalFcst+=f.fcst_op||0;
+        if(r) totalReal+=r.opps||0;
+      });
+      return {...b,totalFcst,totalReal,acc:totalFcst>0?Math.round((totalReal/totalFcst)*100):0};
+    }).sort((a,b)=>b.acc-a.acc);
+
+    var html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:400px;font-family:\'Inter\',sans-serif">';
+    html+='<thead><tr style="background:var(--bg3);border-bottom:2px solid var(--border)">';
+    html+='<th style="padding:8px 10px;text-align:left;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">BDR</th>';
+    allData.forEach(d=>{
+      const isCur=d.sem.sem_atual===DATA.semAtual;
+      html+=`<th style="padding:8px 4px;text-align:center;font-size:9px;color:${isCur?'var(--accent)':'var(--text3)'};text-transform:uppercase;letter-spacing:.05em;font-weight:${isCur?'700':'600'}">S${d.sem.sem_atual} Fcst</th>`;
+      html+=`<th style="padding:8px 4px;text-align:center;font-size:9px;color:${isCur?'var(--accent)':'var(--text3)'};text-transform:uppercase;letter-spacing:.05em;font-weight:${isCur?'700':'600'}">S${d.sem.sem_atual} Real</th>`;
+    });
+    html+='<th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Acur.</th>';
     html+='</tr></thead><tbody>';
-    DATA.bdrs.forEach(bdr=>{
-      html+=`<tr style="border-bottom:1px solid var(--border)">`;
-      html+=`<td style="font-size:10px;font-weight:600;color:var(--text);padding:5px 6px;white-space:nowrap">${bdr.name.split(' ')[0]}</td>`;
+    scored.forEach((bdr,i)=>{
+      const isTop=i<3,isBot=i>=scored.length-3;
+      const rowBg=isTop?'rgba(22,163,74,0.04)':isBot?'rgba(220,38,38,0.04)':'';
+      const photoHtml=bdr.photo
+        ?`<img src="${bdr.photo}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0">`
+        :`<div style="width:22px;height:22px;border-radius:50%;background:${bdr.bg};color:${bdr.color};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0">${bdr.id}</div>`;
+      html+=`<tr style="border-bottom:1px solid var(--border);background:${rowBg}">`;
+      html+=`<td style="padding:8px 10px"><div style="display:flex;align-items:center;gap:6px">${photoHtml}<span style="font-size:11px;font-weight:600;color:${isTop?'var(--green)':isBot?'var(--red)':'var(--text)'}">${bdr.name.split(' ')[0]}</span></div></td>`;
       allData.forEach(d=>{
         const f=d.fcsts.find(x=>x.bdr_id===bdr.id);
         const r=d.results.find(x=>x.bdr_id===bdr.id);
         const fcst=f?f.fcst_op:null;
         const real=r?r.opps:null;
         const col=fcst!==null&&real!==null?(real>=fcst?'var(--green)':'var(--red)'):'var(--text3)';
-        html+=`<td style="text-align:center;font-size:11px;color:var(--accent);padding:5px 2px;font-weight:600">${fcst!==null?fcst:'—'}</td>`;
-        html+=`<td style="text-align:center;font-size:11px;color:${col};padding:5px 2px;font-weight:700">${real!==null?real:'—'}</td>`;
+        html+=`<td style="padding:8px 4px;text-align:center;font-size:12px;font-weight:600;color:var(--accent)">${fcst!==null?fcst:'—'}</td>`;
+        html+=`<td style="padding:8px 4px;text-align:center;font-size:12px;font-weight:700;color:${col}">${real!==null?real:'—'}</td>`;
       });
+      const accCol=bdr.acc>=100?'var(--green)':bdr.acc>=50?'var(--amber)':'var(--red)';
+      html+=`<td style="padding:8px 8px;text-align:center"><span style="font-size:11px;font-weight:700;padding:2px 6px;border-radius:8px;background:${bdr.acc>=100?'var(--green-bg)':bdr.acc>=50?'var(--amber-bg)':'var(--red-bg)'};color:${accCol}">${bdr.totalFcst>0?bdr.acc+'%':'—'}</span></td>`;
       html+='</tr>';
     });
-    html+='</tbody></table>';
+    html+='</tbody></table></div>';
     el.innerHTML=html;
   }catch(e){el.innerHTML='Indisponível offline.';console.warn('Forecast history:',e);}
 }
@@ -2400,6 +2451,42 @@ async function keepForecast(forecastId, bdrId){
     var bdr=DATA.bdrs.find(b=>b.id===bdrId);
     if(bdr) loadBDRForecast(bdr);
   }catch(e){console.warn('Keep forecast error:',e);}
+}
+
+// ── Approve All Forecasts (from Resumo card) ──
+async function approveAllForecasts(semId){
+  if(!confirm('Aprovar o forecast de todos os BDRs para esta semana?')) return;
+  try{
+    const fcsts=await supaFetch('gp_forecast',`semana_id=eq.${semId}`);
+    if(!fcsts) return;
+    for(const f of fcsts){
+      if(f.status!=='aprovado'){
+        await fetch(`${SUPA_URL}/rest/v1/gp_forecast?id=eq.${f.id}`,{
+          method:'PATCH',
+          headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+          body:JSON.stringify({status:'aprovado',status_changed_at:new Date().toISOString(),status_changed_by:currentUser?currentUser.id:'GESTOR'})
+        });
+      }
+    }
+    var btn=document.getElementById('btn-approve-all-fcst');
+    if(btn) btn.outerHTML='<div style="font-size:10px;color:#bbf7d0;font-weight:600">✅ Forecast aprovado</div>';
+  }catch(e){console.warn('Approve all error:',e);}
+}
+
+// ── Reset Forecast ──
+async function resetForecast(forecastId, bdrId){
+  if(!confirm('Zerar o forecast deste BDR?')) return;
+  try{
+    await fetch(`${SUPA_URL}/rest/v1/gp_forecast?id=eq.${forecastId}`,{
+      method:'PATCH',
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({fcst_lc:0,fcst_ra:0,fcst_op:0,status:'aguardando',justificativa:null,status_changed_at:new Date().toISOString(),status_changed_by:currentUser?currentUser.id:'GESTOR'})
+    });
+    loadGestorForecast();
+    loadForecastHistory();
+    var bdr=DATA.bdrs.find(b=>b.id===bdrId);
+    if(bdr) loadBDRForecast(bdr);
+  }catch(e){console.warn('Reset forecast error:',e);}
 }
 
 // ── Forecast Approval Functions ──
@@ -4254,6 +4341,9 @@ async function loadBDRForecast(bdr){
               <div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--accent)">${v}</div>
               <div style="font-size:9px;color:var(--text3);text-transform:uppercase;margin-top:3px">${l}</div>
             </div>`).join('')}
+        </div>
+        <div style="margin-top:10px;text-align:center">
+          <button onclick="resetForecast(${f.id},'${bdr.id}')" style="font-size:10px;font-weight:500;color:var(--text3);background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:'Inter',sans-serif">Resetar Forecast</button>
         </div>`;
       return;
     }
