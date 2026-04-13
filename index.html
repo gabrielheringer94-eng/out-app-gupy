@@ -2131,6 +2131,7 @@ function buildTimeGestor(pane){
       <div style="width:10px;height:10px;border-radius:50%;background:var(--accent)"></div>
       <span style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em">Forecast do time — por semana</span>
     </div>
+    <div id="gestor-fcst-selector" style="display:flex;gap:4px;margin-bottom:10px;justify-content:center"></div>
     <div id="forecast-semanas-grid" class="card" style="margin-bottom:14px;padding:12px">
       <div style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Carregando...</div>
     </div>
@@ -2234,13 +2235,22 @@ function buildTimeGestor(pane){
   loadForecastHistory();
 }
 
-async function loadGestorForecast(){
+async function loadGestorForecast(forceSemId){
   const tbody=document.getElementById('forecast-table-body');
   if(!tbody) return;
   try{
-    const semanas=await supaFetch('gp_semanas','order=id.desc&limit=1');
-    if(!semanas||!semanas[0]){tbody.innerHTML='<tr><td colspan="6" style="padding:12px;text-align:center;font-size:12px;color:var(--text3)">Sem semana ativa.</td></tr>';return;}
-    const semId=semanas[0].id;
+    const allSemanas=await supaFetch('gp_semanas','order=id.asc');
+    if(!allSemanas||!allSemanas.length){tbody.innerHTML='<tr><td colspan="5" style="padding:12px;text-align:center;font-size:12px;color:var(--text3)">Sem semana ativa.</td></tr>';return;}
+    const semId=forceSemId||allSemanas.find(s=>s.sem_atual===DATA.semAtual)?.id||allSemanas[allSemanas.length-1].id;
+    // Render semana selector above the table
+    var selectorEl=document.getElementById('gestor-fcst-selector');
+    if(selectorEl){
+      selectorEl.innerHTML=allSemanas.map(s=>{
+        const isActive=s.id===semId;
+        const isCur=s.sem_atual===DATA.semAtual;
+        return `<button onclick="loadGestorForecast(${s.id})" style="font-size:11px;font-weight:${isActive?'700':'500'};padding:5px 12px;border-radius:20px;border:${isActive?'2px solid var(--accent)':'1px solid var(--border)'};background:${isActive?'var(--accent-light)':'transparent'};color:${isActive?'var(--accent)':'var(--text3)'};cursor:pointer;font-family:'Inter',sans-serif">S${s.sem_atual}${isCur?' ●':''}</button>`;
+      }).join('');
+    }
     const forecasts=await supaFetch('gp_forecast',`semana_id=eq.${semId}&order=bdr_nome.asc`);
 
     if(!forecasts||forecasts.length===0){
@@ -4293,28 +4303,38 @@ function buildHoje(pane, bdr){
   // Push settings moved to ⚙ Settings panel
 }
 
-async function loadBDRForecast(bdr){
+async function loadBDRForecast(bdr, forceSemId){
   const el=document.getElementById(`forecast-content-${bdr.id}`);
   if(!el) return;
   try{
-    // Get current semana_id
-    const semanas=await supaFetch('gp_semanas','order=id.desc&limit=1');
-    if(!semanas||!semanas[0]){el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Sem semana ativa.</div>';return;}
-    const semId=semanas[0].id;
+    // Get all semanas for selector
+    const allSemanas=await supaFetch('gp_semanas','order=id.asc');
+    if(!allSemanas||!allSemanas.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Sem semana ativa.</div>';return;}
+    // Default to forceSemId or current semana
+    const targetSem=forceSemId||allSemanas.find(s=>s.sem_atual===DATA.semAtual)?.id||allSemanas[allSemanas.length-1].id;
+    const semId=targetSem;
+    // Render semana selector chips
+    const selectorHtml='<div style="display:flex;gap:4px;margin-bottom:12px;justify-content:center">'+allSemanas.map(s=>{
+      const isActive=s.id===semId;
+      const isCur=s.sem_atual===DATA.semAtual;
+      return `<button onclick="loadBDRForecast(DATA.bdrs.find(b=>b.id==='${bdr.id}'),${s.id})" style="font-size:11px;font-weight:${isActive?'700':'500'};padding:5px 12px;border-radius:20px;border:${isActive?'2px solid var(--accent)':'1px solid var(--border)'};background:${isActive?'var(--accent-light)':'transparent'};color:${isActive?'var(--accent)':'var(--text3)'};cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s">S${s.sem_atual}${isCur?' ●':''}</button>`;
+    }).join('')+'</div>';
+    el.innerHTML=selectorHtml+'<div id="forecast-sem-content-${bdr.id}"><div style="text-align:center;padding:8px;color:var(--text3);font-size:11px">Carregando...</div></div>';
+    const contentEl=document.getElementById(`forecast-sem-content-${bdr.id}`)||el;
 
     // Check if already submitted
     const existing=await supaFetch('gp_forecast',`semana_id=eq.${semId}&bdr_id=eq.${bdr.id}`);
     const isGestor=currentUser&&currentUser.isGestor;
     if(existing&&existing.length>0){
       const f=existing[0];
-      const dt=new Date(f.enviado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const dt=f.enviado_em?new Date(f.enviado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
       const fStatus=f.status||'aguardando';
       const statusBg=fStatus==='aprovado'?'#f0fdf4':fStatus==='reflita'?'#fff5f5':'#fffbeb';
       const statusBorder=fStatus==='aprovado'?'#bbf7d0':fStatus==='reflita'?'#fecaca':'#fde68a';
       const statusIcon=fStatus==='aprovado'?'✅':fStatus==='reflita'?'🔄':'⏳';
       const statusLabel=fStatus==='aprovado'?'Aprovado pela liderança':fStatus==='reflita'?'Liderança pediu reflexão':'Aguardando aprovação da liderança';
       const statusColor=fStatus==='aprovado'?'var(--green)':fStatus==='reflita'?'var(--red)':'var(--amber)';
-      el.innerHTML=`
+      contentEl.innerHTML=`
         <div style="background:${statusBg};border:1px solid ${statusBorder};border-radius:var(--radius-sm);padding:12px;margin-bottom:12px">
           <div style="display:flex;align-items:center;justify-content:space-between">
             <div style="display:flex;align-items:center;gap:8px">
@@ -4404,7 +4424,7 @@ async function loadBDRForecast(bdr){
     }
 
     // Show input form
-    el.innerHTML=`
+    contentEl.innerHTML=`
       <div style="background:rgba(0,60,253,0.05);border:1px solid rgba(0,60,253,0.15);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:14px">
         <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px">Este é o seu compromisso.</div>
         <div style="font-size:12px;color:var(--text2);line-height:1.6">Seu forecast é visível para o gestor e para o time. Seja honesto — um bom forecast não é o número que você quer, é o número que você acredita que vai entregar.</div>
@@ -4510,7 +4530,7 @@ async function loadBDRForecast(bdr){
         Assumir meu forecast ↗
       </button>`;
   }catch(e){
-    el.innerHTML=`<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Forecast indisponível offline.</div>`;
+    (contentEl||el).innerHTML=`<div style="font-size:12px;color:var(--text3);text-align:center;padding:12px">Forecast indisponível offline.</div>`;
   }
 }
 
@@ -4529,7 +4549,7 @@ async function submitForecast(bdrId,bdrNome,semId,btnRef){
     });
     if(!r.ok) throw new Error(await r.text());
     const bdr=DATA.bdrs.find(b=>b.id===bdrId);
-    if(bdr) loadBDRForecast(bdr);
+    if(bdr) loadBDRForecast(bdr,semId);
   }catch(e){
     btn.textContent='Assumir meu forecast ↗';btn.disabled=false;
     alert('Erro ao enviar. Verifique sua conexão.');
@@ -4557,18 +4577,18 @@ async function editForecast(bdrId,bdrNome,semId,forecastId){
         </div>`).join('')}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button onclick="loadBDRForecast(DATA.bdrs.find(b=>b.id==='${bdrId}'))"
+      <button onclick="loadBDRForecast(DATA.bdrs.find(b=>b.id==='${bdrId}'),${semId})"
         style="padding:12px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">
         Cancelar
       </button>
-      <button onclick="saveEditForecast('${bdrId}',${forecastId})"
+      <button onclick="saveEditForecast('${bdrId}',${forecastId},${semId})"
         style="padding:12px;background:var(--amber);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif">
         Salvar edição
       </button>
     </div>`;
 }
 
-async function saveEditForecast(bdrId,forecastId){
+async function saveEditForecast(bdrId,forecastId,semId){
   const lc=parseInt(document.getElementById(`fcst-lc-${bdrId}`)?.value)||0;
   const ra=parseInt(document.getElementById(`fcst-ra-${bdrId}`)?.value)||0;
   const op=parseInt(document.getElementById(`fcst-op-${bdrId}`)?.value)||0;
@@ -4583,7 +4603,7 @@ async function saveEditForecast(bdrId,forecastId){
     });
     if(!r.ok) throw new Error(await r.text());
     const bdr=DATA.bdrs.find(b=>b.id===bdrId);
-    if(bdr) loadBDRForecast(bdr);
+    if(bdr) loadBDRForecast(bdr,semId);
     // Refresh gestor table if open
     const tbody=document.getElementById('forecast-table-body');
     if(tbody) loadGestorForecast();
