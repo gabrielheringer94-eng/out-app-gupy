@@ -935,7 +935,7 @@ const DATA = {
     GF:{mar:false, fev:false, jan:false},
     JR:{mar:true,  fev:false, jan:false},
     AG:{mar:false, fev:false, jan:false},
-    AM:{mar:false, fev:false, jan:false},
+    AM:{mar:true,  fev:false, jan:false},
     PS:{mar:false, fev:false, jan:false},
   },
   // RA pendentes por BDR (reuniões agendadas ainda não realizadas)
@@ -2231,7 +2231,10 @@ function buildTimeGestor(pane){
     <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">
       <div style="padding:8px 12px;background:var(--bg3);border-bottom:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="var tb=document.getElementById('forecast-table-wrap');tb.style.display=tb.style.display==='none'?'block':'none'">
         <span style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Detalhes por BDR + Status</span>
-        <span style="font-size:14px;color:var(--text3)">▾</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button onclick="(function(){document.querySelectorAll('.fcst-action-btns').forEach(function(el){el.style.display=el.style.display==='none'?'flex':'none'});})()" style="font-size:9px;padding:3px 8px;background:var(--accent-light);color:var(--accent);border:1px solid var(--accent);border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600">Editar</button>
+          <span style="font-size:14px;color:var(--text3)">▾</span>
+        </div>
       </div>
       <div id="forecast-table-wrap" style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;min-width:460px">
@@ -2387,13 +2390,13 @@ async function loadGestorForecast(forceSemId){
         </td>
         <td style="padding:6px 6px;text-align:center" id="fcst-status-${bdr.id}">
           ${f?`<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-            <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:${(f.status||'aguardando')==='aprovado'?'var(--green-bg)':((f.status||'aguardando')==='reflita'?'var(--red-bg)':'var(--amber-bg)')};color:${(f.status||'aguardando')==='aprovado'?'var(--green)':((f.status||'aguardando')==='reflita'?'var(--red)':'var(--amber)')}">${(f.status||'aguardando')==='aprovado'?'Aprovado':(f.status||'aguardando')==='reflita'?'Reflita':'Aguardando'}</span>
-            <div style="display:flex;gap:3px">
+            <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;background:${(f.status||'aguardando')==='aprovado'?'var(--green-bg)':((f.status||'aguardando')==='reflita'?'var(--red-bg)':'var(--amber-bg)')};color:${(f.status||'aguardando')==='aprovado'?'var(--green)':((f.status||'aguardando')==='reflita'?'var(--red)':'var(--amber)')}">${(f.status||'aguardando')==='aprovado'?'Aprovado ✓':(f.status||'aguardando')==='reflita'?'Reflita':'Aguardando'}</span>
+            ${(f.status||'aguardando')!=='aprovado'?`<div class="fcst-action-btns" style="display:flex;gap:3px">
               <button onclick="approveForecast(${f.id},'${bdr.id}')" style="font-size:8px;padding:2px 5px;border:1px solid var(--green);color:var(--green);background:transparent;border-radius:6px;cursor:pointer" title="Aprovar">✓</button>
               <button onclick="showReflectInput(${f.id},'${bdr.id}')" style="font-size:8px;padding:2px 5px;border:1px solid var(--red);color:var(--red);background:transparent;border-radius:6px;cursor:pointer" title="Pedir reflexão">↺</button>
               <button onclick="resetForecast(${f.id},'${bdr.id}')" style="font-size:8px;padding:2px 5px;border:1px solid var(--text3);color:var(--text3);background:transparent;border-radius:6px;cursor:pointer" title="Zerar forecast">🗑</button>
-            </div>
-            ${(f.status||'aguardando')==='reflita'&&f.justificativa?`<div style="font-size:8px;color:var(--red);max-width:80px;word-wrap:break-word;margin-top:2px">"${f.justificativa}"</div>`:''}
+            </div>`:''}
+            ${(f.status||'aguardando')==='reflita'&&f.justificativa?renderForecastConversation(f.justificativa,f.id,bdr.id,true):''}
             <div id="reflect-input-${bdr.id}" style="display:none"></div>
           </div>`:'<span style="font-size:9px;color:var(--text3)">—</span>'}
         </td>
@@ -2621,13 +2624,75 @@ async function submitReflection(forecastId, bdrId){
   var text=(document.getElementById('reflect-text-'+bdrId)||{}).value||'';
   if(!text.trim()){alert('Justificativa obrigatória');return;}
   try{
+    // Fetch existing messages
+    var existing=await supaFetch('gp_forecast',`id=eq.${forecastId}`);
+    var msgs=[];
+    if(existing&&existing[0]&&existing[0].justificativa){
+      try{msgs=JSON.parse(existing[0].justificativa);}catch(e){msgs=[{autor:existing[0].status_changed_by||'?',texto:existing[0].justificativa,data:existing[0].status_changed_at||''}];}
+    }
+    msgs.push({autor:currentUser?currentUser.id:'GESTOR',texto:text.trim(),data:new Date().toISOString()});
     await fetch(`${SUPA_URL}/rest/v1/gp_forecast?id=eq.${forecastId}`,{
       method:'PATCH',
       headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body:JSON.stringify({status:'reflita',justificativa:text.trim(),status_changed_at:new Date().toISOString(),status_changed_by:currentUser?currentUser.id:'GESTOR'})
+      body:JSON.stringify({status:'reflita',justificativa:JSON.stringify(msgs),status_changed_at:new Date().toISOString(),status_changed_by:currentUser?currentUser.id:'GESTOR'})
     });
     loadGestorForecast();
   }catch(e){console.warn('Reflect error:',e);}
+}
+
+// Add message to forecast conversation (BDR tréplica or Gestor reply)
+async function addForecastMessage(forecastId, bdrId, text){
+  if(!text||!text.trim()) return;
+  try{
+    var existing=await supaFetch('gp_forecast',`id=eq.${forecastId}`);
+    var msgs=[];
+    if(existing&&existing[0]&&existing[0].justificativa){
+      try{msgs=JSON.parse(existing[0].justificativa);}catch(e){msgs=[{autor:'?',texto:existing[0].justificativa,data:''}];}
+    }
+    msgs.push({autor:currentUser?currentUser.id:(bdrId||'?'),texto:text.trim(),data:new Date().toISOString()});
+    await fetch(`${SUPA_URL}/rest/v1/gp_forecast?id=eq.${forecastId}`,{
+      method:'PATCH',
+      headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({justificativa:JSON.stringify(msgs),status_changed_at:new Date().toISOString()})
+    });
+    var bdr=DATA.bdrs.find(b=>b.id===bdrId);
+    if(bdr) loadBDRForecast(bdr);
+    loadGestorForecast();
+  }catch(e){console.warn('Add message error:',e);}
+}
+
+// Render conversation bubbles (horizontal scroll)
+function renderForecastConversation(justificativa, forecastId, bdrId, compact){
+  var msgs=[];
+  if(justificativa){
+    try{msgs=JSON.parse(justificativa);}catch(e){msgs=[{autor:'GESTOR',texto:justificativa,data:''}];}
+  }
+  if(!msgs.length) return '';
+  var isGestor=currentUser&&currentUser.isGestor;
+  var bubblesHtml=msgs.map(function(m){
+    var isMe=(currentUser&&currentUser.id===m.autor);
+    var autorLabel=m.autor==='GESTOR'?'Gabriel':DATA.bdrs.find(b=>b.id===m.autor)?.name?.split(' ')[0]||m.autor;
+    var dt=m.data?new Date(m.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+    var bg=m.autor==='GESTOR'?'rgba(37,99,235,0.08)':'rgba(22,163,74,0.08)';
+    var border=m.autor==='GESTOR'?'rgba(37,99,235,0.2)':'rgba(22,163,74,0.2)';
+    var col=m.autor==='GESTOR'?'var(--accent)':'var(--green)';
+    return '<div style="flex-shrink:0;width:'+(compact?'200px':'240px')+';padding:8px 10px;background:'+bg+';border:1px solid '+border+';border-radius:10px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">'
+      +'<span style="font-size:9px;font-weight:700;color:'+col+'">'+autorLabel+'</span>'
+      +'<span style="font-size:8px;color:var(--text3)">'+dt+'</span>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--text);line-height:1.4">'+m.texto+'</div>'
+      +'</div>';
+  }).join('');
+  // Reply input
+  var replyHtml='<div style="flex-shrink:0;display:flex;flex-direction:column;gap:4px;width:'+(compact?'160px':'200px')+'">'
+    +'<textarea id="fcst-reply-'+bdrId+'" placeholder="Responder..." style="width:100%;height:50px;border:1px solid var(--border);border-radius:8px;padding:6px;font-size:10px;font-family:\'Inter\',sans-serif;resize:none;box-sizing:border-box"></textarea>'
+    +'<button onclick="(function(){var t=document.getElementById(\'fcst-reply-'+bdrId+'\').value;addForecastMessage('+forecastId+',\''+bdrId+'\',t)})()" style="font-size:9px;padding:4px 8px;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;font-family:\'Inter\',sans-serif">Enviar</button>'
+    +'</div>';
+  return '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:6px">'
+    +'<div style="display:flex;gap:6px;min-width:max-content;padding-bottom:4px">'
+    +bubblesHtml+replyHtml
+    +'</div></div>';
 }
 
 // REUNIÕES
@@ -4824,9 +4889,9 @@ async function loadBDRForecast(bdr, forceSemId){
             <button onclick="editForecast('${bdr.id}','${bdr.name}',${semId},${f.id})" style="font-size:10px;font-weight:600;color:var(--accent);background:var(--accent-light);border:none;border-radius:8px;padding:5px 10px;cursor:pointer;font-family:\'Inter\',sans-serif">Editar ✎</button>
           </div>
           ${fStatus==='reflita'&&f.justificativa?`<div style="margin-top:8px;padding:10px;background:white;border-radius:8px;border:1px solid #fecaca">
-            <div style="font-size:9px;color:var(--red);font-weight:600;margin-bottom:4px">Feedback do gestor:</div>
-            <div style="font-size:11px;color:var(--text);line-height:1.4;margin-bottom:10px">${f.justificativa}</div>
-            <div style="display:flex;gap:8px">
+            <div style="font-size:9px;color:var(--red);font-weight:600;margin-bottom:4px">Conversa sobre o forecast:</div>
+            ${renderForecastConversation(f.justificativa,f.id,bdr.id,false)}
+            <div style="display:flex;gap:8px;margin-top:8px">
               <button onclick="editForecast('${bdr.id}','${bdr.name}',${semId},${f.id})" style="flex:1;font-size:11px;font-weight:600;color:white;background:var(--accent);border:none;border-radius:8px;padding:8px;cursor:pointer;font-family:'Inter',sans-serif">Ajustar Forecast</button>
               <button onclick="keepForecast(${f.id},'${bdr.id}')" style="flex:1;font-size:11px;font-weight:600;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px;cursor:pointer;font-family:'Inter',sans-serif">Manter esse</button>
             </div>
