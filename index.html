@@ -1008,18 +1008,18 @@ const DATA = {
       {label:'Reunião Ag.',val:10,pct:9,color:'#f59e0b'},
     ]
   },
-  evento:{nome:'HR4Results 2026',ativoFunil:31,ai:20,lc:9,ra:2,atrasada:1,desq:40,aiLcPct:45,lcRaPct:22},
+  evento:{nome:'HR4Results 2026',ativoFunil:13,ai:5,lc:7,ra:1,atrasada:0,desq:58,aiLcPct:Math.round(7/5*100),lcRaPct:Math.round(1/7*100)},
   hr4PassivosTime:{
-    total:{ativo:30,ai:19,lc:9,ra:2,raAtras:1,desqLc:41},
+    total:{ativo:13,ai:5,lc:7,ra:1,raAtras:0,desqLc:58},
     bdrs:[
-      {id:'AG',name:'Adhara Gonçalves', ativo:5, ai:4, lc:1, ra:0, raAtras:0, desqLc:5},
-      {id:'AM',name:'Ariane Mesquita',  ativo:6, ai:5, lc:1, ra:0, raAtras:0, desqLc:3},
+      {id:'AG',name:'Adhara Gonçalves', ativo:1, ai:0, lc:1, ra:0, raAtras:0, desqLc:9},
+      {id:'AM',name:'Ariane Mesquita',  ativo:4, ai:2, lc:2, ra:0, raAtras:0, desqLc:5},
       {id:'GF',name:'Giovana Faceto',   ativo:3, ai:1, lc:2, ra:0, raAtras:0, desqLc:6},
-      {id:'JR',name:'Jeanne Rodrigues', ativo:5, ai:0, lc:4, ra:1, raAtras:1, desqLc:5},
-      {id:'JS',name:"Juliana Sant'Anna",ativo:3, ai:1, lc:1, ra:1, raAtras:0, desqLc:5},
-      {id:'MY',name:'Mydoha Seydo',     ativo:2, ai:2, lc:0, ra:0, raAtras:0, desqLc:6},
-      {id:'PS',name:'Pedro Souza',      ativo:2, ai:2, lc:0, ra:0, raAtras:0, desqLc:5},
-      {id:'VE',name:'Victoria Eilers',  ativo:4, ai:4, lc:0, ra:0, raAtras:0, desqLc:6},
+      {id:'JR',name:'Jeanne Rodrigues', ativo:3, ai:0, lc:2, ra:1, raAtras:0, desqLc:7},
+      {id:'JS',name:"Juliana Sant'Anna",ativo:1, ai:1, lc:0, ra:0, raAtras:0, desqLc:7},
+      {id:'MY',name:'Mydoha Seydo',     ativo:0, ai:0, lc:0, ra:0, raAtras:0, desqLc:8},
+      {id:'PS',name:'Pedro Souza',      ativo:1, ai:1, lc:0, ra:0, raAtras:0, desqLc:6},
+      {id:'VE',name:'Victoria Eilers',  ativo:0, ai:0, lc:0, ra:0, raAtras:0, desqLc:10},
     ]
   },
   eventoPassivo:{
@@ -1341,7 +1341,7 @@ const NAV_ICONS={
   hoje:'⌂',semana:'↗',funil:'▽',mrr_bdr:'◆',time_bdr:'◉',pdi:'◈'
 };
 const NAV_LABELS={
-  resumo:'Resumo',time:'Time',mrr:'MRR',reunioes:'Agenda',weekly:'Weekly',analise:'Análise',
+  resumo:'Resumo',time:'Time',base:'Base',reunioes:'Agenda',weekly:'Weekly',analise:'Análise',
   hoje:'Início',resultado:'Meu Resultado',performance:'Performance',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI'
 };
 
@@ -1536,10 +1536,10 @@ function buildGestorApp(){
     {id:'resumo',   label:'Resumo'},
     {id:'resultado',label:'Resultado'},
     {id:'time',     label:'Time'},
-    {id:'mrr',      label:'MRR'},
+    {id:'base',     label:'Base'},
     {id:'reunioes', label:'Agenda'},
     {id:'weekly',   label:'Weekly'},
-  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildMRRGestor,buildReunioes,buildWeekly]);
+  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildKnowledgeBase,buildReunioes,buildWeekly]);
 }
 
 
@@ -1993,6 +1993,64 @@ function buildResumo(pane){
       </div>
       </div>
     </div>
+
+    <!-- ═══ BLOCO 5.5: EVENTOS / PASSIVOS ═══ -->
+    ${d.evento?`
+    <div class="card" style="margin-bottom:12px;border-left:3px solid #8b5cf6">
+      <div class="collapsible-header" onclick="toggleCard('res-evento-body',this)" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:10px;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.08em">🎪 ${d.evento.nome} — Passivos</div>
+        <span class="collapse-icon" style="font-size:14px;color:var(--text3)">▾</span>
+      </div>
+      <div id="res-evento-body" style="margin-top:10px">
+        <!-- Funil do evento -->
+        <div style="display:flex;gap:4px;margin-bottom:10px">
+          ${[
+            ['Ativo PV',d.evento.ativoFunil,'#8b5cf6'],
+            ['AI',d.evento.ai,'#2563eb'],
+            ['LC',d.evento.lc,'#0891b2'],
+            ['RA',d.evento.ra,'#f59e0b'],
+            ['Desq',d.evento.desq,'#6b7280']
+          ].map(([l,v,c])=>`<div style="flex:1;text-align:center;padding:8px 4px;background:rgba(139,92,246,0.04);border-radius:8px;border:1px solid rgba(139,92,246,0.12)">
+            <div style="font-size:16px;font-weight:700;color:${c};font-family:'Inter',sans-serif">${v}</div>
+            <div style="font-size:8px;color:var(--text3);margin-top:2px">${l}</div>
+          </div>`).join('')}
+        </div>
+        <!-- Por BDR -->
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-family:'Inter',sans-serif;min-width:360px">
+            <thead><tr style="border-bottom:1px solid var(--border)">
+              <th style="padding:4px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600">BDR</th>
+              <th style="padding:4px 4px;text-align:center;font-size:9px;color:var(--text3);font-weight:600">Ativo</th>
+              <th style="padding:4px 4px;text-align:center;font-size:9px;color:var(--text3);font-weight:600">AI</th>
+              <th style="padding:4px 4px;text-align:center;font-size:9px;color:var(--text3);font-weight:600">LC</th>
+              <th style="padding:4px 4px;text-align:center;font-size:9px;color:var(--text3);font-weight:600">RA</th>
+              <th style="padding:4px 4px;text-align:center;font-size:9px;color:var(--text3);font-weight:600">Desq</th>
+            </tr></thead>
+            <tbody>
+            ${d.hr4PassivosTime.bdrs.map(b=>{
+              const bdrData=d.bdrs.find(x=>x.id===b.id);
+              return `<tr style="border-bottom:1px solid var(--border)">
+                <td style="padding:5px 8px;font-size:11px;font-weight:600;color:var(--text)">${b.name.split(' ')[0]}</td>
+                <td style="padding:5px 4px;text-align:center;font-size:12px;font-weight:700;color:${b.ativo>0?'#8b5cf6':'var(--text3)'}">${b.ativo||'—'}</td>
+                <td style="padding:5px 4px;text-align:center;font-size:12px;color:${b.ai>0?'var(--text)':'var(--text3)'}">${b.ai||'—'}</td>
+                <td style="padding:5px 4px;text-align:center;font-size:12px;font-weight:600;color:${b.lc>0?'var(--teal)':'var(--text3)'}">${b.lc||'—'}</td>
+                <td style="padding:5px 4px;text-align:center;font-size:12px;font-weight:700;color:${b.ra>0?'var(--green)':'var(--text3)'}">${b.ra||'—'}</td>
+                <td style="padding:5px 4px;text-align:center;font-size:11px;color:var(--text3)">${b.desqLc||'—'}</td>
+              </tr>`;
+            }).join('')}
+            <tr style="background:var(--bg3);border-top:2px solid var(--border)">
+              <td style="padding:5px 8px;font-size:10px;font-weight:700;color:var(--text)">TOTAL</td>
+              <td style="padding:5px 4px;text-align:center;font-size:11px;font-weight:700;color:#8b5cf6">${d.hr4PassivosTime.total.ativo}</td>
+              <td style="padding:5px 4px;text-align:center;font-size:11px;font-weight:700">${d.hr4PassivosTime.total.ai}</td>
+              <td style="padding:5px 4px;text-align:center;font-size:11px;font-weight:700;color:var(--teal)">${d.hr4PassivosTime.total.lc}</td>
+              <td style="padding:5px 4px;text-align:center;font-size:11px;font-weight:700;color:var(--green)">${d.hr4PassivosTime.total.ra}</td>
+              <td style="padding:5px 4px;text-align:center;font-size:11px;color:var(--text3)">${d.hr4PassivosTime.total.desqLc}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`:''}
 
     <!-- ═══ BLOCO 6: FUNIL RESUMIDO ═══ -->
     <div class="card">
@@ -2573,6 +2631,140 @@ async function submitReflection(forecastId, bdrId){
 
 // REUNIÕES
 // ─── MRR GESTOR ───────────────────────────────────────────────
+// ─── BASE DE CONHECIMENTO ──────────────────────────────────────
+function buildKnowledgeBase(pane){
+  const CATEGORIES=[
+    {id:'cadencias',label:'Cadências',icon:'🎯',color:'#2563eb'},
+    {id:'playbooks',label:'Playbooks',icon:'📋',color:'#16a34a'},
+    {id:'treinamentos',label:'Treinamentos',icon:'🎓',color:'#8b5cf6'},
+    {id:'links',label:'Links Úteis',icon:'🔗',color:'#0891b2'},
+    {id:'comunicados',label:'Comunicados',icon:'📢',color:'#dc2626'},
+  ];
+  const storageKey='kb_items';
+  function getItems(){return JSON.parse(localStorage.getItem(storageKey)||'[]');}
+  function saveItems(items){localStorage.setItem(storageKey,JSON.stringify(items));}
+
+  const isGestor=currentUser&&currentUser.isGestor;
+  const now=Date.now();
+  const weekMs=7*24*60*60*1000;
+
+  pane.innerHTML=`
+    <div style="font-size:11px;color:var(--text3);margin-bottom:14px;font-family:'Inter',sans-serif">Base de Conhecimento · Pré-Vendas · Abril 2026</div>
+
+    <!-- Hero -->
+    <div style="background:linear-gradient(145deg,#0f172a 0%,#1e293b 50%,#334155 100%);border-radius:var(--radius);padding:20px;margin-bottom:14px;text-align:center">
+      <div style="font-size:28px;margin-bottom:8px">📚</div>
+      <div style="font-size:16px;font-weight:700;color:white;margin-bottom:4px">Base de Conhecimento</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.6)">Materiais, cadências, playbooks e links do time</div>
+    </div>
+
+    <!-- Categorias -->
+    <div style="display:flex;gap:4px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch">
+      <button onclick="filterKB('all')" id="kb-filter-all" style="flex-shrink:0;font-size:10px;font-weight:600;padding:5px 12px;border-radius:20px;border:2px solid var(--accent);background:var(--accent-light);color:var(--accent);cursor:pointer;font-family:'Inter',sans-serif">Todos</button>
+      ${CATEGORIES.map(c=>`<button onclick="filterKB('${c.id}')" id="kb-filter-${c.id}" style="flex-shrink:0;font-size:10px;font-weight:500;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;font-family:'Inter',sans-serif">${c.icon} ${c.label}</button>`).join('')}
+    </div>
+
+    <!-- Lista de itens -->
+    <div id="kb-items-list"></div>
+
+    <!-- Adicionar item (só gestor) -->
+    ${isGestor?`
+    <div class="card" style="margin-top:14px;border:1.5px dashed var(--border)">
+      <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">+ Adicionar material</div>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <select id="kb-new-cat" style="flex:0 0 120px;padding:6px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:'Inter',sans-serif;background:var(--bg2);color:var(--text)">
+          ${CATEGORIES.map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join('')}
+        </select>
+        <input id="kb-new-title" type="text" placeholder="Título do material" style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg2)">
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <input id="kb-new-link" type="text" placeholder="Link (https://...)" style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg2)">
+      </div>
+      <input id="kb-new-desc" type="text" placeholder="Descrição curta (opcional)" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:11px;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg2);margin-bottom:8px;box-sizing:border-box">
+      <div style="display:flex;gap:6px">
+        <label style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3);cursor:pointer"><input type="checkbox" id="kb-new-pinned"> Fixar no topo</label>
+        <button onclick="addKBItem()" style="margin-left:auto;padding:6px 16px;background:var(--accent);color:white;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Adicionar</button>
+      </div>
+    </div>`:''}`;
+
+  renderKBItems();
+}
+
+function addKBItem(){
+  var cat=document.getElementById('kb-new-cat').value;
+  var title=document.getElementById('kb-new-title').value.trim();
+  var link=document.getElementById('kb-new-link').value.trim();
+  var desc=document.getElementById('kb-new-desc').value.trim();
+  var pinned=document.getElementById('kb-new-pinned').checked;
+  if(!title){alert('Título obrigatório.');return;}
+  var items=JSON.parse(localStorage.getItem('kb_items')||'[]');
+  items.push({id:Date.now(),cat:cat,title:title,link:link,desc:desc,pinned:pinned,createdAt:Date.now()});
+  localStorage.setItem('kb_items',JSON.stringify(items));
+  document.getElementById('kb-new-title').value='';
+  document.getElementById('kb-new-link').value='';
+  document.getElementById('kb-new-desc').value='';
+  document.getElementById('kb-new-pinned').checked=false;
+  renderKBItems();
+}
+
+function removeKBItem(id){
+  if(!confirm('Remover este material?')) return;
+  var items=JSON.parse(localStorage.getItem('kb_items')||'[]').filter(i=>i.id!==id);
+  localStorage.setItem('kb_items',JSON.stringify(items));
+  renderKBItems();
+}
+
+function togglePinKB(id){
+  var items=JSON.parse(localStorage.getItem('kb_items')||'[]');
+  var item=items.find(i=>i.id===id);
+  if(item) item.pinned=!item.pinned;
+  localStorage.setItem('kb_items',JSON.stringify(items));
+  renderKBItems();
+}
+
+function filterKB(cat){
+  document.querySelectorAll('[id^="kb-filter-"]').forEach(b=>{
+    b.style.border='1px solid var(--border)';b.style.background='transparent';b.style.color='var(--text3)';b.style.fontWeight='500';
+  });
+  var btn=document.getElementById('kb-filter-'+cat);
+  if(btn){btn.style.border='2px solid var(--accent)';btn.style.background='var(--accent-light)';btn.style.color='var(--accent)';btn.style.fontWeight='600';}
+  renderKBItems(cat==='all'?null:cat);
+}
+
+function renderKBItems(filterCat){
+  var el=document.getElementById('kb-items-list');
+  if(!el) return;
+  var items=JSON.parse(localStorage.getItem('kb_items')||'[]');
+  if(filterCat) items=items.filter(i=>i.cat===filterCat);
+  // Sort: pinned first, then by date desc
+  items.sort((a,b)=>{if(a.pinned&&!b.pinned) return -1;if(!a.pinned&&b.pinned) return 1;return b.createdAt-a.createdAt;});
+  var catConfig={cadencias:{icon:'🎯',color:'#2563eb'},playbooks:{icon:'📋',color:'#16a34a'},treinamentos:{icon:'🎓',color:'#8b5cf6'},links:{icon:'🔗',color:'#0891b2'},comunicados:{icon:'📢',color:'#dc2626'}};
+  var weekMs=7*24*60*60*1000;
+  var now=Date.now();
+  var isGestor=currentUser&&currentUser.isGestor;
+  if(items.length===0){el.innerHTML='<div style="text-align:center;padding:24px;color:var(--text3);font-size:12px">Nenhum material adicionado ainda.'+(isGestor?' Use o formulário abaixo para adicionar.':'')+'</div>';return;}
+  el.innerHTML=items.map(function(item){
+    var c=catConfig[item.cat]||{icon:'📄',color:'var(--text3)'};
+    var isNew=(now-item.createdAt)<weekMs;
+    return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;margin-bottom:6px;background:'+(item.pinned?'rgba(37,99,235,0.03)':'white')+'">'
+      +'<div style="font-size:18px;flex-shrink:0;margin-top:2px">'+c.icon+'</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">'
+      +(item.link?'<a href="'+item.link+'" target="_blank" style="font-size:13px;font-weight:600;color:var(--text);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+item.title+'</a>':'<span style="font-size:13px;font-weight:600;color:var(--text)">'+item.title+'</span>')
+      +(item.pinned?'<span style="font-size:8px;color:var(--accent)">📌</span>':'')
+      +(isNew?'<span style="font-size:8px;font-weight:700;color:white;background:var(--green);padding:1px 5px;border-radius:6px">NOVO</span>':'')
+      +'</div>'
+      +(item.desc?'<div style="font-size:11px;color:var(--text3);line-height:1.4">'+item.desc+'</div>':'')
+      +'<div style="font-size:9px;color:var(--text3);margin-top:3px"><span style="color:'+c.color+';font-weight:600">'+item.cat+'</span>'+(item.link?' · <a href="'+item.link+'" target="_blank" style="color:var(--accent);text-decoration:none">abrir →</a>':'')+'</div>'
+      +'</div>'
+      +(isGestor?'<div style="display:flex;flex-direction:column;gap:2px;flex-shrink:0">'
+        +'<button onclick="togglePinKB('+item.id+')" style="background:none;border:none;font-size:12px;cursor:pointer;padding:2px" title="'+(item.pinned?'Desafixar':'Fixar')+'">'+(item.pinned?'📌':'📎')+'</button>'
+        +'<button onclick="removeKBItem('+item.id+')" style="background:none;border:none;font-size:12px;cursor:pointer;padding:2px;color:var(--text3)" title="Remover">✕</button>'
+        +'</div>':'')
+      +'</div>';
+  }).join('');
+}
+
 function buildMRRGestor(pane){
   const m=DATA.mrrTrimestre;
   const q=DATA.q1;
