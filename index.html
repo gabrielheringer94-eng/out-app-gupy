@@ -881,6 +881,21 @@ const DATA = {
     }
   },
   // ── Histórico 3 meses por BDR (Fev, Mar, Abr) ──
+  // Histórico anual de opps mundo (Apres. Solução) — meta: até Jul/25=11, Ago-Out/25=8, Nov/25+=12
+  histAnual:{
+    meses:['Jan25','Fev25','Mar25','Abr25','Mai25','Jun25','Jul25','Ago25','Set25','Out25','Nov25','Dez25','Jan26','Fev26','Mar26','Abr26'],
+    metas:[11,11,11,11,11,11,11,8,8,8,12,12,12,12,12,12],
+    bdrs:{
+      MY:[0,0,0,0,0,0,0,0,0,5,10,4,13,12,15,2],
+      JS:[1,2,1,3,2,0,3,10,3,7,12,4,10,8,6,2],
+      VE:[0,0,0,0,0,0,0,0,0,0,0,2,1,6,4,2],
+      GF:[0,0,0,0,1,0,8,15,32,34,26,15,8,9,7,2],
+      JR:[5,5,2,0,0,5,1,10,3,10,3,2,9,12,10,0],
+      AG:[9,9,7,7,2,4,4,9,9,6,1,5,1,2,8,0],
+      AM:[0,0,0,0,1,1,0,7,7,9,3,2,4,12,2,0],
+      PS:[2,4,4,2,2,0,1,7,8,10,3,2,1,0,5,0],
+    }
+  },
   hist3m:{
     meses:['Jan','Fev','Mar'],
     meta:12,
@@ -5785,6 +5800,55 @@ function buildPerformanceBDR(pane, bdr){
       renderActions(baseActions.map(function(a,i){return {titulo:a.split(' — ')[0].substring(0,40),impacto:i===0?'alto':'medio',descricao:a,prazo:i===0?'esta semana':i===1?'próximas 2 semanas':'30 dias'};}));
     });
   })();
+
+  // ── Histórico Anual MoM ──
+  var ha=DATA.histAnual;
+  if(ha&&ha.bdrs&&ha.bdrs[bdr.id]){
+    var vals=ha.bdrs[bdr.id];
+    var annualEl=document.createElement('div');
+    annualEl.className='card';
+    annualEl.style.cssText='margin-top:14px;padding:14px;overflow-x:auto;-webkit-overflow-scrolling:touch';
+    var hdr='<div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📊 Atingimento MoM — '+bdr.name.split(' ')[0]+'</div>';
+    var tbl='<table style="width:100%;border-collapse:collapse;font-family:\'Inter\',sans-serif;min-width:600px"><thead><tr style="border-bottom:2px solid var(--border)">';
+    tbl+='<th style="padding:4px 6px;text-align:left;font-size:9px;color:var(--text3);font-weight:600">Mês</th>';
+    ha.meses.forEach(function(m){tbl+='<th style="padding:4px 3px;text-align:center;font-size:8px;color:var(--text3);font-weight:600;white-space:nowrap">'+m.replace('25','').replace('26','')+'</th>';});
+    tbl+='</tr></thead><tbody>';
+    // Opps row
+    tbl+='<tr><td style="padding:5px 6px;font-size:10px;font-weight:600;color:var(--text)">Opps</td>';
+    vals.forEach(function(v,i){
+      var meta=ha.metas[i];
+      var pct=meta>0?Math.round((v/meta)*100):0;
+      var col=v>=meta?'var(--green)':v>=meta*0.7?'var(--amber)':'var(--text3)';
+      var bg=v>=meta?'var(--green-bg)':'transparent';
+      tbl+='<td style="padding:5px 3px;text-align:center;font-size:11px;font-weight:700;color:'+col+';background:'+bg+';border-radius:4px">'+v+'</td>';
+    });
+    tbl+='</tr>';
+    // Meta row
+    tbl+='<tr style="border-top:1px solid var(--border)"><td style="padding:4px 6px;font-size:9px;color:var(--text3)">Meta</td>';
+    ha.metas.forEach(function(m){tbl+='<td style="padding:4px 3px;text-align:center;font-size:9px;color:var(--text3)">'+m+'</td>';});
+    tbl+='</tr>';
+    // % row
+    tbl+='<tr><td style="padding:4px 6px;font-size:9px;color:var(--text3)">%</td>';
+    vals.forEach(function(v,i){
+      var meta=ha.metas[i];
+      var pct=meta>0?Math.round((v/meta)*100):0;
+      var col=pct>=100?'var(--green)':pct>=70?'var(--amber)':'var(--red)';
+      tbl+='<td style="padding:4px 3px;text-align:center;font-size:9px;font-weight:600;color:'+col+'">'+pct+'%</td>';
+    });
+    tbl+='</tr></tbody></table>';
+    // Bars
+    var bars='<div style="display:flex;align-items:flex-end;gap:2px;height:40px;margin-top:8px">';
+    var maxV=Math.max.apply(null,vals.concat([12]));
+    vals.forEach(function(v,i){
+      var h=maxV>0?Math.round((v/maxV)*100):0;
+      var meta=ha.metas[i];
+      var col=v>=meta?'var(--green)':v>=meta*0.7?'var(--amber)':'rgba(220,38,38,0.3)';
+      bars+='<div style="flex:1;background:'+col+';border-radius:2px 2px 0 0;height:'+Math.max(h,3)+'%;min-height:2px" title="'+ha.meses[i]+': '+v+' opps"></div>';
+    });
+    bars+='</div>';
+    annualEl.innerHTML=hdr+bars+tbl;
+    pane.appendChild(annualEl);
+  }
 }
 
 function buildBDRFunil(pane,bdr){
