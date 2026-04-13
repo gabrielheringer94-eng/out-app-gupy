@@ -1307,7 +1307,7 @@ const NAV_ICONS={
   hoje:'⌂',semana:'↗',funil:'▽',mrr_bdr:'◆',time_bdr:'◉',pdi:'◈'
 };
 const NAV_LABELS={
-  resumo:'Resumo',time:'Time',mrr:'MRR',reunioes:'Agenda',noticias:'Notícias',analise:'Análise',
+  resumo:'Resumo',time:'Time',mrr:'MRR',reunioes:'Agenda',weekly:'Weekly',analise:'Análise',
   hoje:'Início',resultado:'Meu Resultado',performance:'Performance',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI'
 };
 
@@ -1504,8 +1504,8 @@ function buildGestorApp(){
     {id:'time',     label:'Time'},
     {id:'mrr',      label:'MRR'},
     {id:'reunioes', label:'Agenda'},
-    {id:'noticias', label:'Notícias'},
-  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildMRRGestor,buildReunioes,buildNoticias]);
+    {id:'weekly',   label:'Weekly'},
+  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildMRRGestor,buildReunioes,buildWeekly]);
 }
 
 
@@ -2770,6 +2770,226 @@ function buildMRRBDR(pane,bdr){
 }
 
 // ─── NOSSAS NOTÍCIAS (Pulses) ────────────────────────────────
+function buildWeekly(pane){
+  const d=DATA;
+  const mes=d.mesAbril;
+  const semAtual=d.semAtual;
+  const semData=mes.semanas.find(s=>s.sem===semAtual-1)||mes.semanas[mes.semanas.length-1]; // semana anterior
+  const prevSem=semAtual>2?mes.semanas.find(s=>s.sem===semAtual-2):null;
+
+  // ── Cálculos ──
+  const scored=[...d.bdrs].sort((a,b)=>(b.opps*4+b.ras*2+b.lig/10)-(a.opps*4+a.ras*2+a.lig/10));
+  const topBdr=scored[0];
+  const totalLig=d.bdrs.reduce((s,b)=>s+b.lig,0);
+  const totalRas=d.bdrs.reduce((s,b)=>s+b.ras,0);
+  const totalOpps=mes.opps;
+  const pctMeta=Math.round((totalOpps/d.meta)*100);
+  const conv=d.conversoes;
+
+  // BDRs com conversão preocupante
+  const bdrsBaixos=d.bdrs.filter(b=>b.lig>5&&b.ras===0).map(b=>b.name.split(' ')[0]);
+  const bdrsZeroOpp=d.bdrs.filter(b=>b.opps===0).map(b=>b.name.split(' ')[0]);
+
+  // localStorage para campos editáveis
+  const storageKey='weekly_notes_s'+(semAtual-1);
+  const saved=JSON.parse(localStorage.getItem(storageKey)||'{}');
+
+  pane.innerHTML=`
+    <div style="font-size:11px;color:var(--text3);margin-bottom:14px;font-family:'Inter',sans-serif">
+      Weekly Review · S${semAtual-1} · ${semData?semData.datas:''} · Abril 2026
+    </div>
+
+    <!-- ═══ SLIDE 1: HERO DA SEMANA ═══ -->
+    <div style="background:linear-gradient(145deg,#0f172a 0%,#1e293b 50%,#334155 100%);border-radius:var(--radius);padding:24px 20px;margin-bottom:14px;box-shadow:var(--shadow-lg)">
+      <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">A semana em números</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:16px;text-align:center">
+        <div>
+          <div style="font-size:28px;font-weight:700;font-family:'Inter',sans-serif;color:white;line-height:1">${totalOpps}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:3px">Opps MTD</div>
+        </div>
+        <div>
+          <div style="font-size:28px;font-weight:700;font-family:'Inter',sans-serif;color:#2dd4bf;line-height:1">${totalRas}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:3px">RAs MTD</div>
+        </div>
+        <div>
+          <div style="font-size:28px;font-weight:700;font-family:'Inter',sans-serif;color:#60a5fa;line-height:1">${totalLig}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:3px">Ligações</div>
+        </div>
+        <div>
+          <div style="font-size:28px;font-weight:700;font-family:'Inter',sans-serif;color:${pctMeta>=50?'#4ade80':'#fbbf24'};line-height:1">${pctMeta}%</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:3px">da Meta</div>
+        </div>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden">
+        <div style="width:${Math.min(pctMeta,100)}%;height:100%;background:linear-gradient(90deg,#4ade80,#2dd4bf);border-radius:3px;transition:width .5s"></div>
+      </div>
+      <div style="font-size:9px;color:rgba(255,255,255,.4);margin-top:4px;text-align:right">${totalOpps} de ${d.meta} oportunidades</div>
+    </div>
+
+    <!-- ═══ SLIDE 2: DESTAQUES ═══ -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="collapsible-header" onclick="toggleCard('weekly-highlights',this)" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.08em">✨ Destaques da semana</div>
+        <span class="collapse-icon" style="font-size:14px;color:var(--text3)">▾</span>
+      </div>
+      <div id="weekly-highlights" style="margin-top:10px">
+        <!-- Top Performer -->
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:linear-gradient(135deg,rgba(22,163,74,0.06),rgba(22,163,74,0.02));border-radius:var(--radius-sm);border:1px solid rgba(22,163,74,0.15);margin-bottom:10px">
+          ${topBdr.photo?`<img src="${topBdr.photo}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:3px solid var(--green)">`:`<div style="width:48px;height:48px;border-radius:50%;background:${topBdr.bg};color:${topBdr.color};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;border:3px solid var(--green)">${topBdr.id}</div>`}
+          <div style="flex:1">
+            <div style="font-size:9px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Top Performer</div>
+            <div style="font-size:14px;font-weight:700;color:var(--text)">${topBdr.name.split(' ')[0]}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">${topBdr.opps} opps · ${topBdr.ras} RAs · ${topBdr.lig} lig</div>
+          </div>
+          <div style="text-align:center;padding:8px 12px;background:var(--green-bg);border-radius:8px">
+            <div style="font-size:18px;font-weight:700;color:var(--green);font-family:'Inter',sans-serif">${topBdr.opps}</div>
+            <div style="font-size:8px;color:var(--green)">OPPS</div>
+          </div>
+        </div>
+
+        <!-- Conversion highlight -->
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          ${[['AI→LC',conv.aiLc.real,conv.aiLc.meta],['LC→RA',conv.lcRa.real,conv.lcRa.meta],['RA→OP',conv.raOp.real,conv.raOp.meta]].map(([l,r,m])=>{
+            const col=r>=m?'var(--green)':'var(--red)';
+            return `<div style="flex:1;text-align:center;padding:8px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+              <div style="font-size:16px;font-weight:700;color:${col};font-family:'Inter',sans-serif">${r}%</div>
+              <div style="font-size:9px;color:var(--text3)">${l} (meta ${m}%)</div>
+            </div>`;
+          }).join('')}
+        </div>
+
+        <!-- Editable highlights -->
+        <div style="border-top:1px solid var(--border);padding-top:10px">
+          <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">Destaques manuais</div>
+          <textarea id="weekly-highlights-text" placeholder="Ex: Cliente X fechou após reunião da Mydoha. JS conseguiu 2 opps em um dia..." style="width:100%;height:60px;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:11px;font-family:'Inter',sans-serif;resize:vertical;color:var(--text);background:var(--bg2);box-sizing:border-box">${saved.highlights||''}</textarea>
+          <button onclick="(function(){var v=document.getElementById('weekly-highlights-text').value;var s=JSON.parse(localStorage.getItem('${storageKey}')||'{}');s.highlights=v;localStorage.setItem('${storageKey}',JSON.stringify(s));this.textContent='Salvo ✓';setTimeout(()=>{this.textContent='Salvar'},1500)}).call(this)" style="margin-top:4px;font-size:10px;padding:4px 12px;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif">Salvar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 3: PONTOS DE ATENÇÃO ═══ -->
+    <div class="card" style="margin-bottom:14px;border-left:3px solid var(--red)">
+      <div class="collapsible-header" onclick="toggleCard('weekly-attention',this)" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.08em">⚠ Pontos de atenção</div>
+        <span class="collapse-icon" style="font-size:14px;color:var(--text3)">▾</span>
+      </div>
+      <div id="weekly-attention" style="margin-top:10px">
+        ${bdrsZeroOpp.length>0?`<div style="padding:8px 10px;background:var(--red-bg);border-radius:8px;margin-bottom:8px;font-size:11px;color:var(--text)">
+          <strong style="color:var(--red)">Sem oportunidades:</strong> ${bdrsZeroOpp.join(', ')}
+        </div>`:''}
+        ${bdrsBaixos.length>0?`<div style="padding:8px 10px;background:var(--amber-bg);border-radius:8px;margin-bottom:8px;font-size:11px;color:var(--text)">
+          <strong style="color:var(--amber)">Ligações sem RA:</strong> ${bdrsBaixos.join(', ')} — conectando mas não agendando
+        </div>`:''}
+        ${conv.lcRa.real<conv.lcRa.meta?`<div style="padding:8px 10px;background:var(--red-bg);border-radius:8px;margin-bottom:8px;font-size:11px;color:var(--text)">
+          <strong style="color:var(--red)">Conversão LC→RA abaixo:</strong> ${conv.lcRa.real}% vs meta ${conv.lcRa.meta}%
+        </div>`:''}
+
+        <!-- Atrasadas -->
+        <div style="font-size:10px;font-weight:600;color:var(--text2);margin:8px 0 4px">Reuniões atrasadas: ${d.reunioes.atrasadasTA.length} TA · ${d.reunioes.atrasadasTM.length} TM</div>
+        ${d.reunioes.atrasadasTA.slice(0,3).map(a=>`<div style="font-size:10px;color:var(--text3);padding:2px 0">· ${a.name.split(' ')[0]} — ${a.empresa} (${a.data})</div>`).join('')}
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 4: FORECAST vs REALITY ═══ -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="collapsible-header" onclick="toggleCard('weekly-fcst',this)" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em">📈 Forecast vs Reality</div>
+        <span class="collapse-icon" style="font-size:14px;color:var(--text3)">▾</span>
+      </div>
+      <div id="weekly-fcst" style="margin-top:10px">
+        <div style="display:grid;grid-template-columns:repeat(${mes.semanas.length},1fr);gap:6px">
+          ${mes.semanas.map(s=>{
+            const isCur=s.sem===semAtual;
+            const isPast=s.sem<semAtual;
+            const c=s.opps>0?'var(--green)':'var(--text3)';
+            return `<div style="background:var(--bg2);border-radius:var(--radius-sm);padding:10px 6px;text-align:center;border:${isCur?'2px solid var(--accent)':'1px solid var(--border)'}">
+              <div style="font-size:11px;font-weight:700;color:${isCur?'var(--accent)':'var(--text2)'};margin-bottom:6px">${s.label}</div>
+              <div style="font-size:20px;font-weight:700;font-family:'Inter',sans-serif;color:${isPast?c:'var(--text3)'};line-height:1">${isPast?s.opps:'—'}</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:2px">opps</div>
+              <div style="font-size:9px;color:var(--text3);margin-top:4px">${s.datas}</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div id="weekly-fcst-detail" style="margin-top:10px;font-size:11px;color:var(--text3);text-align:center">Carregando forecast...</div>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 5: AÇÕES DA PRÓXIMA SEMANA ═══ -->
+    <div class="card" style="margin-bottom:14px;border-left:3px solid var(--accent)">
+      <div class="collapsible-header" onclick="toggleCard('weekly-actions',this)" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em">🎯 Ações da próxima semana — S${semAtual}</div>
+        <span class="collapse-icon" style="font-size:14px;color:var(--text3)">▾</span>
+      </div>
+      <div id="weekly-actions" style="margin-top:10px">
+        <!-- Próximas reuniões -->
+        <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">Reuniões confirmadas</div>
+        <div style="margin-bottom:12px">
+          ${d.reunioes.futuras.slice(0,4).map(f=>`<div style="font-size:11px;color:var(--text);padding:4px 0;border-bottom:1px solid var(--border)">${f.date} · ${f.ta.map(m=>m.bdr.split(' ')[0]+' → '+m.empresa).join(' | ')}</div>`).join('')}
+        </div>
+
+        <!-- Editable actions -->
+        <div style="font-size:10px;font-weight:600;color:var(--text2);margin-bottom:6px">Prioridades do gestor</div>
+        <textarea id="weekly-actions-text" placeholder="1. Coaching com AM e JR sobre pitch de agendamento&#10;2. Acompanhar reuniões do MY (6 RAs)&#10;3. Revisar ICP da lista de prospecção..." style="width:100%;height:80px;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:11px;font-family:'Inter',sans-serif;resize:vertical;color:var(--text);background:var(--bg2);box-sizing:border-box">${saved.actions||''}</textarea>
+        <button onclick="(function(){var v=document.getElementById('weekly-actions-text').value;var s=JSON.parse(localStorage.getItem('${storageKey}')||'{}');s.actions=v;localStorage.setItem('${storageKey}',JSON.stringify(s));this.textContent='Salvo ✓';setTimeout(()=>{this.textContent='Salvar'},1500)}).call(this)" style="margin-top:4px;font-size:10px;padding:4px 12px;background:var(--accent);color:white;border:none;border-radius:6px;cursor:pointer;font-family:'Inter',sans-serif">Salvar</button>
+      </div>
+    </div>
+
+    <!-- ═══ PULSES (mantido do Notícias) ═══ -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="collapsible-header" onclick="toggleCard('weekly-pulses',this)" style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.08em">💚 Pulses do time</div>
+        <span class="collapse-icon" style="font-size:14px;color:var(--text3)">▾</span>
+      </div>
+      <div id="weekly-pulses" style="margin-top:10px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <div style="font-size:36px;font-weight:700;font-family:'Inter',sans-serif;color:var(--teal)">${d.pulses.scoreGeral}</div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--text)">Score Geral</div>
+            <div style="font-size:10px;color:var(--text3)">Gupy Pulses · /10</div>
+          </div>
+          <div style="margin-left:auto;display:flex;align-items:flex-end;gap:2px;height:30px">
+            ${d.pulses.tendencia.map((v,i)=>{
+              const h=Math.round(((v-7)/(10-7))*100);
+              const isLast=i===d.pulses.tendencia.length-1;
+              return `<div style="width:6px;background:${isLast?'var(--teal)':'rgba(13,148,136,0.3)'};border-radius:2px 2px 0 0;height:${h}%;min-height:3px"></div>`;
+            }).join('')}
+          </div>
+        </div>
+        ${d.pulses.dimensoes.slice(0,4).map(dim=>{
+          const cor=dim.nota>=9?'var(--green)':dim.nota>=8?'var(--teal)':dim.nota>=7?'var(--amber)':'var(--red)';
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)">
+            <span style="font-size:11px;color:var(--text)">${dim.nome}</span>
+            <span style="font-size:12px;font-weight:700;color:${cor};font-family:'Inter',sans-serif">${dim.nota}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  // Load forecast detail async
+  (async function(){
+    try{
+      const allSems=await supaFetch('gp_semanas','order=id.asc');
+      const el=document.getElementById('weekly-fcst-detail');
+      if(!el||!allSems) return;
+      let html='<table style="width:100%;border-collapse:collapse;font-family:\'Inter\',sans-serif"><thead><tr style="background:var(--bg3);border-bottom:1px solid var(--border)"><th style="padding:6px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600">BDR</th>';
+      allSems.forEach(s=>{ html+=`<th style="padding:6px 4px;text-align:center;font-size:9px;color:${s.sem_atual===semAtual?'var(--accent)':'var(--text3)'};font-weight:600">S${s.sem_atual}</th>`; });
+      html+='</tr></thead><tbody>';
+      for(const bdr of d.bdrs){
+        html+=`<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 8px;font-size:10px;font-weight:600;color:var(--text)">${bdr.name.split(' ')[0]}</td>`;
+        for(const s of allSems){
+          const results=await supaFetch('gp_bdr_resultados',`semana_id=eq.${s.id}&bdr_id=eq.${bdr.id}`);
+          const opps=results&&results[0]?results[0].opps:0;
+          const col=opps>0?'var(--green)':'var(--text3)';
+          html+=`<td style="padding:6px 4px;text-align:center;font-size:12px;font-weight:700;color:${col}">${s.sem_atual<semAtual?opps:'—'}</td>`;
+        }
+        html+='</tr>';
+      }
+      html+='</tbody></table>';
+      el.innerHTML=html;
+    }catch(e){console.warn('Weekly forecast:',e);}
+  })();
+}
+
 function buildNoticias(pane){
   const p=DATA.pulses;
   const maxNota=10;
