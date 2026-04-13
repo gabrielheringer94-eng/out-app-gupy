@@ -707,7 +707,7 @@ function calcSemAtual(){
 
 const DATA = {
   meta:84, metaBDR:12, semAtual:calcSemAtual(), semTotal:4,
-  ultimaAtualizacao:'2026-04-10T14:39:00',
+  ultimaAtualizacao:'2026-04-12T21:50:00',
   // Acumulado do mês (Abril 2026) — atualizado manualmente a cada semana
   mesAbril:{
     opps:6,    // acumulado até S2
@@ -721,7 +721,7 @@ const DATA = {
       {sem:4, opps:0,  ras:0,  lig:0,   label:'S4', datas:'22 – 25/abr'},
     ]
   },
-  funil:{novoLead:139,abordagemIniciada:124,leadConectado:81,reuniaoAgendada:17,oportunidades:5,desqualificados:101},
+  funil:{novoLead:147,abordagemIniciada:124,leadConectado:81,reuniaoAgendada:17,oportunidades:5,desqualificados:102},
   conversoes:{aiLc:{real:65,meta:57},lcRa:{real:21,meta:37},raOp:{real:29,meta:75}},
   // ras = Reuniões Agendadas (negócios/SQLs), opps = Oportunidades (mundo)
   bdrs:[
@@ -915,33 +915,43 @@ const DATA = {
 },
   reunioes:{
     futuras:[
-      {date:'10/04',day:'Qui',
-        ta:[{bdr:'Pedro Souza',empresa:'Blanc Hospital'}],
-        tm:[{bdr:'Pedro Souza',empresa:'Blanc Hospital'}]},
-      {date:'13/04',day:'Seg',
+      {date:'13/04',day:'Dom',
         ta:[{bdr:'Giovana Faceto',empresa:'Hospital e Maternidade Santa Tereza'},{bdr:"Juliana Sant'Anna",empresa:'Comtec'}],
         tm:[{bdr:'Giovana Faceto',empresa:'Hospital e Maternidade Santa Tereza'},{bdr:"Juliana Sant'Anna",empresa:'Comtec'}]},
-      {date:'14/04',day:'Ter',
-        ta:[{bdr:'Giovana Faceto',empresa:'Selia Full Service'},{bdr:"Juliana Sant'Anna",empresa:'Multiplica'},{bdr:'Mydoha Seydo',empresa:'Adfert / Indorama'},{bdr:'Pedro Souza',empresa:'Romariz'}],
-        tm:[{bdr:'Giovana Faceto',empresa:'Selia Full Service'},{bdr:"Juliana Sant'Anna",empresa:'Multiplica'},{bdr:'Mydoha Seydo',empresa:'Adfert / Indorama'},{bdr:'Pedro Souza',empresa:'Romariz'}]},
-      {date:'15/04',day:'Qua',
+      {date:'14/04',day:'Seg',
+        ta:[{bdr:'Giovana Faceto',empresa:'Selia Full Service'},{bdr:"Juliana Sant'Anna",empresa:'Multiplica'},{bdr:'Mydoha Seydo',empresa:'Adfert / Indorama'},{bdr:'Pedro Souza',empresa:'Romariz'},{bdr:'Victoria Eilers',empresa:'Biopark'}],
+        tm:[{bdr:'Giovana Faceto',empresa:'Selia Full Service'},{bdr:"Juliana Sant'Anna",empresa:'Multiplica'},{bdr:'Mydoha Seydo',empresa:'Transportadora Contatto'},{bdr:'Mydoha Seydo',empresa:'Adfert / Indorama'},{bdr:'Pedro Souza',empresa:'Romariz'},{bdr:'Victoria Eilers',empresa:'Biopark'}]},
+      {date:'15/04',day:'Ter',
         ta:[{bdr:'Giovana Faceto',empresa:'Centerplex Cinemas'},{bdr:'Mydoha Seydo',empresa:'Porto Sudeste'},{bdr:'Mydoha Seydo',empresa:'lev negócios'}],
-        tm:[{bdr:'Giovana Faceto',empresa:'Centerplex Cinemas'},{bdr:'Mydoha Seydo',empresa:'Porto Sudeste'},{bdr:'Mydoha Seydo',empresa:'lev negócios'}]},
-      {date:'16/04',day:'Qui',
+        tm:[{bdr:'Giovana Faceto',empresa:'Centerplex Cinemas'},{bdr:'Mydoha Seydo',empresa:'Porto Sudeste'},{bdr:'Mydoha Seydo',empresa:'lev negócios'},{bdr:'Mydoha Seydo',empresa:'vigilância triângulo'}]},
+      {date:'16/04',day:'Qua',
         ta:[{bdr:'Jeanne Rodrigues',empresa:'Hiper Select Supermercados'}],
         tm:[{bdr:'Jeanne Rodrigues',empresa:'Hiper Select Supermercados'}]},
-      {date:'23/04',day:'Qui',
-        ta:[{bdr:'Adhara Gonçalves',empresa:'Consuma'}],
-        tm:[{bdr:'Adhara Gonçalves',empresa:'Consuma'}]},
-      {date:'07/05',day:'Qui',
+      {date:'22/04',day:'Ter',
+        ta:[{bdr:'Mydoha Seydo',empresa:'—'}],
+        tm:[{bdr:'Mydoha Seydo',empresa:'—'}]},
+      {date:'23/04',day:'Qua',
+        ta:[{bdr:'Adhara Gonçalves',empresa:'Consuma'},{bdr:'Mydoha Seydo',empresa:'Centro Universitário Atenas'}],
+        tm:[{bdr:'Mydoha Seydo',empresa:'Centro Universitário Atenas'}]},
+      {date:'07/05',day:'Qua',
         ta:[{bdr:'Mydoha Seydo',empresa:'Weleda'}],
         tm:[{bdr:'Mydoha Seydo',empresa:'Weleda'}]},
     ],
     atrasadasTA:[
       {name:'Giovana Faceto', bg:'rgba(245,158,11,0.15)',color:'#fbbf24',id:'GF',n:1,empresa:'Hospital Vida',ae:'Andrea Ferraz',data:'09/04'},
+      {name:'Giovana Faceto', bg:'rgba(245,158,11,0.15)',color:'#fbbf24',id:'GF',n:1,empresa:'SM EDUCACAO',ae:'Andrea Ferraz',data:'01/04'},
+      {name:"Juliana Sant'Anna", bg:'rgba(20,184,166,0.15)',color:'#2dd4bf',id:'JS',n:1,empresa:'Sítio Recanto do Queijo',ae:'Carlos Grigorio',data:'23/03'},
+      {name:"Juliana Sant'Anna", bg:'rgba(20,184,166,0.15)',color:'#2dd4bf',id:'JS',n:1,empresa:'Grupo Toriba',ae:'Carlos Grigorio',data:'02/04'},
+      {name:'Mydoha Seydo', bg:'rgba(59,130,246,0.15)',color:'#60a5fa',id:'MY',n:1,empresa:'Eletropar Autopeças Ltda.',ae:'Mydoha Seydo',data:'23/03'},
+      {name:'Pedro Souza', bg:'rgba(239,68,68,0.12)',color:'#f87171',id:'PS',n:1,empresa:'Blanc Hospital',ae:'Pedro Souza',data:'10/04'},
+      {name:'Victoria Eilers', bg:'rgba(168,85,247,0.15)',color:'#c084fc',id:'VE',n:1,empresa:'Cana Brava All Inclusive Resort',ae:'Carlos Grigorio',data:'07/04'},
     ],
     atrasadasTM:[
       {name:'Giovana Faceto', bg:'rgba(245,158,11,0.15)',color:'#fbbf24',id:'GF',n:1,empresa:'Hospital Vida',ae:'Andrea Ferraz',data:'09/04'},
+      {name:"Juliana Sant'Anna", bg:'rgba(20,184,166,0.15)',color:'#2dd4bf',id:'JS',n:1,empresa:'Sítio Recanto do Queijo',ae:'Carlos Grigorio',data:'23/03'},
+      {name:"Juliana Sant'Anna", bg:'rgba(20,184,166,0.15)',color:'#2dd4bf',id:'JS',n:1,empresa:'Grupo Toriba',ae:'Carlos Grigorio',data:'02/04'},
+      {name:'Pedro Souza', bg:'rgba(239,68,68,0.12)',color:'#f87171',id:'PS',n:1,empresa:'Blanc Hospital',ae:'Pedro Souza',data:'10/04'},
+      {name:'Victoria Eilers', bg:'rgba(168,85,247,0.15)',color:'#c084fc',id:'VE',n:1,empresa:'Cana Brava All Inclusive Resort',ae:'Carlos Grigorio',data:'07/04'},
     ],
   },
   desq:{
@@ -1054,13 +1064,13 @@ const DATA = {
           {dir:'warn',text:'<strong>12 desqualificados</strong> — principal motivo: "Sem resposta". Revisar timing das tentativas.'},
           {dir:'down',text:'<strong>LC em 8</strong> com 26 abordagens — conversão AI→LC de 31%. Abaixo do esperado.'},
         ]},
-    JS:{nl:18,ai:15,lc:11,ras:2,opps:1,desq:13,topMotivo:'Sem resposta',topMotivoCor:'#ef4444',
+    JS:{nl:20,ai:15,lc:11,ras:2,opps:1,desq:13,topMotivo:'Sem resposta',topMotivoCor:'#ef4444',
         sugestao:[
           {dir:'up',  text:'<strong>1 oportunidade gerada</strong> — boa conversão. Manter ritmo.'},
           {dir:'warn',text:'<strong>13 desqualificados</strong> — revisar ICP da lista de prospecção.'},
           {dir:'down',text:'<strong>2 RAs</strong> com 11 leads conectados — conversão LC→RA de 18%. Trabalhar pitch de agendamento.'},
         ]},
-    VE:{nl:29,ai:25,lc:12,ras:0,opps:1,desq:18,topMotivo:'Sem resposta',topMotivoCor:'#ef4444',
+    VE:{nl:35,ai:25,lc:12,ras:0,opps:1,desq:18,topMotivo:'Sem resposta',topMotivoCor:'#ef4444',
         sugestao:[
           {dir:'up',  text:'<strong>1 oportunidade gerada</strong> com 0 RAs — conversão direta. Entender como replicar.'},
           {dir:'down',text:'<strong>0 RAs</strong> com 12 leads conectados — urgente trabalhar conversão LC→RA.'},
@@ -1072,7 +1082,7 @@ const DATA = {
           {dir:'up',  text:'<strong>3 RAs agendadas</strong> com foco em qualidade de reunião.'},
           {dir:'warn',text:'<strong>AI→LC em 38%</strong> (8/21) — abaixo da meta. Aumentar taxa de conexão.'},
         ]},
-    JR:{nl:11,ai:9,lc:9,ras:1,opps:0,desq:11,topMotivo:'Sem resposta',topMotivoCor:'#ef4444',
+    JR:{nl:11,ai:9,lc:9,ras:1,opps:0,desq:12,topMotivo:'Sem resposta',topMotivoCor:'#ef4444',
         sugestao:[
           {dir:'up',  text:'<strong>62 ligações conectadas</strong> — maior volume do time. Excelente.'},
           {dir:'down',text:'<strong>0 opps e 1 RA</strong> — volume alto mas sem conversão. Revisar qualificação na ligação.'},
