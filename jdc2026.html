@@ -280,6 +280,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
   background:var(--bg2);border-top:1px solid var(--border);
   padding:12px 20px;display:flex;gap:10px;justify-content:center;
   box-shadow:0 -2px 12px rgba(0,18,47,0.08);z-index:100;
+  padding-bottom:max(12px, env(safe-area-inset-bottom));
 }
 .btn{
   padding:10px 24px;border-radius:var(--radius-xs);
@@ -329,8 +330,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
   .summary-table th,.summary-table td{padding:8px 8px;font-size:10px;white-space:nowrap;}
 
   /* Save bar */
-  .save-bar{padding:8px 12px;}
-  .btn{padding:8px 16px;font-size:12px;}
+  .save-bar{padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));gap:6px;}
+  .btn{padding:10px 14px;font-size:11px;}
 
   /* View tabs: scroll horizontal */
   .view-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;gap:4px;padding:10px 12px;}
@@ -732,6 +733,24 @@ function renderPersonSection(p) {
           <div class="toggle-btn ${d.risco.to_indesejavel===true?'yes-selected':''}" onclick="updateToggle('${p.id}','risco','to_indesejavel',true,this)">Sim (TO Indesejavel)</div>
           <div class="toggle-btn ${d.risco.to_indesejavel===false?'no-selected':''}" onclick="updateToggle('${p.id}','risco','to_indesejavel',false,this)">Nao</div>
         </div>
+      </div>
+    </div>
+
+    <!-- BOTÃO CONCLUIR -->
+    <div style="margin:20px 0 40px;display:flex;flex-direction:column;gap:10px;">
+      <button onclick="saveData();this.textContent='Salvo ✓';this.style.background='var(--green)';setTimeout(()=>{this.textContent='Salvar Avaliação de ${p.name.split(' ')[0]}';this.style.background='var(--accent)';},2000)"
+        style="width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;box-shadow:var(--shadow-lg);transition:all .2s">
+        Salvar Avaliação de ${p.name.split(' ')[0]}
+      </button>
+      <div style="display:flex;gap:8px">
+        <button onclick="if(confirm('Exportar JSON de todas as avaliações?')) exportData()"
+          style="flex:1;padding:10px;background:var(--navy);color:#fff;border:none;border-radius:var(--radius-xs);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">
+          Exportar JSON
+        </button>
+        <button onclick="(function(){var idx=PEOPLE.findIndex(x=>x.id==='${p.id}');if(idx<PEOPLE.length-1){showPerson(PEOPLE[idx+1].id);window.scrollTo(0,0);}})()"
+          style="flex:1;padding:10px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:var(--radius-xs);font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">
+          Próximo BDR →
+        </button>
       </div>
     </div>
   </div>`;
