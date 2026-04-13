@@ -708,12 +708,38 @@ function calcSemAtual(){
 const DATA = {
   meta:84, metaBDR:12, semAtual:calcSemAtual(), semTotal:4,
   ultimaAtualizacao:'2026-04-12T21:50:00',
-  // Oportunidades detalhadas (opps mundo TA+TM)
+  // Negócios agendados do mês (SQL mundo, excluindo desqualificados)
   oppsDetalhe:[
-    {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Poli Soluções Digitais',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'09/04'},
-    {bdr:'JS',bdrNome:"Juliana Sant'Anna",empresa:'SIMM SOLUCOES',mundo:1,tipo:'TA',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'10/04'},
-    {bdr:'JS',bdrNome:"Juliana Sant'Anna",empresa:'TUDOR BATERIAS',mundo:1,tipo:'TA',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'07/04'},
+    // Adhara
+    {bdr:'AG',bdrNome:'Adhara Gonçalves',empresa:'Consuma',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Adhara Gonçalves',data:'08/04'},
+    // Giovana
     {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'VR Software',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Andrea Ferraz',data:'10/04'},
+    {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'Hospital Vida',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Andrea Ferraz',data:'09/04'},
+    {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'SM EDUCACAO',mundo:1,tipo:'TA',etapa:'Qualificação',ae:'Andrea Ferraz',data:'01/04'},
+    {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'Centerplex Cinemas',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Andrea Ferraz',data:'15/04'},
+    {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'Hospital e Mat. Santa Tereza',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Giovana Faceto',data:'13/04'},
+    {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'Selia Full Service',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Yago Viana',data:'14/04'},
+    // Jeanne
+    {bdr:'JR',bdrNome:'Jeanne Rodrigues',empresa:'Hiper Select Supermercados',mundo:2,tipo:'TA',etapa:'Qualificação',ae:'Jeanne Rodrigues',data:'16/04'},
+    // Juliana
+    {bdr:'JS',bdrNome:"Juliana Sant'Anna",empresa:'Comtec',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:"Juliana Sant'Anna",data:'13/04'},
+    {bdr:'JS',bdrNome:"Juliana Sant'Anna",empresa:'TUDOR BATERIAS',mundo:1,tipo:'TA',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'07/04'},
+    {bdr:'JS',bdrNome:"Juliana Sant'Anna",empresa:'SIMM SOLUCOES',mundo:2,tipo:'TA',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'10/04'},
+    {bdr:'JS',bdrNome:"Juliana Sant'Anna",empresa:'Multiplica',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:"Juliana Sant'Anna",data:'14/04'},
+    // Mydoha
+    {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Adfert / Indorama',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Mydoha Seydo',data:'14/04'},
+    {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Transportadora Contatto',mundo:2,tipo:'TM',etapa:'Qualificação',ae:'Mydoha Seydo',data:'14/04'},
+    {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Porto Sudeste',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Carlos Grigorio',data:'15/04'},
+    {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'lev negócios',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Mydoha Seydo',data:'15/04'},
+    {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Weleda',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Mydoha Seydo',data:'07/05'},
+    {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'vigilância triângulo',mundo:1,tipo:'TM',etapa:'Qualificação',ae:'Mydoha Seydo',data:'15/04'},
+    // Pedro
+    {bdr:'PS',bdrNome:'Pedro Souza',empresa:'Romariz',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Pedro Souza',data:'14/04'},
+    {bdr:'PS',bdrNome:'Pedro Souza',empresa:'Blanc Hospital',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Pedro Souza',data:'10/04'},
+    // Victoria
+    {bdr:'VE',bdrNome:'Victoria Eilers',empresa:'Biopark',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Carlos Grigorio',data:'14/04'},
+    // Opps já convertidas (Apres. Solução)
+    {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Poli Soluções Digitais',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'09/04'},
     {bdr:'VE',bdrNome:'Victoria Eilers',empresa:'Divinissimo Alimentos',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'08/04'},
   ],
   // Acumulado do mês (Abril 2026) — atualizado manualmente a cada semana
