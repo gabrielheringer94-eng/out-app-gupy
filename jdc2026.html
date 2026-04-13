@@ -109,6 +109,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
   background:var(--bg2);border-radius:var(--radius);
   padding:20px;margin-bottom:16px;
   box-shadow:var(--shadow-sm);border:1px solid var(--border);
+  overflow:visible;position:relative;
 }
 .eval-card-header{
   display:flex;align-items:center;gap:10px;margin-bottom:16px;
@@ -128,7 +129,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
 }
 
 /* ── Rating Scale ── */
-.rating-group{margin-bottom:20px;}
+.rating-group{margin-bottom:20px;overflow:visible;position:relative;z-index:1;}
 .rating-group:last-child{margin-bottom:0;}
 .rating-label{
   font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;
@@ -138,14 +139,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
   font-size:10px;font-weight:400;color:var(--text3);
   background:var(--bg3);padding:2px 8px;border-radius:10px;
 }
-.rating-options{display:flex;gap:6px;flex-wrap:wrap;}
+.rating-options{display:flex;gap:6px;flex-wrap:wrap;overflow:visible;}
 .rating-btn{
   flex:1;min-width:0;
   padding:10px 6px;border-radius:var(--radius-xs);
   background:var(--bg3);border:1.5px solid var(--border);
   font-size:11px;font-weight:500;color:var(--text2);
   cursor:pointer;transition:all .2s;text-align:center;
-  line-height:1.3;
+  line-height:1.3;overflow:visible;position:relative;
 }
 .rating-btn:hover{border-color:var(--accent);background:var(--accent-light);}
 .rating-btn.selected-red{background:var(--red-bg);border-color:var(--red);color:var(--red);font-weight:700;}
