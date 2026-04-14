@@ -6474,41 +6474,51 @@ function setTheme(theme){
   var r=document.documentElement;
   document.body.dataset.theme=theme;
   if(theme==='light'){
-    r.style.setProperty('--bg','#f8f9fc');
+    // Restore ORIGINAL light theme values exactly
+    r.style.setProperty('--bg','#f5f7fa');
     r.style.setProperty('--bg2','#ffffff');
-    r.style.setProperty('--bg3','#f1f3f8');
-    r.style.setProperty('--bg4','#e6e9f0');
-    r.style.setProperty('--border','rgba(99,102,241,0.08)');
-    r.style.setProperty('--border2','rgba(99,102,241,0.14)');
-    r.style.setProperty('--text','#1a1a2e');
-    r.style.setProperty('--text2','#4a4a6a');
-    r.style.setProperty('--text3','#8888a8');
-    r.style.setProperty('--navy','#1a1a2e');
-    r.style.setProperty('--accent','#6366f1');
-    r.style.setProperty('--accent-light','rgba(99,102,241,0.08)');
+    r.style.setProperty('--bg3','#f0f2f6');
+    r.style.setProperty('--bg4','#e8ecf2');
+    r.style.setProperty('--border','rgba(0,18,47,0.08)');
+    r.style.setProperty('--border2','rgba(0,18,47,0.14)');
+    r.style.setProperty('--text','#00122f');
+    r.style.setProperty('--text2','#3d5077');
+    r.style.setProperty('--text3','#7a8eaa');
+    r.style.setProperty('--navy','#00122f');
+    r.style.setProperty('--accent','#003cfd');
+    r.style.setProperty('--accent-light','rgba(0,60,253,0.08)');
+    r.style.setProperty('--accent-mid','rgba(0,60,253,0.14)');
     r.style.setProperty('--green','#16a34a');
     r.style.setProperty('--green-bg','rgba(22,163,74,0.08)');
     r.style.setProperty('--red','#dc2626');
-    r.style.setProperty('--red-bg','rgba(220,38,38,0.06)');
+    r.style.setProperty('--red-bg','rgba(220,38,38,0.08)');
     r.style.setProperty('--amber','#d97706');
-    r.style.setProperty('--amber-bg','rgba(217,119,6,0.06)');
-    r.style.setProperty('--shadow','0 1px 3px rgba(99,102,241,0.06),0 4px 16px rgba(99,102,241,0.04)');
-    r.style.setProperty('--shadow-sm','0 1px 3px rgba(99,102,241,0.06)');
-    r.style.setProperty('--shadow-lg','0 4px 24px rgba(99,102,241,0.10)');
-    // Fix card glass for light
+    r.style.setProperty('--amber-bg','rgba(217,119,6,0.08)');
+    r.style.setProperty('--purple','#7c3aed');
+    r.style.setProperty('--purple-bg','rgba(124,58,237,0.08)');
+    r.style.setProperty('--teal','#0d9488');
+    r.style.setProperty('--shadow','0 1px 4px rgba(0,18,47,0.06),0 4px 16px rgba(0,18,47,0.06)');
+    r.style.setProperty('--shadow-sm','0 1px 3px rgba(0,18,47,0.08)');
+    r.style.setProperty('--shadow-lg','0 4px 24px rgba(0,60,253,0.12)');
+    // Restore original card styles (white, no blur)
     document.querySelectorAll('.card').forEach(function(c){
       c.style.background='#ffffff';c.style.backdropFilter='none';c.style.webkitBackdropFilter='none';
-      c.style.border='1px solid rgba(99,102,241,0.08)';c.style.boxShadow='0 1px 3px rgba(99,102,241,0.06),0 4px 12px rgba(99,102,241,0.04)';
+      c.style.border='1px solid rgba(0,18,47,0.08)';
+      c.style.boxShadow='0 1px 4px rgba(0,18,47,0.05),0 2px 8px rgba(0,18,47,0.03)';
     });
-    // Fix header/nav for light
+    // Restore original header
     var hdr=document.querySelector('.app-header');
-    if(hdr){hdr.style.background='rgba(255,255,255,0.9)';hdr.style.borderBottom='1px solid rgba(99,102,241,0.08)';}
+    if(hdr){hdr.style.background='#ffffff';hdr.style.backdropFilter='none';hdr.style.webkitBackdropFilter='none';hdr.style.borderBottom='1px solid rgba(0,18,47,0.08)';hdr.style.boxShadow='0 1px 3px rgba(0,18,47,0.08)';}
+    // Restore original nav
     var nav=document.querySelector('.bottom-nav');
-    if(nav){nav.style.background='rgba(255,255,255,0.95)';nav.style.borderTop='1px solid rgba(99,102,241,0.08)';}
-    // Fix metric cards
+    if(nav){nav.style.background='#ffffff';nav.style.backdropFilter='none';nav.style.webkitBackdropFilter='none';nav.style.borderTop='1px solid rgba(0,18,47,0.08)';nav.style.boxShadow='0 -2px 12px rgba(0,0,0,0.06)';}
+    // Restore metric cards
     document.querySelectorAll('.metric-card').forEach(function(c){
-      c.style.background='#ffffff';c.style.backdropFilter='none';c.style.border='1px solid rgba(99,102,241,0.08)';
+      c.style.background='#ffffff';c.style.backdropFilter='none';c.style.webkitBackdropFilter='none';
+      c.style.border='1px solid rgba(0,18,47,0.08)';c.style.boxShadow='0 1px 3px rgba(0,18,47,0.08)';
     });
+    // Nav active color back to original blue
+    document.querySelectorAll('.nav-item.active').forEach(function(n){n.style.color='#003cfd';n.style.textShadow='none';});
   } else {
     r.style.setProperty('--bg','#0a0a0f');
     r.style.setProperty('--bg2','#12121a');
