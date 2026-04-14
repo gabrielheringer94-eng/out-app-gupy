@@ -6883,6 +6883,17 @@ function jdcCalc9box(id){
   var m={'3-1':'Q7','3-2':'Q8','3-3':'Q9','2-1':'Q4','2-2':'Q5','2-3':'Q6','1-1':'Q1','1-2':'Q2','1-3':'Q3'};
   return m[sL+'-'+pL]||null;
 }
+// Pontuação detalhada 0-4 de cada pilar
+function jdcGetScores(id){
+  var d=jdcData[id];if(!d)return null;
+  var res=d.resultado.nota;
+  var cVals=[d.cultura.agilidade,d.cultura.fazer_mais,d.cultura.juntos,d.cultura.paixao,d.cultura.obsessao];
+  var cF=cVals.filter(function(v){return v!==null;});
+  var cAvg=cF.length?Math.round(cF.reduce(function(a,b){return a+b;},0)/cF.length*10)/10:null;
+  var perf=res&&cAvg!==null?Math.round((res*0.6+cAvg*0.4)*10)/10:null;
+  var sol=d.solidez.final;
+  return {resultado:res,cultura:cAvg,performance:perf,solidez:sol};
+}
 
 function jdcRatingHtml(pid,section,field,label,hint,scale){
   var cur=jdcData[pid][section][field];
@@ -6964,9 +6975,14 @@ function jdcBuildPerson(pid){
     +'<div style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;background:'+p.color+';box-shadow:0 2px 8px rgba(99,102,241,.2)">'+ini+'</div>'
     +'<div><div style="font-size:16px;font-weight:700;color:var(--text)">'+p.name+'</div>'
     +'<div style="font-size:11px;color:var(--text3)">BDR · Ciclo Jan-Dez 2025</div></div>'
-    +'<div style="margin-left:auto;text-align:center;background:var(--bg3);border-radius:8px;padding:6px 12px">'
+    +'<div style="margin-left:auto;text-align:center;background:var(--bg3);border-radius:8px;padding:8px 14px">'
     +'<div style="font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">9BOX</div>'
-    +'<div style="font-size:15px;font-weight:800;color:var(--accent);margin-top:2px" id="jdc-q-'+pid+'">'+(q||'—')+'</div></div></div>';
+    +'<div style="font-size:16px;font-weight:800;color:var(--accent);margin-top:2px" id="jdc-q-'+pid+'">'+(q||'—')+'</div>'
+    +(function(){var sc=jdcGetScores(pid);if(!sc||!sc.performance)return '';var perfCol=sc.performance>=3?'var(--green)':sc.performance>=2?'var(--amber)':'var(--red)';var solCol=sc.solidez>=3?'var(--green)':sc.solidez>=2?'var(--amber)':'var(--red)';return '<div style="display:flex;gap:6px;margin-top:6px">'
+    +'<div style="text-align:center;padding:3px 6px;background:var(--bg4);border-radius:6px;min-width:36px"><div style="font-size:14px;font-weight:700;color:'+perfCol+'">'+sc.performance+'</div><div style="font-size:7px;color:var(--text3)">Perf</div></div>'
+    +'<div style="text-align:center;padding:3px 6px;background:var(--bg4);border-radius:6px;min-width:36px"><div style="font-size:14px;font-weight:700;color:'+solCol+'">'+sc.solidez+'</div><div style="font-size:7px;color:var(--text3)">Solidez</div></div>'
+    +'</div>';})()
+    +'</div></div>';
 
   // Solidez
   var solContent=jdcRatingHtml(pid,'solidez','autonomia','Autonomia','Independência para tomar decisões',JDC_SOL_SCALE)
@@ -7045,39 +7061,84 @@ function jdcBuildSummary(){
 }
 
 function jdcBuild9box(){
-  var cells=[
-    {q:'q7',l:'Perf. Abaixo<br>+ Excedendo',bg:'#fef2f2'},
-    {q:'q8',l:'Perf. Dentro<br>+ Excedendo',bg:'#fef9ee'},
-    {q:'q9',l:'Perf. Acima<br>+ Excedendo',bg:'#f0fdf4'},
-    {q:'q4',l:'Perf. Abaixo<br>+ Sólido',bg:'#fef9ee'},
-    {q:'q5',l:'Perf. Dentro<br>+ Sólido',bg:'#f0f2f6'},
-    {q:'q6',l:'Perf. Acima<br>+ Sólido',bg:'#ecfdf5'},
-    {q:'q1',l:'Perf. Abaixo<br>+ Em Desenv.',bg:'#fef2f2'},
-    {q:'q2',l:'Perf. Dentro<br>+ Em Desenv.',bg:'#fff7ed'},
-    {q:'q3',l:'Perf. Acima<br>+ Em Desenv.',bg:'#f0fdf4'},
-  ];
-  var placements={};
+  // Scatter plot 9BOX — eixos 1-4, quadrantes coloridos, pontos por BDR
+  var W=340,H=300,pL=36,pR=16,pT=16,pB=44;
+  var pw=W-pL-pR, ph=H-pT-pB;
+  function toX(v){return pL+((v-1)/3)*pw;}
+  function toY(v){return pT+ph-((v-1)/3)*ph;}
+
+  // Quadrant backgrounds (Performance x = horizontal, Solidez y = vertical)
+  // x<2.5 & y<2.5 = red (Q1), x>=2.5 & y<2.5 = blue-ish (Q2/Q3), etc.
+  var quads='';
+  // Red zone: perf 1-2.5, solidez 1-2.5
+  quads+='<rect x="'+pL+'" y="'+toY(2.5)+'" width="'+(toX(2.5)-pL)+'" height="'+(toY(1)-toY(2.5))+'" fill="rgba(239,68,68,0.08)" rx="4"/>';
+  // Red zone top-left: perf 1-2.5, solidez 2.5-4
+  quads+='<rect x="'+pL+'" y="'+toY(4)+'" width="'+(toX(2.5)-pL)+'" height="'+(toY(2.5)-toY(4))+'" fill="rgba(245,158,11,0.06)" rx="4"/>';
+  // Blue zone: perf 2.5-3.5, solidez 1-4
+  quads+='<rect x="'+toX(2.5)+'" y="'+toY(4)+'" width="'+(toX(3.5)-toX(2.5))+'" height="'+(toY(1)-toY(4))+'" fill="rgba(99,102,241,0.06)" rx="4"/>';
+  // Green zone: perf 3.5-4, solidez 1-4
+  quads+='<rect x="'+toX(3.5)+'" y="'+toY(4)+'" width="'+(toX(4)-toX(3.5)+pR)+'" height="'+(toY(1)-toY(4))+'" fill="rgba(34,197,94,0.08)" rx="4"/>';
+
+  // Grid lines
+  var grid='';
+  for(var i=1;i<=4;i++){
+    grid+='<line x1="'+pL+'" y1="'+toY(i)+'" x2="'+(W-pR)+'" y2="'+toY(i)+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
+    grid+='<line x1="'+toX(i)+'" y1="'+pT+'" x2="'+toX(i)+'" y2="'+(H-pB)+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
+    // Y axis labels (Solidez)
+    grid+='<text x="'+(pL-8)+'" y="'+(toY(i)+4)+'" font-size="10" fill="var(--text3)" text-anchor="end" font-weight="600" font-family="Inter">'+i+'</text>';
+    // X axis labels (Performance)
+    grid+='<text x="'+toX(i)+'" y="'+(H-pB+18)+'" font-size="10" fill="var(--text3)" text-anchor="middle" font-weight="600" font-family="Inter">'+i+'</text>';
+  }
+
+  // Axis labels
+  var axes='<text x="'+(W/2)+'" y="'+(H-4)+'" font-size="11" fill="var(--red)" text-anchor="middle" font-weight="700" font-family="Inter">';
+  axes+='Performance (Resultado + Cultura) →</text>';
+
+  // Y axis gradient bar
+  axes+='<rect x="2" y="'+pT+'" width="4" height="'+ph+'" rx="2" fill="url(#yGrad)"/>';
+  axes+='<defs><linearGradient id="yGrad" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#ef4444"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#22c55e"/></linearGradient>';
+  axes+='<linearGradient id="xGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ef4444"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#22c55e"/></linearGradient></defs>';
+  // X axis gradient bar
+  axes+='<rect x="'+pL+'" y="'+(H-pB+24)+'" width="'+pw+'" height="4" rx="2" fill="url(#xGrad)"/>';
+
+  // Plot BDR points
+  var points='';
+  var jitter=0;
   JDC_PEOPLE.forEach(function(p){
-    var q=jdcCalc9box(p.id);
-    if(q){var k=q.toLowerCase();if(!placements[k])placements[k]=[];placements[k].push(p);}
+    var sc=jdcGetScores(p.id);
+    if(!sc||!sc.performance||!sc.solidez) return;
+    var x=toX(sc.performance)+(jitter%3-1)*8;
+    var y=toY(sc.solidez)+(Math.floor(jitter/3)-1)*6;
+    jitter++;
+    var name=p.name.split(' ')[0];
+    // Dot with glow
+    points+='<circle cx="'+x+'" cy="'+y+'" r="8" fill="'+p.color+'" opacity="0.9" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>';
+    points+='<circle cx="'+x+'" cy="'+y+'" r="12" fill="'+p.color+'" opacity="0.15"/>';
+    // Name label
+    points+='<text x="'+x+'" y="'+(y-12)+'" font-size="9" fill="var(--text)" text-anchor="middle" font-weight="700" font-family="Inter">'+name+'</text>';
+    // Score badge
+    points+='<text x="'+x+'" y="'+(y+3)+'" font-size="7" fill="#fff" text-anchor="middle" font-weight="700" font-family="Inter">'+sc.performance+'</text>';
   });
-  var cellsHtml=cells.map(function(c){
-    var ppl=placements[c.q]||[];
-    var hl=ppl.length>0?'box-shadow:0 0 0 3px var(--accent),0 4px 16px rgba(99,102,241,.2);transform:scale(1.03);z-index:1;':'';
-    var names=ppl.map(function(p){return '<div style="font-size:10px;font-weight:700;color:'+p.color+';margin-top:2px">'+p.name.split(' ')[0]+'</div>';}).join('');
-    return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;'
-      +'background:'+c.bg+';font-size:8px;font-weight:600;color:var(--text3);text-align:center;padding:8px 4px;'
-      +'line-height:1.2;transition:all .3s;position:relative;'+hl+'"><div>'+c.l+'</div>'+names+'</div>';
-  }).join('');
-  return '<div style="display:flex;gap:8px;align-items:stretch">'
-    +'<div style="writing-mode:vertical-lr;transform:rotate(180deg);font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;justify-content:center;padding:0 4px">Solidez no Nível ↑</div>'
-    +'<div style="flex:1"><div style="display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:4px;aspect-ratio:3/3;max-width:360px">'
-    +cellsHtml+'</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px;padding-left:0">'
-    +'<div style="font-size:9px;font-weight:600;color:var(--text3);text-align:center;text-transform:uppercase">Abaixo</div>'
-    +'<div style="font-size:9px;font-weight:600;color:var(--text3);text-align:center;text-transform:uppercase">Dentro</div>'
-    +'<div style="font-size:9px;font-weight:600;color:var(--text3);text-align:center;text-transform:uppercase">Acima</div>'
-    +'</div></div></div>';
+
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:'+W+'px;font-family:Inter,sans-serif">'
+    +quads+grid+axes+points+'</svg>';
+
+  // Legenda
+  var legend='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;justify-content:center">';
+  JDC_PEOPLE.forEach(function(p){
+    var sc=jdcGetScores(p.id);
+    var q=jdcCalc9box(p.id);
+    if(!sc||!sc.performance) return;
+    legend+='<div style="display:flex;align-items:center;gap:4px;font-size:10px">'
+      +'<div style="width:8px;height:8px;border-radius:50%;background:'+p.color+'"></div>'
+      +'<span style="color:var(--text2);font-weight:500">'+p.name.split(' ')[0]+'</span>'
+      +'<span style="color:var(--accent);font-weight:700;font-size:9px">'+(q||'')+'</span>'
+      +'<span style="color:var(--text3);font-size:9px">('+sc.performance+')</span>'
+      +'</div>';
+  });
+  legend+='</div>';
+
+  return svg+legend;
 }
 
 function jdcBuildMeritPanel(){
