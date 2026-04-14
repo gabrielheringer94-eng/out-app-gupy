@@ -6771,7 +6771,9 @@ function jdcInit(){
   var saved=localStorage.getItem('jdc2026_data');
   if(saved){try{jdcData=JSON.parse(saved);}catch(e){jdcData={};}}
   jdcInitDefaults();
-  // Then try Supabase (async, merges newer data)
+  // Auto-push local data to Supabase (ensures cloud has latest)
+  if(saved) setTimeout(function(){jdcSaveToSupabase();},2000);
+  // Then try Supabase (async, merges newer data from other devices)
   jdcLoadFromSupabase();
 }
 async function jdcLoadFromSupabase(){
