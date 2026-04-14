@@ -1302,12 +1302,132 @@ function buildLogin(){
   content.appendChild(grid);
 }
 
+// ── ANALYTICS DASHBOARD ──
+async function showAnalytics(){
+  var old=document.getElementById('analytics-modal');
+  if(old) old.remove();
+  var overlay=document.createElement('div');
+  overlay.id='analytics-modal';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)';
+  overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};
+  overlay.innerHTML='<div style="background:var(--bg2);border-radius:16px;padding:20px;max-width:440px;width:100%;max-height:85vh;overflow-y:auto;border:1px solid var(--border)"><div style="text-align:center;padding:20px;color:var(--text3)">Carregando analytics...</div></div>';
+  document.body.appendChild(overlay);
+  try{
+    var rows=await supaFetch('gp_tracking','order=created_at.desc&limit=200');
+    if(!rows||rows.length===0){overlay.querySelector('div>div').innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)">Nenhum dado de uso ainda. Os dados aparecem após os BDRs usarem o app.</div>';return;}
+    // Aggregate
+    var userLogins={};var userLastSeen={};var tabCounts={};var actionCounts={};var deviceCounts={mobile:0,desktop:0};var today=new Date().toDateString();var todayCount=0;
+    rows.forEach(function(r){
+      // Logins per user
+      if(r.event==='login'){
+        userLogins[r.user_name]=(userLogins[r.user_name]||0)+1;
+        if(!userLastSeen[r.user_name]||r.created_at>userLastSeen[r.user_name]) userLastSeen[r.user_name]=r.created_at;
+      }
+      // Tabs
+      if(r.event==='tab_view') tabCounts[r.detail]=(tabCounts[r.detail]||0)+1;
+      // Actions
+      if(r.event!=='login'&&r.event!=='tab_view') actionCounts[r.event]=(actionCounts[r.event]||0)+1;
+      // Device
+      if(r.device) deviceCounts[r.device]=(deviceCounts[r.device]||0)+1;
+      // Today
+      if(new Date(r.created_at).toDateString()===today) todayCount++;
+    });
+    // Build HTML
+    var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'
+      +'<div style="font-size:16px;font-weight:700;color:var(--text)">📊 Analytics de Uso</div>'
+      +'<button onclick="document.getElementById(\'analytics-modal\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button></div>';
+    // Summary cards
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:16px">'
+      +'<div style="text-align:center;padding:10px;background:var(--bg3);border-radius:10px"><div style="font-size:20px;font-weight:700;color:var(--accent)">'+rows.length+'</div><div style="font-size:9px;color:var(--text3)">Eventos total</div></div>'
+      +'<div style="text-align:center;padding:10px;background:var(--bg3);border-radius:10px"><div style="font-size:20px;font-weight:700;color:var(--green)">'+todayCount+'</div><div style="font-size:9px;color:var(--text3)">Hoje</div></div>'
+      +'<div style="text-align:center;padding:10px;background:var(--bg3);border-radius:10px"><div style="font-size:20px;font-weight:700;color:var(--purple)">'+Object.keys(userLogins).length+'</div><div style="font-size:9px;color:var(--text3)">Usuários</div></div>'
+      +'</div>';
+    // Device split
+    var totalDev=deviceCounts.mobile+deviceCounts.desktop;
+    html+='<div style="display:flex;gap:8px;margin-bottom:16px">'
+      +'<div style="flex:1;padding:8px;background:var(--bg3);border-radius:8px;text-align:center"><div style="font-size:13px;font-weight:700;color:var(--text)">📱 '+deviceCounts.mobile+'</div><div style="font-size:9px;color:var(--text3)">Mobile'+(totalDev>0?' ('+Math.round(deviceCounts.mobile/totalDev*100)+'%)':'')+'</div></div>'
+      +'<div style="flex:1;padding:8px;background:var(--bg3);border-radius:8px;text-align:center"><div style="font-size:13px;font-weight:700;color:var(--text)">💻 '+deviceCounts.desktop+'</div><div style="font-size:9px;color:var(--text3)">Desktop'+(totalDev>0?' ('+Math.round(deviceCounts.desktop/totalDev*100)+'%)':'')+'</div></div>'
+      +'</div>';
+    // User activity
+    html+='<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Atividade por usuário</div>';
+    var sortedUsers=Object.keys(userLogins).sort(function(a,b){return userLogins[b]-userLogins[a];});
+    sortedUsers.forEach(function(name){
+      var lastSeen=userLastSeen[name]?new Date(userLastSeen[name]).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px solid var(--border)">'
+        +'<div><div style="font-size:12px;font-weight:600;color:var(--text)">'+name+'</div>'
+        +'<div style="font-size:10px;color:var(--text3)">Último: '+lastSeen+'</div></div>'
+        +'<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--accent)">'+userLogins[name]+'</div><div style="font-size:9px;color:var(--text3)">logins</div></div>'
+        +'</div>';
+    });
+    // Top tabs
+    html+='<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 8px">Abas mais visitadas</div>';
+    var sortedTabs=Object.keys(tabCounts).sort(function(a,b){return tabCounts[b]-tabCounts[a];});
+    sortedTabs.slice(0,8).forEach(function(tab){
+      var pct=Math.round(tabCounts[tab]/rows.length*100);
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0">'
+        +'<div style="font-size:11px;color:var(--text);flex:1">'+tab+'</div>'
+        +'<div style="width:80px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden"><div style="width:'+Math.min(pct*3,100)+'%;height:100%;background:var(--accent);border-radius:2px"></div></div>'
+        +'<div style="font-size:11px;font-weight:600;color:var(--accent);width:30px;text-align:right">'+tabCounts[tab]+'</div>'
+        +'</div>';
+    });
+    // Actions
+    if(Object.keys(actionCounts).length>0){
+      html+='<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 8px">Ações realizadas</div>';
+      var labels={'forecast_submit':'Forecast enviado','forecast_approve':'Forecast aprovado','forecast_reflect':'Forecast devolvido','forecast_reset':'Forecast resetado','opps_modal':'Opps consultadas','jdc_save':'JDC salva','theme_change':'Tema alterado'};
+      Object.keys(actionCounts).sort(function(a,b){return actionCounts[b]-actionCounts[a];}).forEach(function(act){
+        html+='<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px">'
+          +'<span style="color:var(--text)">'+(labels[act]||act)+'</span>'
+          +'<span style="font-weight:700;color:var(--green)">'+actionCounts[act]+'</span></div>';
+      });
+    }
+    // Recent events (last 15)
+    html+='<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 8px">Últimos eventos</div>';
+    rows.slice(0,15).forEach(function(r){
+      var dt=new Date(r.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      var icon=r.event==='login'?'🔑':r.event==='tab_view'?'📄':r.event==='forecast_submit'?'📊':r.event==='jdc_save'?'📋':'⚡';
+      html+='<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:10px;border-bottom:1px solid var(--border)">'
+        +'<span>'+icon+'</span>'
+        +'<span style="color:var(--text);font-weight:500">'+r.user_name+'</span>'
+        +'<span style="color:var(--text3)">'+r.event+(r.detail?' · '+r.detail:'')+'</span>'
+        +'<span style="margin-left:auto;color:var(--text3);font-size:9px">'+dt+'</span>'
+        +'<span style="font-size:8px;color:var(--text3)">'+(r.device==='mobile'?'📱':'💻')+'</span>'
+        +'</div>';
+    });
+    overlay.querySelector('div').innerHTML=html;
+  }catch(e){
+    overlay.querySelector('div>div').innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)">Erro ao carregar analytics: '+e.message+'</div>';
+  }
+}
+
+// ── TRACKING ──
+function track(event,detail){
+  try{
+    var u=currentUser||{};
+    var isMobile=/iPhone|iPad|Android|Mobile/i.test(navigator.userAgent);
+    var payload={
+      user_id:u.id||'unknown',
+      user_name:(u.name||'').split(' ')[0],
+      is_gestor:u.isGestor||false,
+      event:event,
+      detail:detail||'',
+      device:isMobile?'mobile':'desktop',
+      created_at:new Date().toISOString()
+    };
+    fetch(SUPA_URL+'/rest/v1/gp_tracking',{
+      method:'POST',
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(payload)
+    }).catch(function(){});
+  }catch(e){}
+}
+
 function doLogin(){
   if(!currentUser) return;
   try{
     localStorage.setItem('gupypulse_session',JSON.stringify({userId:currentUser.id}));
     if(currentUser.isGestor) sessionStorage.setItem('gupypulse_gestor_auth','true');
   }catch(e){}
+  track('login','direct');
   document.getElementById('screen-login').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
   setupApp();
@@ -1619,6 +1739,7 @@ function buildTabs(tabs,builders){
       btn.classList.add('active');
       const pane=document.getElementById('pane-'+t.id);
       pane.classList.add('active');
+      track('tab_view',t.label||t.id);
       if(!pane.dataset.built){
         pane.dataset.built='1';
         builders[i](pane);
@@ -2701,7 +2822,7 @@ async function approveAllForecasts(semId){
 }
 
 // ── Reset Forecast ──
-async function resetForecast(forecastId, bdrId){
+async function resetForecast(forecastId, bdrId){track('forecast_reset',bdrId);
   if(!confirm('Zerar o forecast deste BDR?')) return;
   try{
     await fetch(`${SUPA_URL}/rest/v1/gp_forecast?id=eq.${forecastId}`,{
@@ -2717,7 +2838,7 @@ async function resetForecast(forecastId, bdrId){
 }
 
 // ── Forecast Approval Functions ──
-async function approveForecast(forecastId, bdrId){
+async function approveForecast(forecastId, bdrId){track('forecast_approve',bdrId);
   try{
     await fetch(`${SUPA_URL}/rest/v1/gp_forecast?id=eq.${forecastId}`,{
       method:'PATCH',
@@ -2736,7 +2857,7 @@ function showReflectInput(forecastId, bdrId){
     <button onclick="submitReflection(${forecastId},'${bdrId}')" style="font-size:8px;padding:2px 6px;background:var(--red);color:white;border:none;border-radius:4px;cursor:pointer;margin-top:2px;width:100%">Enviar</button>`;
 }
 
-async function submitReflection(forecastId, bdrId){
+async function submitReflection(forecastId, bdrId){track('forecast_reflect',bdrId);
   var text=(document.getElementById('reflect-text-'+bdrId)||{}).value||'';
   if(!text.trim()){alert('Justificativa obrigatória');return;}
   try{
@@ -5206,7 +5327,7 @@ async function submitForecast(bdrId,bdrNome,semId,btnRef){
       body:JSON.stringify({semana_id:semId,bdr_id:bdrId,bdr_nome:bdrNome,fcst_lc:lc,fcst_ra:ra,fcst_op:op})
     });
     if(!r.ok) throw new Error(await r.text());
-    const bdr=DATA.bdrs.find(b=>b.id===bdrId);
+    track('forecast_submit',bdrId+' S'+semId);const bdr=DATA.bdrs.find(b=>b.id===bdrId);
     if(bdr) loadBDRForecast(bdr,semId);
   }catch(e){
     btn.textContent='Assumir meu forecast ↗';btn.disabled=false;
@@ -5260,7 +5381,7 @@ async function saveEditForecast(bdrId,forecastId,semId){
       body:JSON.stringify({fcst_lc:lc,fcst_ra:ra,fcst_op:op})
     });
     if(!r.ok) throw new Error(await r.text());
-    const bdr=DATA.bdrs.find(b=>b.id===bdrId);
+    track('forecast_submit',bdrId+' S'+semId);const bdr=DATA.bdrs.find(b=>b.id===bdrId);
     if(bdr) loadBDRForecast(bdr,semId);
     // Refresh gestor table if open
     const tbody=document.getElementById('forecast-table-body');
@@ -5319,7 +5440,7 @@ function renderWeeklyEvents(){
 }
 
 // ── Modal de Oportunidades ──
-function showOppsModal(bdrFilter){
+function showOppsModal(bdrFilter){track('opps_modal',bdrFilter||'all');
   // Remove modal existente
   var old=document.getElementById('opps-modal-overlay');
   if(old) old.remove();
@@ -6514,6 +6635,15 @@ function buildSettingsContent(){
     </div>
 
     <!-- Salvar -->
+    ${currentUser&&currentUser.isGestor?`
+    <!-- Analytics (só gestor) -->
+    <div style="margin-bottom:24px">
+      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;font-family:'Inter',sans-serif">Analytics de Uso</div>
+      <button onclick="showAnalytics()" style="width:100%;padding:12px;background:rgba(168,85,247,0.1);color:var(--purple);border:1.5px solid rgba(168,85,247,0.25);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">
+        📊 Ver quem está usando o app
+      </button>
+    </div>`:''}
+
     <button onclick="saveSettings()" style="width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:12px">
       Salvar preferências
     </button>
@@ -6523,7 +6653,7 @@ function buildSettingsContent(){
   `;
 }
 
-function setTheme(theme){
+function setTheme(theme){track('theme_change',theme);
   // Save preference first
   if(currentUser){
     var pk='gpulse-prefs-'+currentUser.id;
@@ -6826,7 +6956,7 @@ function countJdcFields(d){
 }
 jdcInit();
 
-function jdcSave(){
+function jdcSave(){track('jdc_save',jdcActive||'');
   // Save locally (instant)
   localStorage.setItem('jdc2026_data',JSON.stringify(jdcData));
   // Save to Supabase (async, per person)
