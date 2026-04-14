@@ -6755,9 +6755,7 @@ var jdcData={};
 var jdcActive='juliana';
 var jdcView='eval';
 
-function jdcInit(){
-  var saved=localStorage.getItem('jdc2026_data');
-  if(saved){try{jdcData=JSON.parse(saved);}catch(e){jdcData={};}}
+function jdcInitDefaults(){
   JDC_PEOPLE.forEach(function(p){
     if(!jdcData[p.id]) jdcData[p.id]={
       solidez:{autonomia:null,complexidade:null,impacto:null,final:null},
@@ -6768,9 +6766,89 @@ function jdcInit(){
     };
   });
 }
+function jdcInit(){
+  // Load from localStorage first (instant)
+  var saved=localStorage.getItem('jdc2026_data');
+  if(saved){try{jdcData=JSON.parse(saved);}catch(e){jdcData={};}}
+  jdcInitDefaults();
+  // Then try Supabase (async, merges newer data)
+  jdcLoadFromSupabase();
+}
+async function jdcLoadFromSupabase(){
+  try{
+    var rows=await supaFetch('gp_jdc','order=person_id.asc');
+    if(!rows||rows.length===0) return;
+    var changed=false;
+    rows.forEach(function(row){
+      if(row.person_id&&row.data){
+        var remote=typeof row.data==='string'?JSON.parse(row.data):row.data;
+        // Merge: Supabase wins if has data
+        var local=jdcData[row.person_id];
+        if(!local||!hasJdcData(local)){
+          jdcData[row.person_id]=remote;changed=true;
+        } else {
+          // Check if remote is newer (has more filled fields)
+          if(hasJdcData(remote)&&countJdcFields(remote)>countJdcFields(local)){
+            jdcData[row.person_id]=remote;changed=true;
+          }
+        }
+      }
+    });
+    if(changed){
+      localStorage.setItem('jdc2026_data',JSON.stringify(jdcData));
+      // Re-render if JDC tab is open
+      var pane=document.querySelector('[data-built]');
+      if(pane&&jdcView) jdcRender(pane);
+    }
+  }catch(e){console.warn('JDC Supabase load:',e);}
+}
+function hasJdcData(d){
+  if(!d) return false;
+  return d.solidez&&(d.solidez.autonomia!==null||d.solidez.final!==null)||
+    d.resultado&&d.resultado.nota!==null||
+    d.cultura&&d.cultura.agilidade!==null;
+}
+function countJdcFields(d){
+  var count=0;
+  if(!d) return 0;
+  if(d.solidez){['autonomia','complexidade','impacto','final'].forEach(function(k){if(d.solidez[k]!==null) count++;});}
+  if(d.resultado&&d.resultado.nota!==null) count++;
+  if(d.resultado&&d.resultado.entregas) count++;
+  if(d.cultura){['agilidade','fazer_mais','juntos','paixao','obsessao'].forEach(function(k){if(d.cultura[k]!==null) count++;});}
+  if(d.cultura&&d.cultura.comentario) count++;
+  if(d.carreira&&d.carreira.prioridade) count++;
+  if(d.carreira&&d.carreira.desenvolvimento) count++;
+  if(d.risco&&d.risco.saida!==null) count++;
+  if(d.risco&&d.risco.to_indesejavel!==null) count++;
+  return count;
+}
 jdcInit();
 
-function jdcSave(){localStorage.setItem('jdc2026_data',JSON.stringify(jdcData));}
+function jdcSave(){
+  // Save locally (instant)
+  localStorage.setItem('jdc2026_data',JSON.stringify(jdcData));
+  // Save to Supabase (async, per person)
+  jdcSaveToSupabase();
+}
+async function jdcSaveToSupabase(){
+  try{
+    for(var i=0;i<JDC_PEOPLE.length;i++){
+      var p=JDC_PEOPLE[i];
+      var d=jdcData[p.id];
+      if(!d||!hasJdcData(d)) continue;
+      // Upsert via POST with on_conflict
+      await fetch(SUPA_URL+'/rest/v1/gp_jdc',{
+        method:'POST',
+        headers:{
+          'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,
+          'Content-Type':'application/json',
+          'Prefer':'resolution=merge-duplicates,return=minimal'
+        },
+        body:JSON.stringify({person_id:p.id,data:d,updated_at:new Date().toISOString(),updated_by:currentUser?currentUser.id:'gestor'})
+      });
+    }
+  }catch(e){console.warn('JDC Supabase save:',e);}
+}
 
 function jdcColorBg(c){
   return c==='red'?'var(--red-bg)':c==='amber'?'var(--amber-bg)':c==='green'?'var(--green-bg)':'var(--purple-bg)';
