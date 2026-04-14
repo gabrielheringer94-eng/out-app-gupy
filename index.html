@@ -6124,6 +6124,18 @@ async function loadDataFromSupabase(){
 
 // ─── INIT ─────────────────────────────────────────────────────
 (async function(){
+  // Apply saved theme EARLY (before any rendering)
+  try{
+    var savedSession=localStorage.getItem('gupypulse_session');
+    if(savedSession){
+      var ss=JSON.parse(savedSession);
+      if(ss.userId){
+        var pk='gpulse-prefs-'+ss.userId;
+        var pp=JSON.parse(localStorage.getItem(pk)||'{}');
+        if(pp.theme==='light') applyLightVars();
+      }
+    }
+  }catch(e){}
   const loading=document.getElementById('screen-loading');
   const msg=document.getElementById('loading-msg');
   try{
@@ -6471,6 +6483,16 @@ function buildSettingsContent(){
 }
 
 function setTheme(theme){
+  // Save preference first
+  if(currentUser){
+    var pk='gpulse-prefs-'+currentUser.id;
+    var p={};try{p=JSON.parse(localStorage.getItem(pk)||'{}');}catch(e){}
+    p.theme=theme;localStorage.setItem(pk,JSON.stringify(p));
+  }
+  // Reload page to apply theme cleanly (inline styles need re-render)
+  location.reload();
+  return;
+  // Below is kept as fallback but reload is preferred
   var r=document.documentElement;
   document.body.dataset.theme=theme;
   if(theme==='light'){
@@ -6567,7 +6589,41 @@ function setTheme(theme){
 function applySavedTheme(){
   if(!currentUser) return;
   var pk='gpulse-prefs-'+currentUser.id;
-  try{var p=JSON.parse(localStorage.getItem(pk)||'{}');if(p.theme) setTheme(p.theme);}catch(e){}
+  try{
+    var p=JSON.parse(localStorage.getItem(pk)||'{}');
+    if(p.theme==='light') applyLightVars();
+    // dark is default from CSS, no action needed
+  }catch(e){}
+}
+
+function applyLightVars(){
+  var r=document.documentElement;
+  r.style.setProperty('--bg','#f5f7fa');
+  r.style.setProperty('--bg2','#ffffff');
+  r.style.setProperty('--bg3','#f0f2f6');
+  r.style.setProperty('--bg4','#e8ecf2');
+  r.style.setProperty('--border','rgba(0,18,47,0.08)');
+  r.style.setProperty('--border2','rgba(0,18,47,0.14)');
+  r.style.setProperty('--text','#00122f');
+  r.style.setProperty('--text2','#3d5077');
+  r.style.setProperty('--text3','#7a8eaa');
+  r.style.setProperty('--navy','#00122f');
+  r.style.setProperty('--accent','#003cfd');
+  r.style.setProperty('--accent-light','rgba(0,60,253,0.08)');
+  r.style.setProperty('--accent-mid','rgba(0,60,253,0.14)');
+  r.style.setProperty('--green','#16a34a');
+  r.style.setProperty('--green-bg','rgba(22,163,74,0.08)');
+  r.style.setProperty('--red','#dc2626');
+  r.style.setProperty('--red-bg','rgba(220,38,38,0.08)');
+  r.style.setProperty('--amber','#d97706');
+  r.style.setProperty('--amber-bg','rgba(217,119,6,0.08)');
+  r.style.setProperty('--purple','#7c3aed');
+  r.style.setProperty('--purple-bg','rgba(124,58,237,0.08)');
+  r.style.setProperty('--teal','#0d9488');
+  r.style.setProperty('--shadow','0 1px 4px rgba(0,18,47,0.06),0 4px 16px rgba(0,18,47,0.06)');
+  r.style.setProperty('--shadow-sm','0 1px 3px rgba(0,18,47,0.08)');
+  r.style.setProperty('--shadow-lg','0 4px 24px rgba(0,60,253,0.12)');
+  document.body.dataset.theme='light';
 }
 
 function saveSettings(){
