@@ -1349,15 +1349,83 @@ async function showAnalytics(){
       +'<div style="flex:1;padding:8px;background:var(--bg3);border-radius:8px;text-align:center"><div style="font-size:13px;font-weight:700;color:var(--text)">💻 '+deviceCounts.desktop+'</div><div style="font-size:9px;color:var(--text3)">Desktop'+(totalDev>0?' ('+Math.round(deviceCounts.desktop/totalDev*100)+'%)':'')+'</div></div>'
       +'</div>';
     // User activity
-    html+='<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Atividade por usuário</div>';
-    var sortedUsers=Object.keys(userActivity).sort(function(a,b){return userActivity[b]-userActivity[a];});
+    // Per-user detailed breakdown
+    html+='<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Detalhamento por usuário</div>';
+    // Build per-user data
+    var perUser={};
+    rows.forEach(function(r){
+      if(!r.user_name) return;
+      if(!perUser[r.user_name]) perUser[r.user_name]={total:0,tabs:{},actions:{},lastSeen:null,days:{}};
+      var u=perUser[r.user_name];
+      u.total++;
+      if(!u.lastSeen||r.created_at>u.lastSeen) u.lastSeen=r.created_at;
+      // Track by day
+      var day=r.created_at?r.created_at.split('T')[0]:'';
+      if(day){if(!u.days[day]) u.days[day]={total:0,tabs:{},actions:{}};u.days[day].total++;}
+      if(r.event==='tab_view'&&r.detail){
+        u.tabs[r.detail]=(u.tabs[r.detail]||0)+1;
+        if(day) u.days[day].tabs[r.detail]=(u.days[day].tabs[r.detail]||0)+1;
+      }
+      if(r.event!=='tab_view'&&r.event!=='login'){
+        u.actions[r.event]=(u.actions[r.event]||0)+1;
+        if(day) u.days[day].actions[r.event]=(u.days[day].actions[r.event]||0)+1;
+      }
+    });
+    var actionLabels={'forecast_submit':'Forecast enviado','forecast_approve':'Forecast aprovado','forecast_reflect':'Forecast devolvido','forecast_reset':'Forecast resetado','opps_modal':'Opps consultadas','jdc_save':'JDC salva','theme_change':'Tema alterado'};
+    var sortedUsers=Object.keys(perUser).sort(function(a,b){return perUser[b].total-perUser[a].total;});
     sortedUsers.forEach(function(name){
-      var lastSeen=userLastSeen[name]?new Date(userLastSeen[name]).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
-      html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px solid var(--border)">'
+      var u=perUser[name];
+      var lastSeen=u.lastSeen?new Date(u.lastSeen).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+      var uid='analytics-user-'+name.replace(/[^a-zA-Z]/g,'');
+      html+='<div style="border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden">';
+      // Header (clickable)
+      html+='<div onclick="(function(){var el=document.getElementById(\''+uid+'\');el.style.display=el.style.display===\'none\'?\'block\':\'none\';})()" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer;background:var(--bg3)">'
+        +'<div style="display:flex;align-items:center;gap:8px"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent)"></div>'
         +'<div><div style="font-size:12px;font-weight:600;color:var(--text)">'+name+'</div>'
-        +'<div style="font-size:10px;color:var(--text3)">Último: '+lastSeen+'</div></div>'
-        +'<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--accent)">'+userActivity[name]+'</div><div style="font-size:9px;color:var(--text3)">ações</div></div>'
+        +'<div style="font-size:9px;color:var(--text3)">Último: '+lastSeen+'</div></div></div>'
+        +'<div style="display:flex;align-items:center;gap:8px"><div style="font-size:16px;font-weight:700;color:var(--accent)">'+u.total+'</div><span style="font-size:12px;color:var(--text3)">▾</span></div>'
         +'</div>';
+      // Detail (collapsed by default)
+      html+='<div id="'+uid+'" style="display:none;padding:10px 12px">';
+      // Tabs visited
+      var tabKeys=Object.keys(u.tabs).sort(function(a,b){return u.tabs[b]-u.tabs[a];});
+      if(tabKeys.length>0){
+        html+='<div style="font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Abas visitadas</div>';
+        tabKeys.forEach(function(tab){
+          html+='<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px">'
+            +'<span style="color:var(--text)">'+tab+'</span>'
+            +'<span style="font-weight:700;color:var(--accent)">'+u.tabs[tab]+'x</span></div>';
+        });
+      }
+      // Actions
+      var actKeys=Object.keys(u.actions).sort(function(a,b){return u.actions[b]-u.actions[a];});
+      if(actKeys.length>0){
+        html+='<div style="font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;margin:8px 0 4px">Ações</div>';
+        actKeys.forEach(function(act){
+          html+='<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px">'
+            +'<span style="color:var(--text)">'+(actionLabels[act]||act)+'</span>'
+            +'<span style="font-weight:700;color:var(--green)">'+u.actions[act]+'x</span></div>';
+        });
+      }
+      // Per-day breakdown
+      var dayKeys=Object.keys(u.days).sort().reverse();
+      if(dayKeys.length>0){
+        html+='<div style="font-size:9px;font-weight:600;color:var(--text3);text-transform:uppercase;margin:8px 0 4px">Por dia</div>';
+        dayKeys.slice(0,7).forEach(function(day){
+          var d=u.days[day];
+          var dayLabel=day.split('-').reverse().slice(0,2).join('/');
+          var tabDetail=Object.keys(d.tabs).map(function(t){return t+' '+d.tabs[t]+'x';}).join(', ');
+          var actDetail=Object.keys(d.actions).map(function(a){return (actionLabels[a]||a).split(' ')[0]+' '+d.actions[a]+'x';}).join(', ');
+          var detail=[tabDetail,actDetail].filter(function(x){return x;}).join(' · ');
+          html+='<div style="padding:4px 0;border-bottom:1px solid var(--border)">'
+            +'<div style="display:flex;justify-content:space-between;font-size:11px">'
+            +'<span style="font-weight:600;color:var(--text)">'+dayLabel+'</span>'
+            +'<span style="font-weight:700;color:var(--accent)">'+d.total+' ações</span></div>'
+            +(detail?'<div style="font-size:9px;color:var(--text3);margin-top:2px">'+detail+'</div>':'')
+            +'</div>';
+        });
+      }
+      html+='</div></div>';
     });
     // Top tabs
     html+='<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin:16px 0 8px">Abas mais visitadas</div>';
