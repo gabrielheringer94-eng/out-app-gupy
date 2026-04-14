@@ -1316,11 +1316,11 @@ async function showAnalytics(){
     var rows=await supaFetch('gp_tracking','order=created_at.desc&limit=200');
     if(!rows||rows.length===0){overlay.querySelector('div>div').innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)">Nenhum dado de uso ainda. Os dados aparecem após os BDRs usarem o app.</div>';return;}
     // Aggregate
-    var userLogins={};var userLastSeen={};var tabCounts={};var actionCounts={};var deviceCounts={mobile:0,desktop:0};var today=new Date().toDateString();var todayCount=0;
+    var userActivity={};var userLastSeen={};var tabCounts={};var actionCounts={};var deviceCounts={mobile:0,desktop:0};var today=new Date().toDateString();var todayCount=0;
     rows.forEach(function(r){
-      // Logins per user
-      if(r.event==='login'){
-        userLogins[r.user_name]=(userLogins[r.user_name]||0)+1;
+      // Track ALL activity per user (not just logins)
+      if(r.user_name){
+        userActivity[r.user_name]=(userActivity[r.user_name]||0)+1;
         if(!userLastSeen[r.user_name]||r.created_at>userLastSeen[r.user_name]) userLastSeen[r.user_name]=r.created_at;
       }
       // Tabs
@@ -1340,7 +1340,7 @@ async function showAnalytics(){
     html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:16px">'
       +'<div style="text-align:center;padding:10px;background:var(--bg3);border-radius:10px"><div style="font-size:20px;font-weight:700;color:var(--accent)">'+rows.length+'</div><div style="font-size:9px;color:var(--text3)">Eventos total</div></div>'
       +'<div style="text-align:center;padding:10px;background:var(--bg3);border-radius:10px"><div style="font-size:20px;font-weight:700;color:var(--green)">'+todayCount+'</div><div style="font-size:9px;color:var(--text3)">Hoje</div></div>'
-      +'<div style="text-align:center;padding:10px;background:var(--bg3);border-radius:10px"><div style="font-size:20px;font-weight:700;color:var(--purple)">'+Object.keys(userLogins).length+'</div><div style="font-size:9px;color:var(--text3)">Usuários</div></div>'
+      +'<div style="text-align:center;padding:10px;background:var(--bg3);border-radius:10px"><div style="font-size:20px;font-weight:700;color:var(--purple)">'+Object.keys(userActivity).length+'</div><div style="font-size:9px;color:var(--text3)">Usuários</div></div>'
       +'</div>';
     // Device split
     var totalDev=deviceCounts.mobile+deviceCounts.desktop;
@@ -1350,13 +1350,13 @@ async function showAnalytics(){
       +'</div>';
     // User activity
     html+='<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Atividade por usuário</div>';
-    var sortedUsers=Object.keys(userLogins).sort(function(a,b){return userLogins[b]-userLogins[a];});
+    var sortedUsers=Object.keys(userActivity).sort(function(a,b){return userActivity[b]-userActivity[a];});
     sortedUsers.forEach(function(name){
       var lastSeen=userLastSeen[name]?new Date(userLastSeen[name]).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
       html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px solid var(--border)">'
         +'<div><div style="font-size:12px;font-weight:600;color:var(--text)">'+name+'</div>'
         +'<div style="font-size:10px;color:var(--text3)">Último: '+lastSeen+'</div></div>'
-        +'<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--accent)">'+userLogins[name]+'</div><div style="font-size:9px;color:var(--text3)">logins</div></div>'
+        +'<div style="text-align:right"><div style="font-size:14px;font-weight:700;color:var(--accent)">'+userActivity[name]+'</div><div style="font-size:9px;color:var(--text3)">ações</div></div>'
         +'</div>';
     });
     // Top tabs
