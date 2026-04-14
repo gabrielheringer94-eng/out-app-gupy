@@ -668,6 +668,15 @@ input[type="number"]:focus {
 </style>
 </head>
 <body>
+<script>
+// Apply theme IMMEDIATELY before any rendering (prevents flash)
+(function(){
+  try{
+    var s=localStorage.getItem('gupypulse_session');
+    if(s){var u=JSON.parse(s);if(u.userId){var p=JSON.parse(localStorage.getItem('gpulse-prefs-'+u.userId)||'{}');if(p.theme==='light'){document.body.setAttribute('data-theme','light');}}}
+  }catch(e){}
+})();
+</script>
 
 <!-- LOGIN -->
 <div id="screen-login" class="screen active">
