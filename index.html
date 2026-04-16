@@ -3792,6 +3792,7 @@ function buildReunioes(pane){
         <button data-filter="contestada" onclick="filterAtrasadas('contestada')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">✅ Contestada</button>
         <button data-filter="aguardando" onclick="filterAtrasadas('aguardando')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">⏸ Aguardando</button>
         <button data-filter="nao_op" onclick="filterAtrasadas('nao_op')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">🚫 Não é op</button>
+        <button data-filter="data_errada" onclick="filterAtrasadas('data_errada')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">📅 Data errada</button>
       </div>
 
       <!-- TA -->
@@ -3958,7 +3959,8 @@ function renderAtrasadaStatus(key){
     'pendente':{label:'⏳ Ainda não avaliou',color:'var(--text3)',bg:'var(--bg3)'},
     'contestada':{label:'✅ Avaliada e contestada',color:'var(--green)',bg:'rgba(34,197,94,0.12)'},
     'aguardando':{label:'⏸ Aguardando ok de vendas',color:'var(--amber)',bg:'rgba(245,158,11,0.12)'},
-    'nao_op':{label:'🚫 Líder validou - não é uma op',color:'var(--red)',bg:'rgba(248,113,113,0.12)'}
+    'nao_op':{label:'🚫 Líder validou - não é uma op',color:'var(--red)',bg:'rgba(248,113,113,0.12)'},
+    'data_errada':{label:'📅 Reunião com data errada',color:'var(--purple)',bg:'rgba(168,85,247,0.12)'}
   };
   var c=cfg[status]||cfg.pendente;
   var safeKey=key.replace(/"/g,'&quot;');
@@ -3967,6 +3969,7 @@ function renderAtrasadaStatus(key){
     +'<option value="contestada"'+(status==='contestada'?' selected':'')+'>✅ Avaliada e contestada</option>'
     +'<option value="aguardando"'+(status==='aguardando'?' selected':'')+'>⏸ Aguardando ok de vendas</option>'
     +'<option value="nao_op"'+(status==='nao_op'?' selected':'')+'>🚫 Líder validou - não é uma op</option>'
+    +'<option value="data_errada"'+(status==='data_errada'?' selected':'')+'>📅 Reunião com data errada</option>'
     +'</select>';
 }
 
