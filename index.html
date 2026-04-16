@@ -3813,7 +3813,7 @@ function buildReunioes(pane){
           <input id="atr-new-empresa" type="text" placeholder="Empresa" style="width:100%;padding:8px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);margin-bottom:8px;box-sizing:border-box;font-family:'Inter',sans-serif">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
             <input id="atr-new-ae" type="text" placeholder="AE responsável" style="padding:8px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);box-sizing:border-box;font-family:'Inter',sans-serif">
-            <input id="atr-new-data" type="text" placeholder="Data (DD/MM)" maxlength="5" style="padding:8px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);box-sizing:border-box;font-family:'Inter',sans-serif">
+            <input id="atr-new-data" type="date" style="padding:8px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);box-sizing:border-box;font-family:'Inter',sans-serif;color-scheme:dark">
           </div>
           <div style="display:flex;gap:6px">
             <button onclick="toggleAddAtrasadaForm()" style="flex:1;padding:8px;background:var(--bg2);color:var(--text2);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Cancelar</button>
@@ -4023,10 +4023,12 @@ function addManualAtrasada(){
   var bdrId=document.getElementById('atr-new-bdr').value;
   var empresa=(document.getElementById('atr-new-empresa').value||'').trim();
   var ae=(document.getElementById('atr-new-ae').value||'').trim();
-  var data=(document.getElementById('atr-new-data').value||'').trim();
-  if(!empresa||!data){alert('Empresa e data são obrigatórios.');return;}
-  // Validate date format DD/MM
-  if(!/^\d{2}\/\d{2}$/.test(data)){alert('Formato de data: DD/MM (ex: 15/04)');return;}
+  var dataRaw=(document.getElementById('atr-new-data').value||'').trim();
+  if(!empresa||!dataRaw){alert('Empresa e data são obrigatórios.');return;}
+  // Date picker returns YYYY-MM-DD → convert to DD/MM
+  var dateParts=dataRaw.split('-');
+  if(dateParts.length!==3){alert('Data inválida.');return;}
+  var data=dateParts[2]+'/'+dateParts[1];
   var bdr=DATA.bdrs.find(function(b){return b.id===bdrId;});
   if(!bdr) return;
   var item={
