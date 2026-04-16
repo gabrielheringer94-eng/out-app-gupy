@@ -3745,52 +3745,127 @@ function buildReunioes(pane){
       <div class="metric-card mc-red"><div class="metric-label">Atrasadas</div><div class="metric-val">${totAt}</div><div class="metric-sub"><span class="pill pill-red">30 dias</span></div></div>
     </div>
 
-    <div class="card" style="margin-bottom:10px;padding:0;overflow:hidden">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)">
-        <div class="card-title" style="margin-bottom:0">Próximas reuniões</div>
-        ${totAt>0?`<span style="font-size:10px;font-weight:600;color:var(--red);background:var(--red-bg);padding:2px 8px;border-radius:10px">🔴 ${totAt} atrasada(s)</span>`:''}
-      </div>
-      <!-- Filtro por BDR -->
-      <div id="futuras-filter-bar" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg3)">
-        <button data-bdr-filter="all" onclick="filterFuturasByBDR('all')" class="fut-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1.5px solid var(--accent);background:var(--accent-light);color:var(--accent);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600">Todos</button>
-        ${(function(){
-          var bdrsSet=new Set();
-          r.futuras.forEach(function(d){d.ta.forEach(function(m){bdrsSet.add(m.bdr);});d.tm.forEach(function(m){bdrsSet.add(m.bdr);});});
-          return Array.from(bdrsSet).sort().map(function(b){
-            var short=b.split(' ')[0];
-            return '<button data-bdr-filter="'+b.replace(/"/g,'&quot;')+'" onclick="filterFuturasByBDR(this.dataset.bdrFilter)" class="fut-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:\'Inter\',sans-serif;font-weight:500">'+short+'</button>';
-          }).join('');
-        })()}
-      </div>
-      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
-        <div id="futuras-timeline" style="display:flex;gap:0;min-width:max-content">
-          ${r.futuras.map(d=>`
-            <div class="fut-day-col" style="min-width:220px;border-right:1px solid var(--border);padding:12px;flex-shrink:0">
-              <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.04em;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--accent-light);white-space:nowrap">${d.date} · ${d.day}</div>
-              <div class="fut-day-cards" style="display:flex;flex-direction:column;gap:6px">
-                ${d.ta.map(m=>`<div class="fut-card" data-bdr="${m.bdr.replace(/"/g,'&quot;')}" style="border-radius:var(--radius-xs);padding:7px 8px;background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.12)">
-                  <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
-                    <span style="font-size:8px;font-weight:700;color:var(--accent);background:var(--accent-light);padding:1px 5px;border-radius:3px;flex-shrink:0">TA</span>
-                    <span style="font-size:10px;color:var(--text2);white-space:nowrap">${m.bdr.split(' ')[0]}</span>
-                  </div>
-                  <div style="font-size:11px;font-weight:600;color:var(--text);line-height:1.3;word-break:break-word">${m.empresa}</div>
-                </div>`).join('')}
-                ${d.tm.map(m=>`<div class="fut-card" data-bdr="${m.bdr.replace(/"/g,'&quot;')}" style="border-radius:var(--radius-xs);padding:7px 8px;background:rgba(20,184,166,0.06);border:1px solid rgba(20,184,166,0.12)">
-                  <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
-                    <span style="font-size:8px;font-weight:700;color:var(--teal);background:rgba(13,148,136,0.1);padding:1px 5px;border-radius:3px;flex-shrink:0">TM</span>
-                    <span style="font-size:10px;color:var(--text2);white-space:nowrap">${m.bdr.split(' ')[0]}</span>
-                  </div>
-                  <div style="font-size:11px;font-weight:600;color:var(--text);line-height:1.3;word-break:break-word">${m.empresa}</div>
-                </div>`).join('')}
-                ${d.ta.length===0&&d.tm.length===0?`<div class="fut-empty" style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Sem reuniões</div>`:''}
-              </div>
-            </div>`).join('')}
-        </div>
-      </div>
-      <div style="padding:8px 14px;background:var(--bg3);border-top:1px solid var(--border);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px">
-        <span>←</span> arraste para ver mais <span>→</span>
-      </div>
-    </div>
+    ${(function(){
+      // ═══ Reuniões do Mês — Summary + Timeline unificada ═══
+      var all=getReunioesDoMes();
+      var summary=computeReunioesSummary();
+      var slCfg=getReuniaoStatusCfg();
+      var slLabels=getReuniaoStatusLabels();
+      var pastelPills=[
+        {k:'total',label:'Total',val:summary.total,color:'var(--text)',bg:'var(--bg3)'},
+        {k:'futura',label:slLabels.futura,val:summary.futura,color:slCfg.futura.color,bg:slCfg.futura.bg},
+        {k:'aconteceu',label:slLabels.aconteceu,val:summary.aconteceu,color:slCfg.aconteceu.color,bg:slCfg.aconteceu.bg},
+        {k:'virou_op',label:slLabels.virou_op,val:summary.virou_op,color:slCfg.virou_op.color,bg:slCfg.virou_op.bg},
+        {k:'no_show',label:slLabels.no_show,val:summary.no_show,color:slCfg.no_show.color,bg:slCfg.no_show.bg},
+        {k:'desqualificada',label:slLabels.desqualificada,val:summary.desqualificada,color:slCfg.desqualificada.color,bg:slCfg.desqualificada.bg},
+        {k:'reagendada',label:slLabels.reagendada,val:summary.reagendada,color:slCfg.reagendada.color,bg:slCfg.reagendada.bg}
+      ];
+      // Agrupar reuniões por data efetiva (aplicando overrides de reagendamento)
+      var today=new Date(); today.setHours(0,0,0,0);
+      function parseData(s){var p=s.split('/');return new Date(2026,parseInt(p[1])-1,parseInt(p[0]));}
+      var byDate={};
+      all.forEach(function(m){
+        var origKey=m.tipo+'|'+m.empresa+'|'+m.data;
+        var effDate=getReuniaoDateOverride(origKey)||m.data;
+        m._origData=m.data; m._effData=effDate;
+        m._status=getReuniaoStatusEffective(m);
+        var d=parseData(effDate); d.setHours(0,0,0,0);
+        m._time=d>today?'futura':'passada';
+        m._bdrId=getBdrIdByNome(m.bdrNome);
+        if(!byDate[effDate]) byDate[effDate]={date:effDate,day:m.day||'',items:[]};
+        byDate[effDate].items.push(m);
+      });
+      var days=Object.values(byDate).sort(function(a,b){return parseData(a.date)-parseData(b.date);});
+      // Dia da semana PT para casos sem day
+      var dowPT=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+      days.forEach(function(d){if(!d.day){var x=parseData(d.date);d.day=dowPT[x.getDay()];}});
+      // BDRs para filtro
+      var bdrsSet=new Set(); all.forEach(function(m){bdrsSet.add(m.bdrNome);});
+
+      function renderCard(m){
+        var stCfg=slCfg[m._status]||slCfg.aconteceu;
+        var stLabel=slLabels[m._status]||m._status;
+        var tipoCor=m.tipo==='TA'?'var(--accent)':'var(--teal)';
+        var tipoBg=m.tipo==='TA'?'var(--accent-light)':'rgba(13,148,136,0.1)';
+        var origKeySafe=(m.tipo+'|'+m.empresa+'|'+m._origData).replace(/"/g,'&quot;');
+        var bdrShort=(m.bdrNome||'').split(' ')[0];
+        var wasReagendada=m._effData!==m._origData;
+        return '<div class="reu-card" data-bdr="'+(m.bdrNome||'').replace(/"/g,'&quot;')+'" data-status="'+m._status+'" data-time="'+m._time+'" '
+          +'style="border-radius:var(--radius-xs);padding:8px;background:'+(m.tipo==='TA'?'rgba(99,102,241,0.06)':'rgba(20,184,166,0.06)')+';border:1px solid '+(m.tipo==='TA'?'rgba(99,102,241,0.18)':'rgba(20,184,166,0.18)')+';'+(m._time==='passada'?'opacity:.92;':'')+'">'
+          +'<div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">'
+            +'<span style="font-size:8px;font-weight:700;color:'+tipoCor+';background:'+tipoBg+';padding:1px 5px;border-radius:3px;flex-shrink:0">'+m.tipo+'</span>'
+            +'<span style="font-size:10px;color:var(--text2);white-space:nowrap;font-weight:600">'+bdrShort+'</span>'
+            +(wasReagendada?'<span style="font-size:8px;color:var(--purple);background:rgba(168,85,247,0.12);padding:1px 4px;border-radius:3px">de '+m._origData+'</span>':'')
+          +'</div>'
+          +'<div style="font-size:11px;font-weight:600;color:var(--text);line-height:1.3;word-break:break-word;margin-bottom:6px">'+m.empresa+'</div>'
+          +'<div>'+renderReuniaoStatus(m)+'</div>'
+          +(m._status==='virou_op'&&m._bdrId?'<div onclick="showOppsModal(\''+m._bdrId+'\')" style="margin-top:5px;font-size:9px;color:#22c55e;cursor:pointer;text-decoration:underline;font-weight:600">ver opp →</div>':'')
+          +'</div>';
+      }
+      var pillsHTML=pastelPills.map(function(p,i){
+        var isAction=p.k!=='total';
+        var handler=isAction?'onclick="filterReunioesByStatus(\''+p.k+'\')"':'';
+        return '<div '+handler+' style="flex:0 0 auto;'+(isAction?'cursor:pointer;':'')+'padding:8px 12px;border-radius:10px;background:'+p.bg+';border:1px solid '+(p.k==='total'?'var(--border)':p.color)+';min-width:80px;text-align:center;transition:transform .15s" '+(isAction?'onmouseenter="this.style.transform=\'translateY(-2px)\'" onmouseleave="this.style.transform=\'translateY(0)\'"':'')+'>'
+          +'<div style="font-size:17px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+p.color+';line-height:1">'+p.val+'</div>'
+          +'<div style="font-size:9px;color:var(--text3);margin-top:3px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px">'+p.label+'</div>'
+        +'</div>';
+      }).join('');
+      var bdrFilterHTML='<button data-bdr-filter="all" onclick="filterFuturasByBDR(\'all\');filterReunioesByBDR(\'all\')" class="fut-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1.5px solid var(--accent);background:var(--accent-light);color:var(--accent);cursor:pointer;font-family:\'Inter\',sans-serif;font-weight:600">Todos</button>'
+        +Array.from(bdrsSet).sort().map(function(b){
+          var short=b.split(' ')[0];
+          return '<button data-bdr-filter="'+b.replace(/"/g,'&quot;')+'" onclick="filterReunioesByBDR(this.dataset.bdrFilter)" class="fut-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:\'Inter\',sans-serif;font-weight:500">'+short+'</button>';
+        }).join('');
+      return ''
+        +'<div class="card" style="margin-bottom:10px;padding:0;overflow:hidden">'
+          +'<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)">'
+            +'<div class="card-title" style="margin-bottom:0">Reuniões do mês</div>'
+            +(totAt>0?'<span style="font-size:10px;font-weight:600;color:var(--red);background:var(--red-bg);padding:2px 8px;border-radius:10px">🔴 '+totAt+' lead-time crítico</span>':'')
+          +'</div>'
+          // Summary pills
+          +'<div style="display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px;border-bottom:1px solid var(--border);background:var(--bg3)">'+pillsHTML+'</div>'
+          // Time filter
+          +'<div style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg2);align-items:center">'
+            +'<span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-right:2px">Período:</span>'
+            +'<button class="reu-time-btn" data-time-filter="all" onclick="filterReunioesByTime(\'all\')" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1.5px solid var(--accent);background:var(--accent-light);color:var(--accent);cursor:pointer;font-family:\'Inter\',sans-serif;font-weight:700">Todas</button>'
+            +'<button class="reu-time-btn" data-time-filter="passada" onclick="filterReunioesByTime(\'passada\')" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:\'Inter\',sans-serif;font-weight:500">Passadas</button>'
+            +'<button class="reu-time-btn" data-time-filter="futura" onclick="filterReunioesByTime(\'futura\')" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:\'Inter\',sans-serif;font-weight:500">Futuras</button>'
+            +'<div style="flex:1;min-width:8px"></div>'
+            +'<span style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-right:2px">Status:</span>'
+            +'<select onchange="filterReunioesByStatus(this.value)" style="font-size:10px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-family:\'Inter\',sans-serif;font-weight:600">'
+              +'<option value="all">Todos</option>'
+              +'<option value="futura">⏳ Futuras</option>'
+              +'<option value="aconteceu">✅ Aconteceram</option>'
+              +'<option value="virou_op">🚀 Viraram op</option>'
+              +'<option value="no_show">👻 No-show</option>'
+              +'<option value="desqualificada">🚫 Desq</option>'
+              +'<option value="reagendada">📅 Reagendadas</option>'
+            +'</select>'
+          +'</div>'
+          // BDR filter
+          +'<div id="futuras-filter-bar" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg3)">'+bdrFilterHTML+'</div>'
+          // Timeline
+          +'<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">'
+            +'<div id="futuras-timeline" style="display:flex;gap:0;min-width:max-content">'
+              +days.map(function(d){
+                var dParsed=parseData(d.date); dParsed.setHours(0,0,0,0);
+                var isPast=dParsed<today;
+                var isToday=dParsed.getTime()===today.getTime();
+                var headerColor=isToday?'var(--amber)':(isPast?'var(--text3)':'var(--accent)');
+                var headerBg=isToday?'rgba(245,158,11,0.15)':(isPast?'var(--bg3)':'var(--accent-light)');
+                return '<div class="reu-day-col" style="min-width:230px;border-right:1px solid var(--border);padding:12px;flex-shrink:0;'+(isPast?'opacity:.85':'')+'">'
+                  +'<div style="font-size:11px;font-weight:700;color:'+headerColor+';letter-spacing:.04em;margin-bottom:10px;padding:5px 8px;border-radius:5px;background:'+headerBg+';white-space:nowrap;display:inline-block">'+d.date+' · '+d.day+(isToday?' · HOJE':'')+'</div>'
+                  +'<div style="display:flex;flex-direction:column;gap:6px">'
+                    +d.items.map(renderCard).join('')
+                  +'</div>'
+                +'</div>';
+              }).join('')
+            +'</div>'
+          +'</div>'
+          +'<div style="padding:8px 14px;background:var(--bg3);border-top:1px solid var(--border);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:4px">'
+            +'<span>←</span> arraste para ver mais <span>→</span> · clique no status para editar · clique em pill para filtrar'
+          +'</div>'
+        +'</div>';
+    })()}
     <div class="card">
       <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
         Reuniões atrasadas — Lead Time
@@ -4010,6 +4085,128 @@ function renderAtrasadaComment(key){
     +'onmouseleave="this.style.borderColor=\'var(--border)\'">';
 }
 
+// ═══════════════════════════════════════════════════════════
+// ── Reuniões do Mês (status por reunião + conexão com opps)
+// ═══════════════════════════════════════════════════════════
+function getReunioesDoMes(){
+  var out=[];
+  (DATA.reunioes.futuras||[]).forEach(function(d){
+    (d.ta||[]).forEach(function(m){ out.push({tipo:'TA',bdrNome:m.bdr,empresa:m.empresa,data:d.date,day:d.day,source:'futura'}); });
+    (d.tm||[]).forEach(function(m){ out.push({tipo:'TM',bdrNome:m.bdr,empresa:m.empresa,data:d.date,day:d.day,source:'futura'}); });
+  });
+  (DATA.reunioes.atrasadasTA||[]).forEach(function(a){ out.push({tipo:'TA',bdrNome:a.name,empresa:a.empresa,ae:a.ae,data:a.data,source:'atrasada',bg:a.bg,color:a.color,id:a.id}); });
+  (DATA.reunioes.atrasadasTM||[]).forEach(function(a){ out.push({tipo:'TM',bdrNome:a.name,empresa:a.empresa,ae:a.ae,data:a.data,source:'atrasada',bg:a.bg,color:a.color,id:a.id}); });
+  // Dedup por (tipo|empresa|data)
+  var seen={}; return out.filter(function(m){var k=m.tipo+'|'+m.empresa+'|'+m.data; if(seen[k]) return false; seen[k]=true; return true;});
+}
+function getReuniaoDateOverride(key){
+  try{var map=JSON.parse(localStorage.getItem('reuniao_date_overrides')||'{}');return map[key]||null;}catch(e){return null;}
+}
+function setReuniaoDateOverride(key,newDate){
+  try{var map=JSON.parse(localStorage.getItem('reuniao_date_overrides')||'{}');map[key]=newDate;localStorage.setItem('reuniao_date_overrides',JSON.stringify(map));}catch(e){}
+}
+function getReuniaoStatusOverride(key){
+  try{var map=JSON.parse(localStorage.getItem('reuniao_status')||'{}');return map[key]||null;}catch(e){return null;}
+}
+function setReuniaoStatus(key,status){
+  try{
+    var map=JSON.parse(localStorage.getItem('reuniao_status')||'{}');
+    if(status==='auto') delete map[key]; else map[key]=status;
+    localStorage.setItem('reuniao_status',JSON.stringify(map));
+    if(typeof track==='function') track('reuniao_status',key+' → '+status);
+  }catch(e){}
+  var pane=document.getElementById('pane-reunioes');
+  if(pane){pane.dataset.built='';pane.innerHTML='';buildReunioes(pane);pane.dataset.built='1';}
+}
+function empresaTemOpp(empresa){
+  if(!empresa||empresa==='—') return false;
+  var e=(empresa||'').toLowerCase().trim();
+  return (DATA.oppsDetalhe||[]).some(function(o){return (o.empresa||'').toLowerCase().trim()===e;});
+}
+function getReuniaoStatusEffective(m){
+  // Usa data efetiva (override de reagendamento)
+  var origKey=m.tipo+'|'+m.empresa+'|'+m.data;
+  var override=getReuniaoStatusOverride(origKey);
+  if(override) return override;
+  if(empresaTemOpp(m.empresa)) return 'virou_op';
+  var pts=m.data.split('/'); var d=new Date(2026,parseInt(pts[1])-1,parseInt(pts[0]));
+  var hoje=new Date(); hoje.setHours(0,0,0,0); d.setHours(0,0,0,0);
+  return d>hoje?'futura':'aconteceu';
+}
+function promptReagendar(key){
+  var nova=prompt('Nova data da reunião (DD/MM):','');
+  if(!nova) return;
+  nova=nova.trim();
+  if(!/^\d{2}\/\d{2}$/.test(nova)){alert('Formato inválido. Use DD/MM (ex: 22/04)');return;}
+  setReuniaoDateOverride(key,nova);
+  setReuniaoStatus(key,'reagendada');
+}
+function getReuniaoStatusLabels(){
+  return {futura:'⏳ Ainda não aconteceu',aconteceu:'✅ Aconteceu',virou_op:'🚀 Virou oportunidade',no_show:'👻 No-show',desqualificada:'🚫 Desqualificada',reagendada:'📅 Reagendada'};
+}
+function getReuniaoStatusCfg(){
+  return {
+    futura:{color:'var(--accent)',bg:'var(--accent-light)'},
+    aconteceu:{color:'var(--green)',bg:'rgba(34,197,94,0.12)'},
+    virou_op:{color:'#22c55e',bg:'rgba(34,197,94,0.18)'},
+    no_show:{color:'var(--amber)',bg:'rgba(245,158,11,0.15)'},
+    desqualificada:{color:'var(--red)',bg:'rgba(248,113,113,0.15)'},
+    reagendada:{color:'#a855f7',bg:'rgba(168,85,247,0.15)'}
+  };
+}
+function renderReuniaoStatus(m){
+  var key=m.tipo+'|'+m.empresa+'|'+m.data;
+  var current=getReuniaoStatusEffective(m);
+  var labels=getReuniaoStatusLabels();
+  var cfg=getReuniaoStatusCfg(); var c=cfg[current]||cfg.aconteceu;
+  var safeKey=key.replace(/"/g,'&quot;');
+  var opts=['futura','aconteceu','virou_op','no_show','desqualificada','reagendada'].map(function(s){
+    return '<option value="'+s+'"'+(current===s?' selected':'')+'>'+labels[s]+'</option>';
+  }).join('')+'<option value="auto">↺ Auto-detectar</option>';
+  return '<select data-reu-key="'+safeKey+'" onchange="if(this.value===&quot;reagendada&quot;){promptReagendar(this.dataset.reuKey);}else{setReuniaoStatus(this.dataset.reuKey,this.value);}" style="font-size:9px;padding:3px 5px;border-radius:5px;border:1px solid var(--border);background:'+c.bg+';color:'+c.color+';font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;max-width:180px;width:100%">'+opts+'</select>';
+}
+function computeReunioesSummary(){
+  var all=getReunioesDoMes();
+  var counts={futura:0,aconteceu:0,virou_op:0,no_show:0,desqualificada:0,reagendada:0,total:all.length};
+  all.forEach(function(m){var s=getReuniaoStatusEffective(m);counts[s]=(counts[s]||0)+1;});
+  return counts;
+}
+function filterReunioesByStatus(status){
+  document.querySelectorAll('.reu-card').forEach(function(el){
+    var s=el.getAttribute('data-status')||'';
+    var show=(status==='all'||s===status);
+    el.style.display=show?'':'none';
+  });
+  // Hide empty day columns
+  document.querySelectorAll('.reu-day-col').forEach(function(col){
+    var any=col.querySelectorAll('.reu-card:not([style*="display: none"])').length;
+    col.style.display=any>0?'':'none';
+  });
+}
+function filterReunioesByTime(time){
+  document.querySelectorAll('.reu-time-btn').forEach(function(b){
+    var active=b.dataset.timeFilter===time;
+    b.style.border=active?'1.5px solid var(--accent)':'1px solid var(--border)';
+    b.style.background=active?'var(--accent-light)':'var(--bg2)';
+    b.style.color=active?'var(--accent)':'var(--text2)';
+    b.style.fontWeight=active?'700':'500';
+  });
+  document.querySelectorAll('.reu-card').forEach(function(el){
+    var t=el.getAttribute('data-time')||'';
+    el.style.display=(time==='all'||t===time)?'':'none';
+  });
+  document.querySelectorAll('.reu-day-col').forEach(function(col){
+    var any=col.querySelectorAll('.reu-card:not([style*="display: none"])').length;
+    col.style.display=any>0?'':'none';
+  });
+}
+function getBdrIdByNome(bdrNome){
+  if(!bdrNome) return null;
+  var first=bdrNome.split(' ')[0].toLowerCase();
+  var b=(DATA.bdrs||[]).find(function(bdr){return bdr.name===bdrNome||(bdr.name||'').split(' ')[0].toLowerCase()===first;});
+  return b?b.id:null;
+}
+
 function toggleAddAtrasadaForm(){
   var f=document.getElementById('add-atrasada-form');
   var b=document.getElementById('btn-add-atrasada');
@@ -4107,35 +4304,20 @@ function filterFuturasByBDR(bdr){
     b.style.color=active?'var(--accent)':'var(--text2)';
     b.style.fontWeight=active?'600':'500';
   });
-  // Show/hide cards + hide empty day columns
-  document.querySelectorAll('.fut-day-col').forEach(function(col){
-    var cards=col.querySelectorAll('.fut-card');
+  // Novos cards (reu-card / reu-day-col)
+  document.querySelectorAll('.reu-day-col').forEach(function(col){
+    var cards=col.querySelectorAll('.reu-card');
     var visibleCount=0;
     cards.forEach(function(c){
       var show=(bdr==='all'||c.getAttribute('data-bdr')===bdr);
       c.style.display=show?'':'none';
       if(show) visibleCount++;
     });
-    // Empty state toggle
-    var empty=col.querySelector('.fut-empty');
-    if(cards.length>0){
-      if(visibleCount===0){
-        var inner=col.querySelector('.fut-day-cards');
-        var existMsg=inner.querySelector('.fut-filtered-empty');
-        if(!existMsg){
-          var msg=document.createElement('div');
-          msg.className='fut-filtered-empty';
-          msg.style.cssText='font-size:11px;color:var(--text3);text-align:center;padding:8px';
-          msg.textContent='—';
-          inner.appendChild(msg);
-        }
-      } else {
-        var m=col.querySelector('.fut-filtered-empty');
-        if(m) m.remove();
-      }
-    }
+    col.style.display=visibleCount>0?'':'none';
   });
 }
+// Alias para compatibilidade com o novo painel "Reuniões do mês"
+function filterReunioesByBDR(bdr){ filterFuturasByBDR(bdr); }
 
 function filterAtrasadas(filter){
   // Update button styles
