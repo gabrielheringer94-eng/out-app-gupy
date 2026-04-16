@@ -3809,6 +3809,7 @@ function buildReunioes(pane){
             <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Data</th>
             <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase">⏱ Dias</th>
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Status</th>
+            <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">💬 Comentário</th>
           </tr></thead>
           <tbody>
           ${r.atrasadasTA.map(a=>{
@@ -3824,6 +3825,7 @@ function buildReunioes(pane){
               <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'Inter\',sans-serif;color:var(--text3)">${a.data}</td>
               <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${dc}">${dias}d</span></td>
               <td style="padding:6px 8px">${renderAtrasadaStatus(key)}</td>
+              <td style="padding:6px 8px">${renderAtrasadaComment(key)}</td>
             </tr>`;
           }).join("")}
           </tbody>
@@ -3844,6 +3846,7 @@ function buildReunioes(pane){
             <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Data</th>
             <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase">⏱ Dias</th>
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Status</th>
+            <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">💬 Comentário</th>
           </tr></thead>
           <tbody>
           ${r.atrasadasTM.map(a=>{
@@ -3859,6 +3862,7 @@ function buildReunioes(pane){
               <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'Inter\',sans-serif;color:var(--text3)">${a.data}</td>
               <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${dc}">${dias}d</span></td>
               <td style="padding:6px 8px">${renderAtrasadaStatus(key)}</td>
+              <td style="padding:6px 8px">${renderAtrasadaComment(key)}</td>
             </tr>`;
           }).join("")}
           </tbody>
@@ -3937,6 +3941,30 @@ function setAtrasadaStatus(key,status){
     if(activeBtn) filterAtrasadas(activeBtn.dataset.filter);
   }catch(e){}
 }
+// ── Comentários em reuniões atrasadas ──
+function getAtrasadaComment(key){
+  try{var map=JSON.parse(localStorage.getItem('atrasada_comments')||'{}');return map[key]||'';}catch(e){return '';}
+}
+function setAtrasadaComment(key,text){
+  try{
+    var map=JSON.parse(localStorage.getItem('atrasada_comments')||'{}');
+    if(text&&text.trim()) map[key]=text.trim(); else delete map[key];
+    localStorage.setItem('atrasada_comments',JSON.stringify(map));
+    track('atrasada_comment',key);
+  }catch(e){}
+}
+function renderAtrasadaComment(key){
+  var comment=getAtrasadaComment(key);
+  var safeKey=key.replace(/"/g,'&quot;');
+  var safeVal=(comment||'').replace(/"/g,'&quot;');
+  return '<input type="text" data-atr-comment-key="'+safeKey+'" value="'+safeVal+'" placeholder="Adicionar comentário..." '
+    +'onblur="setAtrasadaComment(this.dataset.atrCommentKey,this.value)" '
+    +'onkeydown="if(event.key===\'Enter\'){this.blur();}" '
+    +'style="width:100%;min-width:160px;max-width:240px;font-size:10px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:\'Inter\',sans-serif;outline:none" '
+    +'onfocus="this.style.borderColor=\'var(--accent)\'" '
+    +'onmouseleave="this.style.borderColor=\'var(--border)\'">';
+}
+
 function filterAtrasadas(filter){
   // Update button styles
   document.querySelectorAll('.atr-filter-btn').forEach(function(b){
