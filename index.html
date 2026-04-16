@@ -3851,7 +3851,7 @@ function buildReunioes(pane){
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Empresa</th>
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">AE</th>
             <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Data</th>
-            <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase">⏱ Dias</th>
+            <th onclick="sortAtrasadasByDays(this)" class="atr-sort-dias" data-sort="desc" style="padding:5px 8px;text-align:center;font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase;cursor:pointer;user-select:none">⏱ Dias <span class="sort-arrow">▼</span></th>
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Status</th>
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">💬 Comentário</th>
           </tr></thead>
@@ -3862,7 +3862,7 @@ function buildReunioes(pane){
             const dias=Math.floor((new Date()-rd)/(1000*60*60*24));
             const dc=dias>=14?'var(--red)':dias>=7?'var(--amber)':'var(--text2)';
             const key='TA|'+a.empresa+'|'+a.data;
-            return `<tr class="atr-row" data-status="${getAtrasadaStatus(key)}" style="border-bottom:1px solid var(--border)">
+            return `<tr class="atr-row" data-status="${getAtrasadaStatus(key)}" data-dias="${dias}" style="border-bottom:1px solid var(--border)">
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
               <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
@@ -3889,7 +3889,7 @@ function buildReunioes(pane){
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Empresa</th>
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">AE</th>
             <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Data</th>
-            <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase">⏱ Dias</th>
+            <th onclick="sortAtrasadasByDays(this)" class="atr-sort-dias" data-sort="desc" style="padding:5px 8px;text-align:center;font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase;cursor:pointer;user-select:none">⏱ Dias <span class="sort-arrow">▼</span></th>
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Status</th>
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">💬 Comentário</th>
           </tr></thead>
@@ -3900,7 +3900,7 @@ function buildReunioes(pane){
             const dias=Math.floor((new Date()-rd)/(1000*60*60*24));
             const dc=dias>=14?'var(--red)':dias>=7?'var(--amber)':'var(--text2)';
             const key='TM|'+a.empresa+'|'+a.data;
-            return `<tr class="atr-row" data-status="${getAtrasadaStatus(key)}" style="border-bottom:1px solid var(--border)">
+            return `<tr class="atr-row" data-status="${getAtrasadaStatus(key)}" data-dias="${dias}" style="border-bottom:1px solid var(--border)">
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
               <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
@@ -4068,6 +4068,26 @@ function addManualAtrasada(){
     }
   }catch(e){}
 })();
+
+function sortAtrasadasByDays(thEl){
+  var currentDir=thEl.dataset.sort||'desc';
+  var newDir=currentDir==='desc'?'asc':'desc';
+  // Get the table of this header
+  var table=thEl.closest('table');
+  if(!table) return;
+  var tbody=table.querySelector('tbody');
+  if(!tbody) return;
+  var rows=Array.from(tbody.querySelectorAll('tr.atr-row'));
+  rows.sort(function(a,b){
+    var da=parseInt(a.getAttribute('data-dias')||'0',10);
+    var db=parseInt(b.getAttribute('data-dias')||'0',10);
+    return newDir==='desc'?db-da:da-db;
+  });
+  rows.forEach(function(r){tbody.appendChild(r);});
+  thEl.dataset.sort=newDir;
+  var arrow=thEl.querySelector('.sort-arrow');
+  if(arrow) arrow.textContent=newDir==='desc'?'▼':'▲';
+}
 
 function toggleAtrasadasBlock(bodyId,headerEl){
   var body=document.getElementById(bodyId);
