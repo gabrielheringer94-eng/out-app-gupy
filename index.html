@@ -3797,6 +3797,31 @@ function buildReunioes(pane){
         <span style="font-size:10px;color:var(--text3);font-weight:400">dias aguardando validação</span>
       </div>
 
+      <!-- Botão adicionar + Formulário -->
+      <div style="margin-bottom:10px">
+        <button onclick="toggleAddAtrasadaForm()" id="btn-add-atrasada" style="width:100%;padding:10px;background:var(--accent-light);color:var(--accent);border:1.5px dashed var(--accent);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">+ Adicionar reunião atrasada manual</button>
+        <div id="add-atrasada-form" style="display:none;margin-top:10px;padding:12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <select id="atr-new-tipo" style="padding:8px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:'Inter',sans-serif">
+              <option value="TA">TA</option>
+              <option value="TM">TM</option>
+            </select>
+            <select id="atr-new-bdr" style="padding:8px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:'Inter',sans-serif">
+              ${DATA.bdrs.map(b=>`<option value="${b.id}">${b.name.split(' ')[0]}</option>`).join('')}
+            </select>
+          </div>
+          <input id="atr-new-empresa" type="text" placeholder="Empresa" style="width:100%;padding:8px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);margin-bottom:8px;box-sizing:border-box;font-family:'Inter',sans-serif">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <input id="atr-new-ae" type="text" placeholder="AE responsável" style="padding:8px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);box-sizing:border-box;font-family:'Inter',sans-serif">
+            <input id="atr-new-data" type="text" placeholder="Data (DD/MM)" maxlength="5" style="padding:8px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);box-sizing:border-box;font-family:'Inter',sans-serif">
+          </div>
+          <div style="display:flex;gap:6px">
+            <button onclick="toggleAddAtrasadaForm()" style="flex:1;padding:8px;background:var(--bg2);color:var(--text2);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Cancelar</button>
+            <button onclick="addManualAtrasada()" style="flex:2;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Adicionar</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Filtro por status -->
       <div id="atr-filter-bar" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding:8px;background:var(--bg3);border-radius:8px">
         <button data-filter="all" onclick="filterAtrasadas('all')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1.5px solid var(--accent);background:var(--accent-light);color:var(--accent);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600">Todas</button>
@@ -3978,6 +4003,63 @@ function renderAtrasadaComment(key){
     +'onfocus="this.style.borderColor=\'var(--accent)\'" '
     +'onmouseleave="this.style.borderColor=\'var(--border)\'">';
 }
+
+function toggleAddAtrasadaForm(){
+  var f=document.getElementById('add-atrasada-form');
+  var b=document.getElementById('btn-add-atrasada');
+  if(!f) return;
+  if(f.style.display==='none'){
+    f.style.display='block';
+    if(b) b.style.display='none';
+  } else {
+    f.style.display='none';
+    if(b) b.style.display='';
+    ['atr-new-empresa','atr-new-ae','atr-new-data'].forEach(function(id){var el=document.getElementById(id);if(el) el.value='';});
+  }
+}
+
+function addManualAtrasada(){
+  var tipo=document.getElementById('atr-new-tipo').value;
+  var bdrId=document.getElementById('atr-new-bdr').value;
+  var empresa=(document.getElementById('atr-new-empresa').value||'').trim();
+  var ae=(document.getElementById('atr-new-ae').value||'').trim();
+  var data=(document.getElementById('atr-new-data').value||'').trim();
+  if(!empresa||!data){alert('Empresa e data são obrigatórios.');return;}
+  // Validate date format DD/MM
+  if(!/^\d{2}\/\d{2}$/.test(data)){alert('Formato de data: DD/MM (ex: 15/04)');return;}
+  var bdr=DATA.bdrs.find(function(b){return b.id===bdrId;});
+  if(!bdr) return;
+  var item={
+    name:bdr.name,bg:bdr.bg,color:bdr.color,id:bdr.id,n:1,
+    empresa:empresa,ae:ae||bdr.name,data:data,_manual:true
+  };
+  // Save to localStorage
+  try{
+    var manualList=JSON.parse(localStorage.getItem('atrasadas_manual')||'{"TA":[],"TM":[]}');
+    manualList[tipo].push(item);
+    localStorage.setItem('atrasadas_manual',JSON.stringify(manualList));
+    // Add to DATA in memory
+    if(tipo==='TA') DATA.reunioes.atrasadasTA.push(item);
+    else DATA.reunioes.atrasadasTM.push(item);
+    track('atrasada_manual_add',tipo+'|'+bdrId+'|'+empresa);
+  }catch(e){console.warn('Save error',e);}
+  // Reset form and refresh
+  toggleAddAtrasadaForm();
+  // Rebuild Reunioes pane
+  var pane=document.getElementById('pane-reunioes');
+  if(pane){pane.dataset.built='';pane.innerHTML='';buildReunioes(pane);pane.dataset.built='1';}
+}
+
+// Load manual atrasadas on startup
+(function(){
+  try{
+    var manualList=JSON.parse(localStorage.getItem('atrasadas_manual')||'{"TA":[],"TM":[]}');
+    if(DATA&&DATA.reunioes){
+      (manualList.TA||[]).forEach(function(it){if(!DATA.reunioes.atrasadasTA.some(function(x){return x.empresa===it.empresa&&x.data===it.data;})) DATA.reunioes.atrasadasTA.push(it);});
+      (manualList.TM||[]).forEach(function(it){if(!DATA.reunioes.atrasadasTM.some(function(x){return x.empresa===it.empresa&&x.data===it.data;})) DATA.reunioes.atrasadasTM.push(it);});
+    }
+  }catch(e){}
+})();
 
 function toggleAtrasadasBlock(bodyId,headerEl){
   var body=document.getElementById(bodyId);
