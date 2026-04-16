@@ -2478,15 +2478,24 @@ function buildResumo(pane){
       const totalFcst=Object.values(fcstByBdr).reduce((s,v)=>s+v,0);
       // Realizado da semana atual — prioriza Supabase, fallback DATA.bdrs.opps (realizado individual)
       const semResults=semId?await supaFetch('gp_bdr_resultados',`semana_id=eq.${semId}`):[];
-      const realByBdr={};
+      const realCurrByBdr={};
       if(semResults&&semResults.length>0){
-        semResults.forEach(r=>{realByBdr[r.bdr_id]=(r.opps||0);});
+        semResults.forEach(r=>{realCurrByBdr[r.bdr_id]=(r.opps||0);});
       }
       // Fallback/merge: sempre inclui DATA.bdrs.opps se não houver entrada no Supabase para aquele BDR
       DATA.bdrs.forEach(b=>{
-        if(realByBdr[b.id]==null) realByBdr[b.id]=(b.opps||0);
+        if(realCurrByBdr[b.id]==null) realCurrByBdr[b.id]=(b.opps||0);
       });
+      // Realizado S0 (semana anterior que acabou — forecastS1)
+      const s1Data=(DATA.forecastS1&&DATA.forecastS1.bdrs)||{};
+      const realS0ByBdr={};
+      DATA.bdrs.forEach(b=>{realS0ByBdr[b.id]=(s1Data[b.id]&&s1Data[b.id].oppReal)||0;});
+      // Realizado total = S0 (semana encerrada) + semana atual
+      const realByBdr={};
+      DATA.bdrs.forEach(b=>{realByBdr[b.id]=(realCurrByBdr[b.id]||0)+(realS0ByBdr[b.id]||0);});
       const realizado=Object.values(realByBdr).reduce((s,v)=>s+v,0);
+      const realizadoS0=Object.values(realS0ByBdr).reduce((s,v)=>s+v,0);
+      const realizadoCurr=Object.values(realCurrByBdr).reduce((s,v)=>s+v,0);
       const gap=realizado-totalFcst;
       const gapCor=gap>=0?'#bbf7d0':'#fecaca';
       const atingPct=totalFcst>0?Math.min(Math.round((realizado/totalFcst)*100),100):0;
@@ -2496,17 +2505,19 @@ function buildResumo(pane){
       const allApproved=fcsts&&fcsts.length>0&&fcsts.every(f=>f.status==='aprovado');
       const el=document.getElementById('resumo-fcst-semana');
       if(!el) return;
-      // Breakdown por BDR
+      // Breakdown por BDR (real = S0 + atual)
       const bdrRows=DATA.bdrs.map(b=>{
         const f=fcstByBdr[b.id]||0;
-        const r=realByBdr[b.id]||0;
+        const rS0=realS0ByBdr[b.id]||0;
+        const rCurr=realCurrByBdr[b.id]||0;
+        const r=rS0+rCurr;
         const delta=r-f;
         const dCol=delta>=0?'#bbf7d0':'#fecaca';
         return `<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,0.04);margin-bottom:3px">
           <div class="bdr-av" style="background:${b.bg};color:${b.color};width:18px;height:18px;font-size:8px;flex-shrink:0">${b.id}</div>
           <span style="font-size:10px;font-weight:600;color:rgba(255,255,255,.85);flex:1;min-width:0">${b.name.split(' ')[0]}</span>
           <span style="font-size:10px;color:rgba(255,255,255,.55);font-family:'Inter',sans-serif">fcst <strong style="color:white">${f}</strong></span>
-          <span style="font-size:10px;color:rgba(255,255,255,.55);font-family:'Inter',sans-serif">real <strong style="color:white">${r}</strong></span>
+          <span style="font-size:10px;color:rgba(255,255,255,.55);font-family:'Inter',sans-serif" title="S0 ${rS0} + atual ${rCurr}">real <strong style="color:white">${r}</strong><span style="font-size:8px;color:rgba(255,255,255,.4);margin-left:2px">(${rS0}+${rCurr})</span></span>
           <span style="font-size:10px;font-weight:700;color:${dCol};font-family:'Inter',sans-serif;min-width:24px;text-align:right">${delta>=0?'+':''}${delta}</span>
         </div>`;
       }).join('');
@@ -2528,7 +2539,8 @@ function buildResumo(pane){
         <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;margin-bottom:4px">
           <div style="width:${atingPct}%;height:100%;background:var(--bg3);border-radius:2px;transition:width .3s"></div>
         </div>
-        <div style="font-size:9px;color:rgba(255,255,255,.5);margin-bottom:6px">${atingPct}% atingido · ${submitted}/${totalBdrs} BDRs enviaram</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.5);margin-bottom:4px">${atingPct}% atingido · ${submitted}/${totalBdrs} BDRs enviaram</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.45);margin-bottom:6px">Realizado = S0 (${realizadoS0}) + atual (${realizadoCurr})</div>
         ${allSubmitted&&!allApproved?`
           <button id="btn-approve-all-fcst" onclick="approveAllForecasts(${semId})" style="width:100%;font-size:11px;font-weight:600;color:var(--accent);background:var(--bg3);border:none;border-radius:8px;padding:8px;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .15s;margin-bottom:6px">Aprovar Forecast S${d.semAtual}</button>`
           :allApproved?`<div style="font-size:10px;color:#bbf7d0;font-weight:600;margin-bottom:6px">✅ Forecast aprovado</div>`:''}
