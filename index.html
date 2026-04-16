@@ -3798,6 +3798,7 @@ function buildReunioes(pane){
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">AE</th>
             <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Data</th>
             <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase">⏱ Dias</th>
+            <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Status</th>
           </tr></thead>
           <tbody>
           ${r.atrasadasTA.map(a=>{
@@ -3805,12 +3806,14 @@ function buildReunioes(pane){
             const rd=new Date(2026,parseInt(pts[1])-1,parseInt(pts[0]));
             const dias=Math.floor((new Date()-rd)/(1000*60*60*24));
             const dc=dias>=14?'var(--red)':dias>=7?'var(--amber)':'var(--text2)';
+            const key='TA|'+a.empresa+'|'+a.data;
             return `<tr style="border-bottom:1px solid var(--border)">
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
               <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
               <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'Inter\',sans-serif;color:var(--text3)">${a.data}</td>
               <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${dc}">${dias}d</span></td>
+              <td style="padding:6px 8px">${renderAtrasadaStatus(key)}</td>
             </tr>`;
           }).join("")}
           </tbody>
@@ -3830,6 +3833,7 @@ function buildReunioes(pane){
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">AE</th>
             <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Data</th>
             <th style="padding:5px 8px;text-align:center;font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase">⏱ Dias</th>
+            <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">Status</th>
           </tr></thead>
           <tbody>
           ${r.atrasadasTM.map(a=>{
@@ -3837,12 +3841,14 @@ function buildReunioes(pane){
             const rd=new Date(2026,parseInt(pts[1])-1,parseInt(pts[0]));
             const dias=Math.floor((new Date()-rd)/(1000*60*60*24));
             const dc=dias>=14?'var(--red)':dias>=7?'var(--amber)':'var(--text2)';
+            const key='TM|'+a.empresa+'|'+a.data;
             return `<tr style="border-bottom:1px solid var(--border)">
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
               <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
               <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'Inter\',sans-serif;color:var(--text3)">${a.data}</td>
               <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${dc}">${dias}d</span></td>
+              <td style="padding:6px 8px">${renderAtrasadaStatus(key)}</td>
             </tr>`;
           }).join("")}
           </tbody>
@@ -3896,6 +3902,37 @@ function filterTimeline(bdrId){
   rows.forEach(function(row){
     row.style.display=(bdrId==='todos'||row.dataset.bdr===bdrId)?'':'none';
   });
+}
+
+// ── Status de reuniões atrasadas (avaliação) ──
+function getAtrasadaStatus(key){
+  try{var map=JSON.parse(localStorage.getItem('atrasada_status')||'{}');return map[key]||'pendente';}catch(e){return 'pendente';}
+}
+function setAtrasadaStatus(key,status){
+  try{
+    var map=JSON.parse(localStorage.getItem('atrasada_status')||'{}');
+    map[key]=status;
+    localStorage.setItem('atrasada_status',JSON.stringify(map));
+    track('atrasada_status',key+' → '+status);
+    // Re-render the select for this row
+    var el=document.querySelector('[data-atr-key="'+CSS.escape(key)+'"]');
+    if(el) el.outerHTML=renderAtrasadaStatus(key);
+  }catch(e){}
+}
+function renderAtrasadaStatus(key){
+  var status=getAtrasadaStatus(key);
+  var cfg={
+    'pendente':{label:'⏳ Ainda não avaliou',color:'var(--text3)',bg:'var(--bg3)'},
+    'contestada':{label:'✅ Avaliada e contestada',color:'var(--green)',bg:'rgba(34,197,94,0.12)'},
+    'aguardando':{label:'⏸ Aguardando ok de vendas',color:'var(--amber)',bg:'rgba(245,158,11,0.12)'}
+  };
+  var c=cfg[status]||cfg.pendente;
+  var safeKey=key.replace(/"/g,'&quot;');
+  return '<select data-atr-key="'+safeKey+'" onchange="setAtrasadaStatus(this.dataset.atrKey,this.value)" style="font-size:10px;padding:4px 6px;border-radius:6px;border:1px solid var(--border);background:'+c.bg+';color:'+c.color+';font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;max-width:180px">'
+    +'<option value="pendente"'+(status==='pendente'?' selected':'')+'>⏳ Ainda não avaliou</option>'
+    +'<option value="contestada"'+(status==='contestada'?' selected':'')+'>✅ Avaliada e contestada</option>'
+    +'<option value="aguardando"'+(status==='aguardando'?' selected':'')+'>⏸ Aguardando ok de vendas</option>'
+    +'</select>';
 }
 
 function buildLeadTimePanel(pane){
