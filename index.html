@@ -2470,13 +2470,23 @@ function buildResumo(pane){
   (async function(){
     try{
       const sems=await supaFetch('gp_semanas','order=id.desc&limit=1');
-      if(!sems||!sems.length) return;
-      const semId=sems[0].id;
-      const fcsts=await supaFetch('gp_forecast',`semana_id=eq.${semId}`);
-      const totalFcst=fcsts?fcsts.reduce((s,f)=>s+(f.fcst_op||0),0):0;
-      // Realizado da semana atual = opps do gp_bdr_resultados da semana, ou 0 se não tem dados
-      const semResults=await supaFetch('gp_bdr_resultados',`semana_id=eq.${semId}`);
-      const realizado=semResults&&semResults.length>0?semResults.reduce((s,r)=>s+(r.opps||0),0):0;
+      const semId=sems&&sems.length?sems[0].id:null;
+      // Forecast: soma dos fcst_op do Supabase
+      const fcsts=semId?await supaFetch('gp_forecast',`semana_id=eq.${semId}`):[];
+      const fcstByBdr={};
+      (fcsts||[]).forEach(f=>{fcstByBdr[f.bdr_id]=(f.fcst_op||0);});
+      const totalFcst=Object.values(fcstByBdr).reduce((s,v)=>s+v,0);
+      // Realizado da semana atual — prioriza Supabase, fallback DATA.bdrs.opps (realizado individual)
+      const semResults=semId?await supaFetch('gp_bdr_resultados',`semana_id=eq.${semId}`):[];
+      const realByBdr={};
+      if(semResults&&semResults.length>0){
+        semResults.forEach(r=>{realByBdr[r.bdr_id]=(r.opps||0);});
+      }
+      // Fallback/merge: sempre inclui DATA.bdrs.opps se não houver entrada no Supabase para aquele BDR
+      DATA.bdrs.forEach(b=>{
+        if(realByBdr[b.id]==null) realByBdr[b.id]=(b.opps||0);
+      });
+      const realizado=Object.values(realByBdr).reduce((s,v)=>s+v,0);
       const gap=realizado-totalFcst;
       const gapCor=gap>=0?'#bbf7d0':'#fecaca';
       const atingPct=totalFcst>0?Math.min(Math.round((realizado/totalFcst)*100),100):0;
@@ -2486,6 +2496,20 @@ function buildResumo(pane){
       const allApproved=fcsts&&fcsts.length>0&&fcsts.every(f=>f.status==='aprovado');
       const el=document.getElementById('resumo-fcst-semana');
       if(!el) return;
+      // Breakdown por BDR
+      const bdrRows=DATA.bdrs.map(b=>{
+        const f=fcstByBdr[b.id]||0;
+        const r=realByBdr[b.id]||0;
+        const delta=r-f;
+        const dCol=delta>=0?'#bbf7d0':'#fecaca';
+        return `<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,0.04);margin-bottom:3px">
+          <div class="bdr-av" style="background:${b.bg};color:${b.color};width:18px;height:18px;font-size:8px;flex-shrink:0">${b.id}</div>
+          <span style="font-size:10px;font-weight:600;color:rgba(255,255,255,.85);flex:1;min-width:0">${b.name.split(' ')[0]}</span>
+          <span style="font-size:10px;color:rgba(255,255,255,.55);font-family:'Inter',sans-serif">fcst <strong style="color:white">${f}</strong></span>
+          <span style="font-size:10px;color:rgba(255,255,255,.55);font-family:'Inter',sans-serif">real <strong style="color:white">${r}</strong></span>
+          <span style="font-size:10px;font-weight:700;color:${dCol};font-family:'Inter',sans-serif;min-width:24px;text-align:right">${delta>=0?'+':''}${delta}</span>
+        </div>`;
+      }).join('');
       el.innerHTML=`
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;margin-bottom:8px">
           <div>
@@ -2506,8 +2530,14 @@ function buildResumo(pane){
         </div>
         <div style="font-size:9px;color:rgba(255,255,255,.5);margin-bottom:6px">${atingPct}% atingido · ${submitted}/${totalBdrs} BDRs enviaram</div>
         ${allSubmitted&&!allApproved?`
-          <button id="btn-approve-all-fcst" onclick="approveAllForecasts(${semId})" style="width:100%;font-size:11px;font-weight:600;color:var(--accent);background:var(--bg3);border:none;border-radius:8px;padding:8px;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .15s">Aprovar Forecast S${d.semAtual}</button>`
-          :allApproved?`<div style="font-size:10px;color:#bbf7d0;font-weight:600">✅ Forecast aprovado</div>`:''}`;
+          <button id="btn-approve-all-fcst" onclick="approveAllForecasts(${semId})" style="width:100%;font-size:11px;font-weight:600;color:var(--accent);background:var(--bg3);border:none;border-radius:8px;padding:8px;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .15s;margin-bottom:6px">Aprovar Forecast S${d.semAtual}</button>`
+          :allApproved?`<div style="font-size:10px;color:#bbf7d0;font-weight:600;margin-bottom:6px">✅ Forecast aprovado</div>`:''}
+        <div onclick="(function(el){var d=el.nextElementSibling;var open=d.style.display!=='none';d.style.display=open?'none':'block';el.querySelector('.chv').textContent=open?'▾':'▴';})(this)" style="cursor:pointer;font-size:10px;color:rgba(255,255,255,.75);padding:6px 8px;border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:space-between;user-select:none">
+          <span>📊 Ver por BDR</span><span class="chv">▾</span>
+        </div>
+        <div style="display:none;padding:6px 0 0">
+          ${bdrRows}
+        </div>`;
     }catch(e){console.warn('Forecast resumo:',e);}
   })();
 }
