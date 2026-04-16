@@ -3822,14 +3822,20 @@ function buildReunioes(pane){
         </div>
       </div>
 
-      <!-- Filtro por status -->
+      <!-- Filtro por status + editar labels -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Filtrar por status</div>
+        <button onclick="editStatusLabels()" style="font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">✏️ Editar nomes</button>
+      </div>
       <div id="atr-filter-bar" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding:8px;background:var(--bg3);border-radius:8px">
         <button data-filter="all" onclick="filterAtrasadas('all')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1.5px solid var(--accent);background:var(--accent-light);color:var(--accent);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600">Todas</button>
-        <button data-filter="pendente" onclick="filterAtrasadas('pendente')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">⏳ Pendente</button>
-        <button data-filter="contestada" onclick="filterAtrasadas('contestada')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">✅ Contestada</button>
-        <button data-filter="aguardando" onclick="filterAtrasadas('aguardando')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">⏸ Aguardando</button>
-        <button data-filter="nao_op" onclick="filterAtrasadas('nao_op')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">🚫 Não é op</button>
-        <button data-filter="data_errada" onclick="filterAtrasadas('data_errada')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">📅 Data errada</button>
+        ${(function(){
+          var L=getStatusLabels();
+          var keys=['pendente','contestada','aguardando','nao_op','data_errada'];
+          return keys.map(function(k){
+            return '<button data-filter="'+k+'" onclick="filterAtrasadas(\''+k+'\')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:\'Inter\',sans-serif;font-weight:500">'+(L[k]||k).replace(/"/g,'&quot;')+'</button>';
+          }).join('');
+        })()}
       </div>
 
       <!-- TA -->
@@ -4127,23 +4133,91 @@ function filterAtrasadas(filter){
     row.style.display=(filter==='all'||filter===st)?'':'none';
   });
 }
+function getStatusLabels(){
+  var defaults={
+    'pendente':'⏳ Ainda não avaliou',
+    'contestada':'✅ Avaliada e contestada',
+    'aguardando':'⏸ Aguardando ok de vendas',
+    'nao_op':'🚫 Líder validou - não é uma op',
+    'data_errada':'📅 Reunião com data errada'
+  };
+  try{var saved=JSON.parse(localStorage.getItem('atrasada_status_labels')||'{}');return Object.assign({},defaults,saved);}catch(e){return defaults;}
+}
+function saveStatusLabels(labels){
+  try{localStorage.setItem('atrasada_status_labels',JSON.stringify(labels));}catch(e){}
+}
+function editStatusLabels(){
+  var labels=getStatusLabels();
+  var keys=['pendente','contestada','aguardando','nao_op','data_errada'];
+  var defaults={
+    'pendente':'⏳ Ainda não avaliou',
+    'contestada':'✅ Avaliada e contestada',
+    'aguardando':'⏸ Aguardando ok de vendas',
+    'nao_op':'🚫 Líder validou - não é uma op',
+    'data_errada':'📅 Reunião com data errada'
+  };
+  // Remove existing modal
+  var existing=document.getElementById('edit-status-modal');
+  if(existing) existing.remove();
+  var overlay=document.createElement('div');
+  overlay.id='edit-status-modal';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)';
+  overlay.onclick=function(e){if(e.target===overlay) overlay.remove();};
+  var html='<div style="background:var(--bg2);border-radius:14px;padding:20px;max-width:440px;width:100%;max-height:85vh;overflow-y:auto;border:1px solid var(--border)">';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">';
+  html+='<div style="font-size:15px;font-weight:700;color:var(--text)">✏️ Editar nomes dos status</div>';
+  html+='<button onclick="document.getElementById(\'edit-status-modal\').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--text3)">✕</button>';
+  html+='</div>';
+  html+='<div style="font-size:11px;color:var(--text3);margin-bottom:12px">Personalize os rótulos que aparecem no dropdown e no filtro. Emojis ajudam a identificar visualmente.</div>';
+  keys.forEach(function(k){
+    html+='<div style="margin-bottom:10px">';
+    html+='<label style="display:block;font-size:10px;font-weight:600;color:var(--text3);margin-bottom:4px;text-transform:uppercase">'+k+'</label>';
+    html+='<input type="text" data-status-key="'+k+'" value="'+(labels[k]||'').replace(/"/g,'&quot;')+'" placeholder="'+defaults[k]+'" style="width:100%;padding:8px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);box-sizing:border-box;font-family:\'Inter\',sans-serif">';
+    html+='</div>';
+  });
+  html+='<div style="display:flex;gap:8px;margin-top:16px">';
+  html+='<button onclick="resetStatusLabels()" style="flex:1;padding:10px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">Restaurar padrão</button>';
+  html+='<button onclick="saveStatusLabelsFromModal()" style="flex:2;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif">Salvar</button>';
+  html+='</div></div>';
+  overlay.innerHTML=html;
+  document.body.appendChild(overlay);
+}
+function saveStatusLabelsFromModal(){
+  var inputs=document.querySelectorAll('[data-status-key]');
+  var labels={};
+  inputs.forEach(function(i){var v=i.value.trim();if(v) labels[i.dataset.statusKey]=v;});
+  saveStatusLabels(labels);
+  var m=document.getElementById('edit-status-modal');if(m) m.remove();
+  // Rebuild reunioes pane
+  var pane=document.getElementById('pane-reunioes');
+  if(pane){pane.dataset.built='';pane.innerHTML='';buildReunioes(pane);pane.dataset.built='1';}
+}
+function resetStatusLabels(){
+  if(!confirm('Restaurar os nomes padrão?')) return;
+  try{localStorage.removeItem('atrasada_status_labels');}catch(e){}
+  var m=document.getElementById('edit-status-modal');if(m) m.remove();
+  var pane=document.getElementById('pane-reunioes');
+  if(pane){pane.dataset.built='';pane.innerHTML='';buildReunioes(pane);pane.dataset.built='1';}
+}
 function renderAtrasadaStatus(key){
   var status=getAtrasadaStatus(key);
+  var labels=getStatusLabels();
   var cfg={
-    'pendente':{label:'⏳ Ainda não avaliou',color:'var(--text3)',bg:'var(--bg3)'},
-    'contestada':{label:'✅ Avaliada e contestada',color:'var(--green)',bg:'rgba(34,197,94,0.12)'},
-    'aguardando':{label:'⏸ Aguardando ok de vendas',color:'var(--amber)',bg:'rgba(245,158,11,0.12)'},
-    'nao_op':{label:'🚫 Líder validou - não é uma op',color:'var(--red)',bg:'rgba(248,113,113,0.12)'},
-    'data_errada':{label:'📅 Reunião com data errada',color:'var(--purple)',bg:'rgba(168,85,247,0.12)'}
+    'pendente':{color:'var(--text3)',bg:'var(--bg3)'},
+    'contestada':{color:'var(--green)',bg:'rgba(34,197,94,0.12)'},
+    'aguardando':{color:'var(--amber)',bg:'rgba(245,158,11,0.12)'},
+    'nao_op':{color:'var(--red)',bg:'rgba(248,113,113,0.12)'},
+    'data_errada':{color:'var(--purple)',bg:'rgba(168,85,247,0.12)'}
   };
   var c=cfg[status]||cfg.pendente;
   var safeKey=key.replace(/"/g,'&quot;');
-  return '<select data-atr-key="'+safeKey+'" onchange="setAtrasadaStatus(this.dataset.atrKey,this.value)" style="font-size:10px;padding:4px 6px;border-radius:6px;border:1px solid var(--border);background:'+c.bg+';color:'+c.color+';font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;max-width:200px">'
-    +'<option value="pendente"'+(status==='pendente'?' selected':'')+'>⏳ Ainda não avaliou</option>'
-    +'<option value="contestada"'+(status==='contestada'?' selected':'')+'>✅ Avaliada e contestada</option>'
-    +'<option value="aguardando"'+(status==='aguardando'?' selected':'')+'>⏸ Aguardando ok de vendas</option>'
-    +'<option value="nao_op"'+(status==='nao_op'?' selected':'')+'>🚫 Líder validou - não é uma op</option>'
-    +'<option value="data_errada"'+(status==='data_errada'?' selected':'')+'>📅 Reunião com data errada</option>'
+  function escapeHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  return '<select data-atr-key="'+safeKey+'" onchange="setAtrasadaStatus(this.dataset.atrKey,this.value)" style="font-size:10px;padding:4px 6px;border-radius:6px;border:1px solid var(--border);background:'+c.bg+';color:'+c.color+';font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;max-width:220px">'
+    +'<option value="pendente"'+(status==='pendente'?' selected':'')+'>'+escapeHtml(labels.pendente)+'</option>'
+    +'<option value="contestada"'+(status==='contestada'?' selected':'')+'>'+escapeHtml(labels.contestada)+'</option>'
+    +'<option value="aguardando"'+(status==='aguardando'?' selected':'')+'>'+escapeHtml(labels.aguardando)+'</option>'
+    +'<option value="nao_op"'+(status==='nao_op'?' selected':'')+'>'+escapeHtml(labels.nao_op)+'</option>'
+    +'<option value="data_errada"'+(status==='data_errada'?' selected':'')+'>'+escapeHtml(labels.data_errada)+'</option>'
     +'</select>';
 }
 
