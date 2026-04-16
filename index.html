@@ -3924,14 +3924,16 @@ function renderAtrasadaStatus(key){
   var cfg={
     'pendente':{label:'⏳ Ainda não avaliou',color:'var(--text3)',bg:'var(--bg3)'},
     'contestada':{label:'✅ Avaliada e contestada',color:'var(--green)',bg:'rgba(34,197,94,0.12)'},
-    'aguardando':{label:'⏸ Aguardando ok de vendas',color:'var(--amber)',bg:'rgba(245,158,11,0.12)'}
+    'aguardando':{label:'⏸ Aguardando ok de vendas',color:'var(--amber)',bg:'rgba(245,158,11,0.12)'},
+    'nao_op':{label:'🚫 Líder validou - não é uma op',color:'var(--red)',bg:'rgba(248,113,113,0.12)'}
   };
   var c=cfg[status]||cfg.pendente;
   var safeKey=key.replace(/"/g,'&quot;');
-  return '<select data-atr-key="'+safeKey+'" onchange="setAtrasadaStatus(this.dataset.atrKey,this.value)" style="font-size:10px;padding:4px 6px;border-radius:6px;border:1px solid var(--border);background:'+c.bg+';color:'+c.color+';font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;max-width:180px">'
+  return '<select data-atr-key="'+safeKey+'" onchange="setAtrasadaStatus(this.dataset.atrKey,this.value)" style="font-size:10px;padding:4px 6px;border-radius:6px;border:1px solid var(--border);background:'+c.bg+';color:'+c.color+';font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;max-width:200px">'
     +'<option value="pendente"'+(status==='pendente'?' selected':'')+'>⏳ Ainda não avaliou</option>'
     +'<option value="contestada"'+(status==='contestada'?' selected':'')+'>✅ Avaliada e contestada</option>'
     +'<option value="aguardando"'+(status==='aguardando'?' selected':'')+'>⏸ Aguardando ok de vendas</option>'
+    +'<option value="nao_op"'+(status==='nao_op'?' selected':'')+'>🚫 Líder validou - não é uma op</option>'
     +'</select>';
 }
 
