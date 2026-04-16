@@ -3785,6 +3785,15 @@ function buildReunioes(pane){
         <span style="font-size:10px;color:var(--text3);font-weight:400">dias aguardando validação</span>
       </div>
 
+      <!-- Filtro por status -->
+      <div id="atr-filter-bar" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding:8px;background:var(--bg3);border-radius:8px">
+        <button data-filter="all" onclick="filterAtrasadas('all')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1.5px solid var(--accent);background:var(--accent-light);color:var(--accent);cursor:pointer;font-family:'Inter',sans-serif;font-weight:600">Todas</button>
+        <button data-filter="pendente" onclick="filterAtrasadas('pendente')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">⏳ Pendente</button>
+        <button data-filter="contestada" onclick="filterAtrasadas('contestada')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">✅ Contestada</button>
+        <button data-filter="aguardando" onclick="filterAtrasadas('aguardando')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">⏸ Aguardando</button>
+        <button data-filter="nao_op" onclick="filterAtrasadas('nao_op')" class="atr-filter-btn" style="font-size:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">🚫 Não é op</button>
+      </div>
+
       <!-- TA -->
       <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px;display:flex;align-items:center;gap:5px">
         <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block"></span>
@@ -3807,7 +3816,7 @@ function buildReunioes(pane){
             const dias=Math.floor((new Date()-rd)/(1000*60*60*24));
             const dc=dias>=14?'var(--red)':dias>=7?'var(--amber)':'var(--text2)';
             const key='TA|'+a.empresa+'|'+a.data;
-            return `<tr style="border-bottom:1px solid var(--border)">
+            return `<tr class="atr-row" data-status="${getAtrasadaStatus(key)}" style="border-bottom:1px solid var(--border)">
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
               <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
@@ -3842,7 +3851,7 @@ function buildReunioes(pane){
             const dias=Math.floor((new Date()-rd)/(1000*60*60*24));
             const dc=dias>=14?'var(--red)':dias>=7?'var(--amber)':'var(--text2)';
             const key='TM|'+a.empresa+'|'+a.data;
-            return `<tr style="border-bottom:1px solid var(--border)">
+            return `<tr class="atr-row" data-status="${getAtrasadaStatus(key)}" style="border-bottom:1px solid var(--border)">
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
               <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
@@ -3916,8 +3925,32 @@ function setAtrasadaStatus(key,status){
     track('atrasada_status',key+' → '+status);
     // Re-render the select for this row
     var el=document.querySelector('[data-atr-key="'+CSS.escape(key)+'"]');
-    if(el) el.outerHTML=renderAtrasadaStatus(key);
+    if(el){
+      // Update parent row's data-status
+      var tr=el.closest('tr');
+      if(tr) tr.setAttribute('data-status',status);
+      el.outerHTML=renderAtrasadaStatus(key);
+    }
+    // Reapply current filter
+    var activeBtn=document.querySelector('.atr-filter-btn[data-active="1"]');
+    if(activeBtn) filterAtrasadas(activeBtn.dataset.filter);
   }catch(e){}
+}
+function filterAtrasadas(filter){
+  // Update button styles
+  document.querySelectorAll('.atr-filter-btn').forEach(function(b){
+    var active=b.dataset.filter===filter;
+    b.dataset.active=active?'1':'0';
+    b.style.border=active?'1.5px solid var(--accent)':'1px solid var(--border)';
+    b.style.background=active?'var(--accent-light)':'var(--bg2)';
+    b.style.color=active?'var(--accent)':'var(--text2)';
+    b.style.fontWeight=active?'600':'500';
+  });
+  // Show/hide rows
+  document.querySelectorAll('.atr-row').forEach(function(row){
+    var st=row.getAttribute('data-status')||'pendente';
+    row.style.display=(filter==='all'||filter===st)?'':'none';
+  });
 }
 function renderAtrasadaStatus(key){
   var status=getAtrasadaStatus(key);
