@@ -3808,11 +3808,12 @@ function buildReunioes(pane){
       </div>
 
       <!-- TA -->
-      <div style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px;display:flex;align-items:center;gap:5px">
+      <div onclick="toggleAtrasadasBlock('atr-ta-body',this)" style="font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px;display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;padding:6px 8px;border-radius:6px;background:rgba(99,102,241,0.04)">
         <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block"></span>
         TA · ${r.atrasadasTA.length} reunião(ões)
+        <span class="atr-toggle-icon" style="margin-left:auto;font-size:14px;color:var(--text3);transition:transform .2s">▾</span>
       </div>
-      <div style="overflow-x:auto;margin-bottom:14px">
+      <div id="atr-ta-body" style="overflow-x:auto;margin-bottom:14px">
         <table style="width:100%;border-collapse:collapse;min-width:380px">
           <thead><tr style="border-bottom:1px solid var(--border)">
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">BDR</th>
@@ -3845,11 +3846,12 @@ function buildReunioes(pane){
       </div>
 
       <!-- TM -->
-      <div style="font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px;display:flex;align-items:center;gap:5px">
+      <div onclick="toggleAtrasadasBlock('atr-tm-body',this)" style="font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px;display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none;padding:6px 8px;border-radius:6px;background:rgba(20,184,166,0.04)">
         <span style="width:6px;height:6px;border-radius:50%;background:var(--teal);display:inline-block"></span>
         TM · ${r.atrasadasTM.length} reunião(ões)
+        <span class="atr-toggle-icon" style="margin-left:auto;font-size:14px;color:var(--text3);transition:transform .2s">▾</span>
       </div>
-      <div style="overflow-x:auto;margin-bottom:12px">
+      <div id="atr-tm-body" style="overflow-x:auto;margin-bottom:12px">
         <table style="width:100%;border-collapse:collapse;min-width:380px">
           <thead><tr style="border-bottom:1px solid var(--border)">
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">BDR</th>
@@ -3975,6 +3977,15 @@ function renderAtrasadaComment(key){
     +'style="width:100%;min-width:160px;max-width:240px;font-size:10px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:\'Inter\',sans-serif;outline:none" '
     +'onfocus="this.style.borderColor=\'var(--accent)\'" '
     +'onmouseleave="this.style.borderColor=\'var(--border)\'">';
+}
+
+function toggleAtrasadasBlock(bodyId,headerEl){
+  var body=document.getElementById(bodyId);
+  if(!body) return;
+  var icon=headerEl.querySelector('.atr-toggle-icon');
+  var isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'';
+  if(icon) icon.style.transform=isOpen?'rotate(-90deg)':'rotate(0deg)';
 }
 
 function filterFuturasByBDR(bdr){
