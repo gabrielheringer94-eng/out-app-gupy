@@ -1,15 +1,4 @@
 <!DOCTYPE html>
-<!--
-  LOBXS HUNTER · Pre Vendas
-  Modificado em: 2026-04-22 (PR1 + PR2)
-  Mudanças aplicadas:
-    · PR1 #1  Home do gestor (buildResumo) virou tela acionável: ações pendentes no topo, diagnóstico colapsado.
-    · PR1 #6  Aba "JDC" renomeada para "Pessoas" (ícone ◉); novo card de status de avaliações no topo.
-    · PR1 #7  Aba "Weekly" removida do nav; substituída por botão "Preparar weekly por email" na Home (previewWeeklyEmail()).
-    · PR2 #2  Forecast-card do BDR subiu pro topo; estados visuais (enviado/pendente) aplicados em loadBDRForecast.
-    · PR2 #3  Hero do BDR com gap grande (48px), barra de pace dupla (ideal + real), cor semafórica.
-    · PR2 #5  Reuniões atrasadas com faixa visual por idade + popover de ação (escalar WhatsApp / marcar resolvida).
--->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -759,15 +748,6 @@ input[type="number"]:focus {
 
 <style>
 @keyframes loadDot{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
-/* PR2 #5 — faixa pulsante para reuniões atrasadas 15+ dias */
-@keyframes pulse-red{0%,100%{background-color:var(--red-bg)}50%{background-color:rgba(248,113,113,0.22)}}
-.atr-ageband{cursor:pointer;transition:background .15s;position:relative}
-.atr-ageband.age-1{background:var(--bg3)}
-.atr-ageband.age-2{background:var(--amber-bg)}
-.atr-ageband.age-3{background:var(--red-bg)}
-.atr-ageband.age-4{background:var(--red-bg);animation:pulse-red 2s infinite}
-.atr-ageband[data-resolved="1"]{opacity:0;transform:translateX(16px);transition:opacity .25s,transform .25s;pointer-events:none}
-.atr-popover{position:absolute;z-index:1000;width:280px;background:var(--bg2);border:1px solid var(--border2);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,0.35);padding:12px;animation:fadeUp .18s ease-out}
 </style>
 
 <script>
@@ -799,83 +779,6 @@ const ESPECIALIDADE_CONFIG={
   'Embaixador Gupy':{icon:'🏅',color:'#6366f1', bg:'rgba(0,60,253,0.1)'},
 };
 
-// ─── PACING POR DIAS ÚTEIS (padrão do app) ────────────────────
-// Todas as telas que mostram "atingimento da meta" usam computePacing().
-// Regra: paceEsperado = (diasUteisPassados / diasUteisTotais) * meta
-// Estados:   above  (ratio >  +0.05) → verde
-//            ontrack(ratio >= -0.05) → amber (dentro do pace)
-//            below  (ratio <  -0.05) → vermelho
-// Feriados nacionais BR 2026 + carnaval (move-se por ano). Override em window.FERIADOS_CUSTOM.
-const FERIADOS_BR={
-  2026:new Set([
-    '2026-01-01','2026-02-16','2026-02-17', // Confraternização + Carnaval seg/ter
-    '2026-04-03','2026-04-21',              // Sexta Santa, Tiradentes
-    '2026-05-01','2026-06-04',              // Trabalho, Corpus Christi
-    '2026-09-07','2026-10-12',              // Independência, Aparecida
-    '2026-11-02','2026-11-15','2026-11-20', // Finados, Proclamação, Consciência Negra
-    '2026-12-25'                            // Natal
-  ])
-};
-function isoDate(d){
-  var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
-  return y+'-'+m+'-'+day;
-}
-function isFeriado(d){
-  var set=FERIADOS_BR[d.getFullYear()];
-  if(set && set.has(isoDate(d))) return true;
-  if(window.FERIADOS_CUSTOM && window.FERIADOS_CUSTOM.has && window.FERIADOS_CUSTOM.has(isoDate(d))) return true;
-  return false;
-}
-function isDiaUtil(d){
-  var dow=d.getDay();
-  if(dow===0||dow===6) return false;
-  return !isFeriado(d);
-}
-function contarDiasUteis(start, end){
-  // start e end são inclusivos
-  if(end<start) return 0;
-  var count=0,d=new Date(start.getFullYear(),start.getMonth(),start.getDate());
-  while(d<=end){
-    if(isDiaUtil(d)) count++;
-    d.setDate(d.getDate()+1);
-  }
-  return count;
-}
-// Calcula pacing para um par (opps, meta) no mês corrente (ou numa data de referência).
-function computePacing(opps, meta, opts){
-  opts=opts||{};
-  var ref=opts.ref?new Date(opts.ref):new Date();
-  ref.setHours(0,0,0,0);
-  var first=new Date(ref.getFullYear(),ref.getMonth(),1);
-  var last=new Date(ref.getFullYear(),ref.getMonth()+1,0);
-  var diasUteisTotais=contarDiasUteis(first,last);
-  var diasUteisPassados=contarDiasUteis(first,ref);
-  var diasUteisRestantes=Math.max(0,diasUteisTotais-diasUteisPassados);
-  var paceEsperado=diasUteisTotais>0?(diasUteisPassados/diasUteisTotais)*meta:0;
-  var paceRound=Math.round(paceEsperado*10)/10;
-  var gapPace=opps-paceEsperado;       // + adiantado / - atrasado
-  var gapMeta=Math.max(0,meta-opps);   // quantas opps faltam para bater a meta
-  var ratio=paceEsperado>0?gapPace/paceEsperado:(opps>=meta?1:-1);
-  var state=ratio>0.05?'above':(ratio>=-0.05?'ontrack':'below');
-  var cor=state==='above'?'var(--green)':state==='ontrack'?'var(--amber)':'var(--red)';
-  var corBg=state==='above'?'var(--green-bg)':state==='ontrack'?'var(--amber-bg)':'var(--red-bg)';
-  var corAccent=state==='above'?'#bbf7d0':state==='ontrack'?'#fde68a':'#fecaca';
-  var corGrad=state==='above'?'linear-gradient(135deg,#16a34a 0%,#15803d 100%)'
-    :state==='ontrack'?'linear-gradient(135deg,#d97706 0%,#b45309 100%)'
-    :'linear-gradient(135deg,#dc2626 0%,#b91c1c 100%)';
-  var pctAtingimento=meta>0?Math.round((opps/meta)*100):0;
-  var pctPaceIdeal=meta>0?Math.min(100,Math.round((paceEsperado/meta)*100)):0;
-  return {
-    opps:opps, meta:meta,
-    paceEsperado:paceRound, gapPace:Math.round(gapPace*10)/10, gapMeta:gapMeta,
-    ratio:ratio, state:state,
-    cor:cor, corBg:corBg, corAccent:corAccent, corGrad:corGrad,
-    pctAtingimento:pctAtingimento, pctPaceIdeal:pctPaceIdeal,
-    diasUteisTotais:diasUteisTotais, diasUteisPassados:diasUteisPassados, diasUteisRestantes:diasUteisRestantes
-  };
-}
-window.computePacing=computePacing;
-
 // Calcula semana atual de Abril 2026 baseada na data real
 function calcSemAtual(){
   const hoje=new Date();
@@ -892,7 +795,7 @@ function calcSemAtual(){
 
 const DATA = {
   meta:84, metaBDR:12, semAtual:calcSemAtual(), semTotal:4,
-  ultimaAtualizacao:'2026-04-22T11:47:00',
+  ultimaAtualizacao:'2026-04-22T09:14:00',
   // Oportunidades REAIS (só Apres. Solução / Desenvolvimento de negócio)
   oppsDetalhe:[
     {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'VR Software',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Andrea Ferraz',data:'10/04'},
@@ -1759,11 +1662,11 @@ function buildTicker(user){
 // ─── TAB BUILDER (Bottom Nav) ─────────────────────────────────
 const NAV_ICONS={
   resumo:'◈',time:'◉',mrr:'◆',reunioes:'◷',noticias:'◉',analise:'◎',
-  hoje:'⌂',semana:'↗',funil:'▽',mrr_bdr:'◆',time_bdr:'◉',pdi:'◈',jdc:'◉'
+  hoje:'⌂',semana:'↗',funil:'▽',mrr_bdr:'◆',time_bdr:'◉',pdi:'◈',jdc:'★'
 };
 const NAV_LABELS={
-  resumo:'Hoje',time:'Time',base:'Base',reunioes:'Agenda',weekly:'Weekly',analise:'Análise',
-  hoje:'Início',resultado:'Meu Resultado',performance:'Performance',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI',jdc:'Pessoas'
+  resumo:'Resumo',time:'Time',base:'Base',reunioes:'Agenda',weekly:'Weekly',analise:'Análise',
+  hoje:'Início',resultado:'Meu Resultado',performance:'Performance',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI',jdc:'JDC'
 };
 
 
@@ -1955,13 +1858,14 @@ function buildTabs(tabs,builders){
 // ─── GESTOR APP ───────────────────────────────────────────────
 function buildGestorApp(){
   buildTabs([
-    {id:'resumo',   label:'Hoje'},
+    {id:'resumo',   label:'Resumo'},
     {id:'resultado',label:'Resultado'},
     {id:'time',     label:'Time'},
     {id:'base',     label:'Base'},
     {id:'reunioes', label:'Agenda'},
-    {id:'jdc',      label:'Pessoas'},
-  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildKnowledgeBase,buildReunioes,buildJDC]);
+    {id:'weekly',   label:'Weekly'},
+    {id:'jdc',      label:'JDC'},
+  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildKnowledgeBase,buildReunioes,buildWeekly,buildJDC]);
 }
 
 
@@ -1973,18 +1877,17 @@ function buildResultadoGestor(pane){
   var semAtual=d.semAtual;
   var semTotal=d.semTotal;
 
-  // Acumulado do mês · pacing padronizado por dias úteis
+  // Acumulado do mês
   var oppsAcum=mes.opps;
   var rasAcum=mes.ras;
   var ligAcum=mes.lig;
-  var pcMes=computePacing(oppsAcum,metaMes);
-  var pctMes=pcMes.pctAtingimento;
-  var proj=pcMes.diasUteisPassados>0?Math.round((oppsAcum/pcMes.diasUteisPassados)*pcMes.diasUteisTotais):0;
+  var pctMes=Math.min(Math.round((oppsAcum/metaMes)*100),100);
+  var proj=semTotal>0?Math.round((oppsAcum/semAtual)*semTotal):0;
   var gapProj=proj-metaMes;
-  var paceEsp=Math.round(pcMes.paceEsperado);
+  var paceEsp=Math.round((metaMes/semTotal)*semAtual);
 
-  // Pacing color (padrão do app: verde/amber/vermelho pelo state)
-  var pacingCol=pcMes.cor;
+  // Pacing color
+  var pacingCol=pctMes>=70?'var(--green)':pctMes>=40?'var(--amber)':'var(--red)';
 
   // Forecast analysis
   function buildForecastAnalysis(){
@@ -2001,7 +1904,7 @@ function buildResultadoGestor(pane){
       var totalFcstRa=forecasts.reduce(function(s,f){return s+(f.fcst_ra||0);},0);
       var semRestantes=semTotal-semAtual;
       var opsNecessarias=Math.max(0,metaMes-oppsAcum);
-      var paceMtd=Math.round(pcMes.paceEsperado);
+      var paceMtd=Math.round((metaMes/semTotal)*semAtual);
       var gapPace=oppsAcum-paceMtd;
       var opsNeedWeek=semRestantes>0?Math.ceil(opsNecessarias/semRestantes):opsNecessarias;
       var rasNeedWeek=Math.ceil(opsNeedWeek/0.3); // ~30% RA→OP
@@ -2204,161 +2107,7 @@ function buildResultadoGestor(pane){
 }
 
 // RESUMO = Nova Home — Diagnóstico Estratégico
-// ─── HOME ACIONÁVEL (segunda-feira de manhã) ──────────────────
-// PR1 · Mudança 1: substitui o Resumo por uma tela orientada a ações.
-// A lógica original permanece em buildDiagnosticoSemana (renderizada no card colapsado abaixo).
 function buildResumo(pane){
-  const d=DATA;
-  const now=new Date();
-  const weekDays=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
-  const months=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-  const dataFmt=weekDays[now.getDay()]+', '+now.getDate()+' de '+months[now.getMonth()]+' de '+now.getFullYear();
-  const hora=now.getHours();
-  const sauda=hora<12?'Bom dia':hora<18?'Boa tarde':'Boa noite';
-
-  // Reuniões atrasadas
-  const r=d.reunioes||{};
-  const atTA=(r.atrasadasTA||[]).map(a=>Object.assign({},a,{tipo:'TA'}));
-  const atTM=(r.atrasadasTM||[]).map(a=>Object.assign({},a,{tipo:'TM'}));
-  const today=new Date(); today.setHours(0,0,0,0);
-  function diasDesde(dmdd){
-    if(!dmdd) return 0;
-    const p=String(dmdd).split('/');
-    if(p.length<2) return 0;
-    const yr=today.getFullYear();
-    const dt=new Date(yr,parseInt(p[1],10)-1,parseInt(p[0],10));
-    if(dt>today) dt.setFullYear(yr-1);
-    return Math.max(0,Math.floor((today-dt)/86400000));
-  }
-  const atAll=atTA.concat(atTM).map(a=>Object.assign({},a,{dias:diasDesde(a.data)}))
-    .sort((a,b)=>b.dias-a.dias);
-  const totalAt=atAll.length;
-  const top5At=atAll.slice(0,5);
-
-  // BDRs fora do pace — usa computePacing (dias úteis) · critério: <50% do pace esperado
-  const foraPace=(d.bdrs||[]).map(b=>{
-    const cur=b.oppsMes!=null?b.oppsMes:(b.opps||0);
-    const bp=computePacing(cur,d.metaBDR);
-    const ratio=bp.paceEsperado>0?(cur/bp.paceEsperado):1;
-    return Object.assign({},b,{pacing:Math.round(ratio*100),paceRatio:ratio,paceInfo:bp});
-  }).filter(b=>b.paceRatio<0.5).sort((a,b)=>a.paceRatio-b.paceRatio);
-
-  pane.innerHTML=`
-    <!-- HEADER DINÂMICO -->
-    <div style="margin-bottom:16px">
-      <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">${dataFmt}</div>
-      <div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em">${sauda}, líder.</div>
-    </div>
-
-    <!-- CARD PRINCIPAL: AÇÕES PENDENTES -->
-    <div class="card" style="margin-bottom:14px">
-      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">Ações pendentes</div>
-
-      <!-- 1. Forecast pendente -->
-      <div style="margin-bottom:14px">
-        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">📊 Forecast pendente</div>
-        <div id="home-fcst-pendente" style="font-size:11px;color:var(--text3);padding:4px 0">Carregando...</div>
-      </div>
-
-      <!-- 2. Reuniões venceram -->
-      <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid var(--border)">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <div style="font-size:13px;font-weight:700;color:var(--text)">🚨 Reuniões venceram</div>
-          <div style="font-size:11px;font-weight:700;color:var(--red);background:var(--red-bg);padding:2px 8px;border-radius:20px">${totalAt}</div>
-        </div>
-        ${top5At.length>0?top5At.map(a=>`
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
-            <div style="flex:1;min-width:0">
-              <div style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.empresa||'—'}</div>
-              <div style="font-size:10px;color:var(--text3)">${(a.name||'').split(' ')[0]} · ${a.tipo}</div>
-            </div>
-            <div style="font-size:12px;font-weight:700;color:var(--red);font-family:'Inter',sans-serif;flex-shrink:0;margin-left:8px">${a.dias}d</div>
-          </div>`).join(''):`<div style="font-size:11px;color:var(--green);padding:4px 0">Nenhuma reunião atrasada. ✓</div>`}
-        ${totalAt>0?`<div onclick="(function(){document.querySelectorAll('.nav-item').forEach(function(b){if(b.textContent.trim().indexOf('Agenda')>=0)b.click();});})();track('home_ver_todas_atrasadas')" style="cursor:pointer;font-size:11px;color:var(--accent);font-weight:600;margin-top:10px;text-align:center">Ver todas (${totalAt}) →</div>`:''}
-      </div>
-
-      <!-- 3. BDRs fora do pace -->
-      <div style="margin-bottom:14px;padding-top:12px;border-top:1px solid var(--border)">
-        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px">⚡ BDRs fora do pace</div>
-        ${foraPace.length>0?foraPace.map(b=>`
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
-            <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
-              ${b.photo?`<img src="${b.photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0">`:`<div style="width:28px;height:28px;border-radius:50%;background:${b.bg};color:${b.color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${b.id}</div>`}
-              <div style="min-width:0;flex:1">
-                <div style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.name.split(' ')[0]}</div>
-                <div style="font-size:10px;color:var(--red);font-weight:600">${b.pacing}% do pace</div>
-              </div>
-            </div>
-            <div onclick="window.open('https://calendar.google.com/calendar/r/eventedit','_blank');track('home_marcar_1a1','${b.id}')" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:8px;padding:6px 10px;flex-shrink:0">Marcar 1:1</div>
-          </div>`).join(''):`<div style="font-size:11px;color:var(--green);padding:4px 0">Time no pace. ✓</div>`}
-      </div>
-
-      <!-- 4. Leads parados +7d (placeholder) -->
-      <div style="padding-top:12px;border-top:1px solid var(--border)">
-        <div style="font-size:13px;font-weight:700;color:var(--text3);margin-bottom:4px">💤 Leads parados +7d</div>
-        <div style="font-size:11px;color:var(--text3);padding:4px 0;font-style:italic">Funcionalidade disponível após integração com Salesforce</div>
-      </div>
-
-      <!-- Weekly email CTA -->
-      <div style="padding-top:14px;margin-top:12px;border-top:1px solid var(--border)">
-        <div onclick="previewWeeklyEmail();track('home_weekly_preview')" style="cursor:pointer;width:100%;text-align:center;padding:13px 14px;background:var(--accent);color:#fff;border-radius:10px;font-size:13px;font-weight:700;box-shadow:var(--shadow-lg);transition:opacity .15s" onmouseenter="this.style.opacity='.9'" onmouseleave="this.style.opacity='1'">📧 Preparar weekly por email</div>
-      </div>
-    </div>
-
-    <!-- DIAGNÓSTICO DA SEMANA (COLAPSADO) -->
-    <div class="card" style="margin-bottom:12px">
-      <div class="collapsible-header" onclick="toggleCard('resumo-diag-body',this)" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">
-        <div style="font-size:13px;font-weight:700;color:var(--text)">📈 Diagnóstico da semana</div>
-        <span class="collapse-icon" style="font-size:14px;color:var(--text3);transform:rotate(-90deg)">▾</span>
-      </div>
-      <div id="resumo-diag-body" style="display:none"></div>
-    </div>
-  `;
-
-  // Populate diagnostic (hidden) — reaproveita a lógica original
-  var diagBody=document.getElementById('resumo-diag-body');
-  if(diagBody) buildDiagnosticoSemana(diagBody);
-
-  // Populate "Forecast pendente" (async, via Supabase)
-  (async function(){
-    var el=document.getElementById('home-fcst-pendente');
-    if(!el) return;
-    try{
-      var sems=await supaFetch('gp_semanas','order=id.asc');
-      var curSem=sems&&sems.length?sems.find(function(s){return s.sem_atual===DATA.semAtual;}):null;
-      var semId=curSem?curSem.id:(sems&&sems.length?sems[sems.length-1].id:null);
-      var fcsts=semId?await supaFetch('gp_forecast','semana_id=eq.'+semId):[];
-      var hasFcst={};
-      (fcsts||[]).forEach(function(f){ if((f.fcst_op||0)>0 || (f.fcst_ra||0)>0) hasFcst[f.bdr_id]=true; });
-      var pendentes=(DATA.bdrs||[]).filter(function(b){return !hasFcst[b.id];});
-      if(pendentes.length===0){
-        el.innerHTML='<div style="font-size:11px;color:var(--green);padding:4px 0">Todos os BDRs enviaram forecast. ✓</div>';
-        return;
-      }
-      el.innerHTML=pendentes.map(function(b){
-        var first=(b.name||'').split(' ')[0];
-        var msg='Oi '+first+', tudo bem? Preciso do seu forecast da semana até amanhã 12h. Obrigado!';
-        var waHref='https://wa.me/?text='+encodeURIComponent(msg);
-        var av=b.photo
-          ? '<img src="'+b.photo+'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0">'
-          : '<div style="width:28px;height:28px;border-radius:50%;background:'+b.bg+';color:'+b.color+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">'+b.id+'</div>';
-        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">'
-          +'<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">'+av
-          +'<span style="font-size:12px;font-weight:600;color:var(--text)">'+first+'</span></div>'
-          +'<a href="'+waHref+'" target="_blank" rel="noopener" onclick="track(\'home_cobrar_fcst\',\''+b.id+'\')" style="font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:8px;padding:6px 10px;text-decoration:none;flex-shrink:0">Cobrar</a>'
-          +'</div>';
-      }).join('');
-    }catch(e){
-      el.innerHTML='<div style="font-size:11px;color:var(--text3);padding:4px 0">Forecast indisponível offline.</div>';
-    }
-  })();
-}
-
-
-// ─── DIAGNÓSTICO DA SEMANA ────────────────────────────────────
-// (Antigo buildResumo — mantido como função interna, renderizado dentro
-//  do card colapsado da Home pelo novo buildResumo acima.)
-function buildDiagnosticoSemana(pane){
   const d=DATA;
 
   // ── Cálculos base (usa acumulado do mês + dias úteis) ──
@@ -2366,18 +2115,16 @@ function buildDiagnosticoSemana(pane){
   // Dias úteis abril 2026: S1(31mar-4abr)=3du, S2(7-11)=4du, S3(14-17)=4du, S4(22-25)=4du + extras
   // User conta: 7 dias úteis passados até agora, 21 totais no mês
   const diasUteisPorSem=[0,3,4,4,4]; // index 0=unused, 1=S1, 2=S2, 3=S3, 4=S4
-  // Pacing padronizado (dias úteis reais via computePacing)
-  const pcTime=computePacing(oppsAcumMes,d.meta);
-  const diasUteisPassados=pcTime.diasUteisPassados;
-  const diasUteisTotais=pcTime.diasUteisTotais;
-  const diasUteisRestantes=pcTime.diasUteisRestantes;
+  const diasUteisPassados=diasUteisPorSem.slice(1,DATA.semAtual).reduce((s,v)=>s+v,0); // S1+S2=7
+  const diasUteisTotais=21; // dias úteis de abril 2026
+  const diasUteisRestantes=diasUteisTotais-diasUteisPassados;
   const mediaDiariaUtil=oppsAcumMes/Math.max(diasUteisPassados,1);
   const proj=Math.round(mediaDiariaUtil*diasUteisTotais);
   const gap=oppsAcumMes-d.meta;
   const gapProj=proj-d.meta;
-  const pctAtual=pcTime.pctAtingimento;
+  const pctAtual=Math.min(Math.round((oppsAcumMes/d.meta)*100),100);
   const pctProj=Math.min(Math.round((proj/d.meta)*100),100);
-  const paceEsp=Math.round(pcTime.paceEsperado);
+  const paceEsp=Math.round((d.meta/diasUteisTotais)*diasUteisPassados);
 
   // ── Conversões reais ──
   const conv={
@@ -2809,21 +2556,12 @@ function buildTimeGestor(pane){
   const META=d.metaBDR, SEMR=d.semTotal-d.semAtual;
 
   // Score composto: opps*4 + ras*2 + lig/10 + ativ/100
-  // Pacing e cor padrão do app (dias úteis · computePacing)
-  const scored=[...d.bdrs].map(b=>{
-    const cur=b.oppsMes!=null?b.oppsMes:(b.opps||0);
-    const bp=computePacing(cur,META);
-    return {
-      ...b,
-      score: b.opps*4 + b.ras*2 + b.lig/10 + b.ativ/100,
-      pacing: bp.pctAtingimento,
-      paceState: bp.state,
-      paceCor: bp.cor,
-      paceCorBg: bp.corBg,
-      paceEsperado: bp.paceEsperado,
-      needed: SEMR>0?Math.ceil((META-b.opps)/SEMR):META-b.opps,
-    };
-  }).sort((a,b)=>b.score-a.score);
+  const scored=[...d.bdrs].map(b=>({
+    ...b,
+    score: b.opps*4 + b.ras*2 + b.lig/10 + b.ativ/100,
+    pacing: Math.min(Math.round((b.opps/META)*100),100),
+    needed: SEMR>0?Math.ceil((META-b.opps)/SEMR):META-b.opps,
+  })).sort((a,b)=>b.score-a.score);
 
   const top3=scored.slice(0,3);
   const bot3=scored.slice(-3).reverse();
@@ -2841,9 +2579,7 @@ function buildTimeGestor(pane){
 
   function bdrCard(b, rank, showRank=true){
     const alert=getAlert(b);
-    // Cor padrão do app (state pelo pace de dias úteis)
-    const pc=b.paceCor||(b.pacing>=70?'var(--green)':b.pacing>=30?'var(--amber)':'var(--red)');
-    const pcBg=b.paceCorBg||(b.pacing>=70?'var(--green-bg)':b.pacing>=30?'var(--amber-bg)':'var(--red-bg)');
+    const pc=b.pacing>=70?'var(--green)':b.pacing>=30?'var(--amber)':'var(--red)';
     const cid='bc-'+b.id+'-'+rank;
     return `<div style="background:var(--bg3);border-radius:var(--radius-sm);margin-bottom:6px;overflow:hidden">
       <div onclick="toggleBdrCard('${cid}')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;cursor:pointer">
@@ -2853,7 +2589,7 @@ function buildTimeGestor(pane){
           <span style="font-size:13px;font-weight:600;color:var(--text)">${b.name.split(' ')[0]}</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:${pcBg};color:${pc}">${b.pacing}%</span>
+          <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:${b.pacing>=70?'var(--green-bg)':b.pacing>=30?'var(--amber-bg)':'var(--red-bg)'};color:${pc}">${b.pacing}%</span>
           <span id="icon-${cid}" style="font-size:11px;color:var(--text3)">▾</span>
         </div>
       </div>
@@ -2989,7 +2725,7 @@ function buildTimeGestor(pane){
   // Ranking table
   const rkEl=document.getElementById('ranking-rows');
   scored.forEach((b,i)=>{
-    const pc=b.paceCor||(b.pacing>=70?'var(--green)':b.pacing>=30?'var(--amber)':'var(--red)');
+    const pc=b.pacing>=70?'var(--green)':b.pacing>=30?'var(--amber)':'var(--red)';
     const isTop=i<3, isBot=i>=scored.length-3;
     const bdrData=DATA.bdrs.find(x=>x.id===b.id);
     const raPend=DATA.raPendentes?DATA.raPendentes[b.id]||0:0;
@@ -4006,102 +3742,6 @@ function buildWeekly(pane){
   })();
 }
 
-// ─── WEEKLY EMAIL PREVIEW ─────────────────────────────────────
-// PR1 · Mudança 7: Weekly saiu do nav e virou botão na Home.
-// TODO: automatizar envio via Supabase Edge Function + Resend.
-function previewWeeklyEmail(){
-  const d=DATA;
-  const mes=d.mesAbril||{};
-  const semAtual=d.semAtual;
-  const semReview=Math.max(1,semAtual-1);
-  const semData=(mes.semanas||[]).find(s=>s.sem===semReview)||(mes.semanas||[]).slice(-1)[0]||{datas:''};
-  const scored=[...(d.bdrs||[])].sort((a,b)=>(b.opps*4+b.ras*2+b.lig/10)-(a.opps*4+a.ras*2+a.lig/10));
-  const topBdr=scored[0]||{name:'—',opps:0,ras:0,lig:0};
-  const totalOpps=mes.opps||0;
-  const pctMeta=d.meta>0?Math.round((totalOpps/d.meta)*100):0;
-  const conv=d.conversoes||{aiLc:{real:0,meta:0},lcRa:{real:0,meta:0},raOp:{real:0,meta:0}};
-  const bdrsBaixos=(d.bdrs||[]).filter(b=>b.lig>5&&b.ras===0).map(b=>b.name.split(' ')[0]);
-  const totAtrasadas=((d.reunioes&&d.reunioes.atrasadasTA)||[]).length+((d.reunioes&&d.reunioes.atrasadasTM)||[]).length;
-  const totFuturas=((d.reunioes&&d.reunioes.futuras)||[]).reduce((s,x)=>s+(x.ta?x.ta.length:0)+(x.tm?x.tm.length:0),0);
-  const convAbaixo=[['AI→LC',conv.aiLc],['LC→RA',conv.lcRa],['RA→OP',conv.raOp]]
-    .filter(([,c])=>c.real<c.meta)
-    .map(([l,c])=>l+' ('+c.real+'% vs meta '+c.meta+'%)');
-  let notas={};
-  try{ notas=JSON.parse(localStorage.getItem('weekly_notes_s'+semReview)||'{}'); }catch(e){}
-  const prioridades=(notas.prioridades||notas.proxSemana||'').toString().trim();
-
-  const css=`body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;background:#f6f7fb;color:#1a1a26;margin:0;padding:24px;line-height:1.55}`
-    +`.wrap{max-width:640px;margin:0 auto;background:#fff;border-radius:14px;padding:28px;box-shadow:0 2px 12px rgba(0,0,0,0.06)}`
-    +`h1{font-size:20px;margin:0 0 4px;color:#0a0a0f}`
-    +`.sub{font-size:13px;color:#606078;margin-bottom:20px}`
-    +`h2{font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:#6366f1;margin:24px 0 10px;border-bottom:1px solid #e5e7eb;padding-bottom:6px}`
-    +`ul{padding-left:20px;margin:8px 0}`
-    +`li{font-size:13px;margin-bottom:6px}`
-    +`.kpi{display:inline-block;background:#eef2ff;color:#4338ca;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;margin-right:6px}`
-    +`.foot{font-size:11px;color:#606078;margin-top:26px;border-top:1px solid #e5e7eb;padding-top:12px;text-align:center}`
-    +`.actions{position:sticky;top:0;background:#fff;border-bottom:1px solid #e5e7eb;padding:10px 0;margin:-28px -28px 20px;padding:14px 28px;display:flex;gap:8px;flex-wrap:wrap}`
-    +`button{font:inherit;background:#6366f1;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-weight:600;cursor:pointer;font-size:13px}`
-    +`button.sec{background:#eef2ff;color:#4338ca}`;
-
-  const body=`
-    <div class="wrap">
-      <div class="actions no-print">
-        <button onclick="copyHtml()">📋 Copiar HTML</button>
-        <button class="sec" onclick="window.print()">🖨️ Imprimir</button>
-      </div>
-      <div id="weekly-content">
-      <h1>Weekly — S${semReview} · ${semData.datas||''}</h1>
-      <div class="sub">Resumo semanal · Pré-Vendas Outbound · LOBXS HUNTER</div>
-
-      <h2>✨ Destaques</h2>
-      <ul>
-        <li><strong>Top performer da semana:</strong> ${topBdr.name} — ${topBdr.opps} opps, ${topBdr.ras} RAs, ${topBdr.lig} ligações.</li>
-        <li><span class="kpi">${totalOpps} opps MTD</span><span class="kpi">${pctMeta}% da meta</span></li>
-        <li><strong>Conversões:</strong> AI→LC ${conv.aiLc.real}% · LC→RA ${conv.lcRa.real}% · RA→OP ${conv.raOp.real}%.</li>
-      </ul>
-
-      <h2>⚠️ Pontos de atenção</h2>
-      <ul>
-        ${bdrsBaixos.length>0?`<li><strong>BDRs com ligações sem RA:</strong> ${bdrsBaixos.join(', ')}.</li>`:''}
-        <li><strong>Reuniões atrasadas:</strong> ${totAtrasadas} pendentes de validação.</li>
-        ${convAbaixo.length>0?`<li><strong>Conversões abaixo da meta:</strong> ${convAbaixo.join(' · ')}.</li>`:'<li>Conversões dentro das metas. ✓</li>'}
-      </ul>
-
-      <h2>🎯 Próxima semana</h2>
-      <ul>
-        <li><strong>Reuniões confirmadas:</strong> ${totFuturas} (TA + TM).</li>
-        <li><strong>Prioridades:</strong> ${prioridades?prioridades.replace(/\n/g,'<br>'):'— preencher em "weekly_notes_s'+semReview+'" no localStorage.'}</li>
-      </ul>
-
-      <div class="foot">Gerado automaticamente pelo LOBXS HUNTER · ${new Date().toLocaleDateString('pt-BR')}</div>
-      </div>
-    </div>`;
-
-  // Script do preview: montado via concatenação para não fechar o <script> da página.
-  const previewScript='<'+'script>'
-    +'function copyHtml(){'
-      +'var el=document.getElementById("weekly-content");'
-      +'var html=el.outerHTML;'
-      +'if(navigator.clipboard&&navigator.clipboard.writeText){'
-        +'navigator.clipboard.writeText(html).then(function(){alert("HTML copiado! Cole no seu cliente de email.");})'
-        +'.catch(function(){fallback(html);});'
-      +'}else{fallback(html);}'
-    +'}'
-    +'function fallback(html){'
-      +'var ta=document.createElement("textarea");ta.value=html;document.body.appendChild(ta);ta.select();'
-      +'try{document.execCommand("copy");alert("HTML copiado! Cole no seu cliente de email.");}'
-      +'catch(e){alert("Falha ao copiar. Copie manualmente.");}'
-      +'document.body.removeChild(ta);'
-    +'}'
-    +'<'+'/script>';
-
-  const doc='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Weekly S'+semReview+' — LOBXS HUNTER</title><style>'+css+'</style></head><body>'+body+previewScript+'</body></html>';
-  const w=window.open('about:blank','_blank');
-  if(w){ w.document.open(); w.document.write(doc); w.document.close(); }
-  else { alert('Libere pop-ups para visualizar o preview do weekly.'); }
-}
-window.previewWeeklyEmail=previewWeeklyEmail;
-
 function buildNoticias(pane){
   const p=DATA.pulses;
   const maxNota=10;
@@ -4402,22 +4042,20 @@ function buildReunioes(pane){
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">💬 Comentário</th>
           </tr></thead>
           <tbody>
-          ${r.atrasadasTA.filter(a=>!atrIsResolved('TA|'+a.empresa+'|'+a.data)).map(a=>{
+          ${r.atrasadasTA.map(a=>{
             const pts=a.data.split('/');
             const rd=new Date(2026,parseInt(pts[1])-1,parseInt(pts[0]));
             const dias=Math.floor((new Date()-rd)/(1000*60*60*24));
             const dc=dias>=14?'var(--red)':dias>=7?'var(--amber)':'var(--text2)';
             const key='TA|'+a.empresa+'|'+a.data;
-            const band=atrAgeBand(dias);
-            const payload=JSON.stringify({key:key,empresa:a.empresa,ae:a.ae,aeFirst:(a.ae||'').split(' ')[0],dias:dias,data:a.data}).replace(/"/g,'&quot;');
-            return `<tr class="atr-row atr-ageband age-${band}" data-key="${key}" data-status="${getAtrasadaStatus(key)}" data-dias="${dias}" onclick="atrShowPopover(this,JSON.parse(this.dataset.payload))" data-payload="${payload}" style="border-bottom:1px solid var(--border)">
+            return `<tr class="atr-row" data-status="${getAtrasadaStatus(key)}" data-dias="${dias}" style="border-bottom:1px solid var(--border)">
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
               <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
               <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'Inter\',sans-serif;color:var(--text3)">${a.data}</td>
               <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${dc}">${dias}d</span></td>
-              <td style="padding:6px 8px" onclick="event.stopPropagation()">${renderAtrasadaStatus(key)}</td>
-              <td style="padding:6px 8px" onclick="event.stopPropagation()">${renderAtrasadaComment(key)}</td>
+              <td style="padding:6px 8px">${renderAtrasadaStatus(key)}</td>
+              <td style="padding:6px 8px">${renderAtrasadaComment(key)}</td>
             </tr>`;
           }).join("")}
           </tbody>
@@ -4442,22 +4080,20 @@ function buildReunioes(pane){
             <th style="padding:5px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">💬 Comentário</th>
           </tr></thead>
           <tbody>
-          ${r.atrasadasTM.filter(a=>!atrIsResolved('TM|'+a.empresa+'|'+a.data)).map(a=>{
+          ${r.atrasadasTM.map(a=>{
             const pts=a.data.split('/');
             const rd=new Date(2026,parseInt(pts[1])-1,parseInt(pts[0]));
             const dias=Math.floor((new Date()-rd)/(1000*60*60*24));
             const dc=dias>=14?'var(--red)':dias>=7?'var(--amber)':'var(--text2)';
             const key='TM|'+a.empresa+'|'+a.data;
-            const band=atrAgeBand(dias);
-            const payload=JSON.stringify({key:key,empresa:a.empresa,ae:a.ae,aeFirst:(a.ae||'').split(' ')[0],dias:dias,data:a.data}).replace(/"/g,'&quot;');
-            return `<tr class="atr-row atr-ageband age-${band}" data-key="${key}" data-status="${getAtrasadaStatus(key)}" data-dias="${dias}" onclick="atrShowPopover(this,JSON.parse(this.dataset.payload))" data-payload="${payload}" style="border-bottom:1px solid var(--border)">
+            return `<tr class="atr-row" data-status="${getAtrasadaStatus(key)}" data-dias="${dias}" style="border-bottom:1px solid var(--border)">
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
               <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
               <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'Inter\',sans-serif;color:var(--text3)">${a.data}</td>
               <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${dc}">${dias}d</span></td>
-              <td style="padding:6px 8px" onclick="event.stopPropagation()">${renderAtrasadaStatus(key)}</td>
-              <td style="padding:6px 8px" onclick="event.stopPropagation()">${renderAtrasadaComment(key)}</td>
+              <td style="padding:6px 8px">${renderAtrasadaStatus(key)}</td>
+              <td style="padding:6px 8px">${renderAtrasadaComment(key)}</td>
             </tr>`;
           }).join("")}
           </tbody>
@@ -4512,89 +4148,6 @@ function filterTimeline(bdrId){
     row.style.display=(bdrId==='todos'||row.dataset.bdr===bdrId)?'':'none';
   });
 }
-
-// ── PR2 #5 — Faixas visuais + popover de ação para reuniões atrasadas ──
-function atrAgeBand(dias){
-  if(dias<=3) return 1;
-  if(dias<=7) return 2;
-  if(dias<=14) return 3;
-  return 4;
-}
-function atrIsResolved(key){
-  try{var m=JSON.parse(localStorage.getItem('atrasada_resolved')||'{}');return !!m[key];}catch(e){return false;}
-}
-function atrSetResolved(key){
-  try{
-    var m=JSON.parse(localStorage.getItem('atrasada_resolved')||'{}');
-    m[key]=Date.now();
-    localStorage.setItem('atrasada_resolved',JSON.stringify(m));
-  }catch(e){}
-}
-function atrRowKey(tipo,empresa,data){return tipo+'|'+empresa+'|'+data;}
-
-var _atrActivePopover=null;
-function atrClosePopover(){
-  if(_atrActivePopover){
-    _atrActivePopover.remove();
-    _atrActivePopover=null;
-    document.removeEventListener('mousedown',atrOutsideHandler,true);
-    document.removeEventListener('keydown',atrEscHandler,true);
-  }
-}
-function atrOutsideHandler(e){
-  if(_atrActivePopover && !_atrActivePopover.contains(e.target)){
-    var row=e.target.closest('.atr-ageband');
-    if(!row||row!==_atrActivePopover._ownerRow) atrClosePopover();
-  }
-}
-function atrEscHandler(e){ if(e.key==='Escape') atrClosePopover(); }
-
-function atrShowPopover(rowEl, payload){
-  // Close previous
-  atrClosePopover();
-  var key=payload.key;
-  var pop=document.createElement('div');
-  pop.className='atr-popover';
-  pop.onclick=function(e){e.stopPropagation();};
-  var msg='Oi '+(payload.aeFirst||'')+', preciso de validação da reunião com '+payload.empresa+' que aconteceu há '+payload.dias+' dias. Virou oportunidade? Obrigado!';
-  var waHref='https://wa.me/?text='+encodeURIComponent(msg);
-  pop.innerHTML=''
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-      +'<div style="font-size:12px;font-weight:700;color:var(--text);line-height:1.3;padding-right:8px">'+payload.empresa+' · <span style="color:var(--red)">'+payload.dias+'d em atraso</span></div>'
-      +'<button class="atr-pop-close" aria-label="Fechar" style="font-size:14px;color:var(--text3);background:transparent;border:none;cursor:pointer;padding:0 4px">✕</button>'
-    +'</div>'
-    +'<div style="font-size:11px;color:var(--text2);margin-bottom:4px">AE: '+(payload.ae||'—')+'</div>'
-    +'<div style="font-size:11px;color:var(--text3);margin-bottom:12px">Última ação: Reunião realizada em '+payload.data+'</div>'
-    +'<a class="atr-pop-wa" href="'+waHref+'" target="_blank" rel="noopener" style="display:block;width:100%;text-align:center;padding:10px;background:#25d366;color:#fff;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;margin-bottom:6px;box-sizing:border-box">📱 Escalar via WhatsApp</a>'
-    +'<button class="atr-pop-resolve" style="width:100%;padding:10px;background:var(--bg3);color:var(--green);border:1px solid var(--green);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">✓ Marcar como resolvida</button>';
-  // Position relative to the row
-  var rect=rowEl.getBoundingClientRect();
-  var parentRect=rowEl.offsetParent?rowEl.offsetParent.getBoundingClientRect():{left:0,top:0};
-  pop.style.left=Math.max(8,Math.min(window.innerWidth-296,rect.left))+'px';
-  pop.style.top=(rect.bottom+window.scrollY+6)+'px';
-  pop.style.position='absolute';
-  document.body.appendChild(pop);
-  _atrActivePopover=pop;
-  _atrActivePopover._ownerRow=rowEl;
-  // Handlers
-  pop.querySelector('.atr-pop-close').onclick=function(){atrClosePopover();};
-  pop.querySelector('.atr-pop-wa').onclick=function(){track('atr_escalar_wa',key);};
-  pop.querySelector('.atr-pop-resolve').onclick=function(){
-    track('atr_marcar_resolvida',key);
-    atrSetResolved(key);
-    document.querySelectorAll('.atr-ageband[data-key="'+CSS.escape(key)+'"]').forEach(function(row){
-      row.dataset.resolved='1';
-      setTimeout(function(){ if(row&&row.parentNode) row.parentNode.removeChild(row); },260);
-    });
-    atrClosePopover();
-  };
-  setTimeout(function(){
-    document.addEventListener('mousedown',atrOutsideHandler,true);
-    document.addEventListener('keydown',atrEscHandler,true);
-  },0);
-}
-window.atrShowPopover=atrShowPopover;
-window.atrClosePopover=atrClosePopover;
 
 // ── Status de reuniões atrasadas (avaliação) ──
 function getAtrasadaStatus(key){
@@ -5127,21 +4680,13 @@ function buildLeadTimePanel(pane){
     +'<div class="card-title">Timeline — por reunião (maior atraso primeiro)</div>'
     +filterChips
     +'<div id="timeline-rows">'
-    +allMeetings.filter(function(m){
-      // Skip resolvidas em ambas TA/TM
-      return !(atrIsResolved('TA|'+m.empresa+'|'+m.data) && atrIsResolved('TM|'+m.empresa+'|'+m.data));
-    }).map(function(m){
+    +allMeetings.map(function(m){
       var pct=Math.round((m.dias/Math.max(maxDias,1))*100);
       var bdrData=DATA.bdrs.find(function(b){return b.id===m.id;});
       var photo=bdrData&&bdrData.photo
         ?'<img src="'+bdrData.photo+'" style="width:20px;height:20px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
         :'<div style="width:20px;height:20px;border-radius:50%;background:'+m.bg+';color:'+m.color+';display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;flex-shrink:0">'+m.id+'</div>';
-      // Descobre tipo (TA ou TM) — pega o primeiro que casar
-      var tipoMatch=r.atrasadasTA.find(function(x){return x.empresa===m.empresa&&x.data===m.data;})?'TA':'TM';
-      var key=tipoMatch+'|'+m.empresa+'|'+m.data;
-      var band=atrAgeBand(m.dias);
-      var payload=JSON.stringify({key:key,empresa:m.empresa,ae:m.ae,aeFirst:(m.ae||'').split(' ')[0],dias:m.dias,data:m.data}).replace(/"/g,'&quot;');
-      return '<div class="atr-ageband age-'+band+'" data-key="'+key+'" data-bdr="'+m.id+'" data-payload="'+payload+'" onclick="atrShowPopover(this,JSON.parse(this.dataset.payload))" style="padding:7px 8px;border-bottom:1px solid var(--border);border-radius:6px;margin-bottom:2px">'
+      return '<div style="padding:7px 0;border-bottom:1px solid var(--border)" data-bdr="'+m.id+'">'
         +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
         +'<div style="display:flex;align-items:center;gap:6px">'
         +photo
@@ -6059,26 +5604,7 @@ function buildHoje(pane, bdr){
   const totalOppsTime=DATA.funil.oportunidades;
   const totalRAsTime=DATA.funil.reuniaoAgendada;
   const pctMetaTime=Math.round((totalOppsTime/DATA.meta)*100);
-  const oppsMesVal=bdr.oppsMes||bdr.opps||0;
-  // PR2 #3 — hero com gap grande e pace dual (cálculo por dias úteis · padrão do app)
-  const pc=computePacing(oppsMesVal,DATA.metaBDR);
-  const pctMetaBDR=pc.pctAtingimento;
-  const paceEsperado=pc.paceEsperado;
-  const pctPaceIdeal=pc.pctPaceIdeal;
-  const paceGrad=pc.corGrad;
-  const paceAccent=pc.corAccent;
-  let gapBig,gapSub;
-  if(pc.state==='above'){
-    if(oppsMesVal>=DATA.metaBDR) gapBig='+'+(oppsMesVal-DATA.metaBDR)+' opps acima da meta';
-    else gapBig='+'+Math.round(pc.gapPace)+' opps acima do pace';
-    gapSub='Continue assim — ritmo acima do esperado.';
-  } else if(pc.state==='ontrack'){
-    gapBig='Você tá no pace 🎯';
-    gapSub='Ritmo alinhado com a meta do mês.';
-  } else {
-    gapBig=`Faltam ${pc.gapMeta} opps para a sua meta`;
-    gapSub=pc.diasUteisRestantes>0?`Restam ${pc.diasUteisRestantes} dias úteis no mês — pace ideal hoje: ${paceEsperado}.`:'Fim do ciclo — precisamos fechar a meta.';
-  }
+  const oppsMesVal=bdr.oppsMes||bdr.opps||0;const pctMetaBDR=Math.min(Math.round((oppsMesVal/DATA.metaBDR)*100),100);
   const atrasadasBDR=[...DATA.reunioes.atrasadasTA,...DATA.reunioes.atrasadasTM].filter(a=>a.id===bdr.id);
   const temAtrasadas=atrasadasBDR.length>0;
   const totalAtrasadas=atrasadasBDR.reduce((s,a)=>s+a.n,0);
@@ -6130,35 +5656,19 @@ function buildHoje(pane, bdr){
 
     <div style="font-size:12px;color:var(--text3);margin-bottom:12px;font-family:\'Inter\',sans-serif">Ter, 07 abr 2026 · W32 › 07</div>
 
-    <!-- FORECAST DO BDR — PR2 #2 — card topo, estado visual aplicado em loadBDRForecast -->
-    <div class="card collapsible-card" id="forecast-card-${bdr.id}" data-fcst-state="loading" style="margin-bottom:10px;border:1.5px solid var(--accent-light);transition:border-color .2s,background .2s">
-      <div onclick="toggleCard('forecast-body-${bdr.id}',this)" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:0">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div id="forecast-icon-${bdr.id}" style="width:32px;height:32px;border-radius:9px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">◈</div>
-          <div>
-            <div id="forecast-title-${bdr.id}" style="font-size:13px;font-weight:700;color:var(--text)">Meu forecast da semana</div>
-            <div id="forecast-sub-${bdr.id}" style="font-size:10px;color:var(--text3);margin-top:1px">Carregando status…</div>
-          </div>
-        </div>
-        <span class="collapse-icon" style="font-size:18px;color:var(--text3);transition:transform .2s">▾</span>
-      </div>
-      <div id="forecast-body-${bdr.id}" style="margin-top:14px">
-        <div id="forecast-content-${bdr.id}">
-          <div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Carregando...</div>
+    <!-- HERO: ATINGIMENTO -->
+    <div style="margin-bottom:10px;background:linear-gradient(135deg,${pctMetaBDR>=70?'#16a34a,#15803d':pctMetaBDR>=30?'#d97706,#b45309':'#dc2626,#b91c1c'});border-radius:var(--radius);padding:20px 18px;box-shadow:0 4px 20px rgba(0,0,0,0.12)">
+      <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Atingimento da meta · Abril 2026</div>
+      <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:12px">
+        <div style="font-size:64px;font-weight:700;font-family:\'Inter\',sans-serif;color:#fff;line-height:1">${pctMetaBDR}%</div>
+        <div style="margin-bottom:8px">
+          <div style="font-size:13px;color:rgba(255,255,255,.75)">${oppsMesVal} de ${DATA.metaBDR} opps</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5)">meta do mês</div>
         </div>
       </div>
-    </div>
-
-    <!-- HERO: ATINGIMENTO — PR2 #3 — hierarquia invertida (GAP em destaque) -->
-    <div style="margin-bottom:10px;background:${paceGrad};border-radius:var(--radius);padding:20px 18px;box-shadow:0 4px 20px rgba(0,0,0,0.12)">
-      <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Atingimento da meta · Abril 2026</div>
-      <div style="font-size:48px;font-weight:700;font-family:\'Inter\',sans-serif;color:${paceAccent};line-height:1.05;letter-spacing:-.02em;margin-bottom:6px">${gapBig}</div>
-      <div style="font-size:20px;font-weight:600;font-family:\'Inter\',sans-serif;color:#fff;line-height:1.2;margin-bottom:12px">${oppsMesVal} de ${DATA.metaBDR} opps · ${pctMetaBDR}%</div>
-      <div style="height:10px;background:rgba(0,0,0,0.28);border-radius:5px;overflow:hidden;position:relative;margin-bottom:5px">
-        <div style="position:absolute;left:0;top:0;height:100%;width:${pctPaceIdeal}%;background:rgba(255,255,255,0.22);border-radius:5px"></div>
-        <div style="position:absolute;left:0;top:0;height:100%;width:${pctMetaBDR}%;background:${paceAccent};border-radius:5px;transition:width .3s"></div>
+      <div style="height:8px;background:rgba(0,0,0,0.3);border-radius:4px;overflow:hidden;margin-bottom:14px">
+        <div style="width:${pctMetaBDR}%;height:100%;background:var(--bg2);border-radius:4px"></div>
       </div>
-      <div style="font-size:10px;color:rgba(255,255,255,.7);margin-bottom:14px;letter-spacing:.02em">Pace ideal: ${pctPaceIdeal}% · Atual: ${pctMetaBDR}%</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <button onclick="showOppsModal('${bdr.id}')"
           style="background:rgba(0,0,0,0.2);border:none;border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:background .15s;font-family:inherit"
@@ -6166,7 +5676,7 @@ function buildHoje(pane, bdr){
           <div style="font-size:26px;font-weight:700;font-family:\'Inter\',sans-serif;color:#fff;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">${oppsMesVal||'0'}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Opps ↗</div>
         </button>
-        <button onclick="(function(){var el=document.getElementById('agenda-mes-${bdr.id}');if(el){el.scrollIntoView({behavior:'smooth',block:'start'});}})();track('bdr_hero_reunioes','${bdr.id}')"
+        <button onclick="(function(){document.querySelectorAll('.nav-item').forEach(function(b){if(b.querySelector('.nav-label')&&b.querySelector('.nav-label').textContent==='Meu Resultado'){b.click();}});})()"
           style="background:rgba(0,0,0,0.2);border:none;border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:background .15s;font-family:inherit"
           onmouseenter="this.style.background='rgba(0,0,0,0.3)'" onmouseleave="this.style.background='rgba(0,0,0,0.2)'">
           <div style="font-size:26px;font-weight:700;font-family:\'Inter\',sans-serif;color:#fff">${bdr.ras}</div>
@@ -6176,7 +5686,6 @@ function buildHoje(pane, bdr){
       <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);font-size:11px;color:rgba(255,255,255,.6)">
         Time: ${totalRAsTime} RAs · ${totalOppsTime} opps · <span style="color:rgba(255,255,255,.85);font-weight:600">${pctMetaTime}% da meta</span>
       </div>
-      <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:6px">${gapSub}</div>
     </div>
 
     <!-- PRIORIDADES -->
@@ -6198,7 +5707,7 @@ function buildHoje(pane, bdr){
     </div>
 
     <!-- REUNIÕES — colunas por data, deslize horizontal -->
-    <div class="card" id="agenda-mes-${bdr.id}" style="margin-bottom:10px;padding:0;overflow:hidden;scroll-margin-top:12px">
+    <div class="card" style="margin-bottom:10px;padding:0;overflow:hidden">
       <div style="padding:14px 16px;border-bottom:1px solid var(--border)">
         <div style="font-size:12px;font-weight:700;color:var(--text);font-family:'Inter',sans-serif">Agenda do mês</div>
       </div>
@@ -6323,41 +5832,29 @@ function buildHoje(pane, bdr){
       </div>`;
     })()}
 
-    `;
+    <!-- FORECAST DO BDR -->
+    <div class="card collapsible-card" id="forecast-card-${bdr.id}" style="margin-top:10px;border:1.5px solid var(--accent-light)">
+      <div onclick="toggleCard('forecast-body-${bdr.id}',this)" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:0">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:32px;height:32px;border-radius:9px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">◈</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">Meu forecast da semana</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:1px">Compromisso com você e com o time</div>
+          </div>
+        </div>
+        <span class="collapse-icon" style="font-size:18px;color:var(--text3);transition:transform .2s">▾</span>
+      </div>
+      <div id="forecast-body-${bdr.id}" style="margin-top:14px">
+        <div id="forecast-content-${bdr.id}">
+          <div style="text-align:center;padding:16px;color:var(--text3);font-size:13px">Carregando...</div>
+        </div>
+      </div>
+    </div>`;
 
-  // Load forecast async after pane renders — o card do forecast já está no topo (PR2 #2)
+  // Load forecast async after pane renders
   loadBDRForecast(bdr);
 
   // Push settings moved to ⚙ Settings panel
-}
-
-// PR2 #2 — aplica o estado visual do card de forecast (pendente vs enviado).
-function applyForecastCardState(bdrId, sent){
-  const card=document.getElementById('forecast-card-'+bdrId);
-  if(!card) return;
-  const title=document.getElementById('forecast-title-'+bdrId);
-  const sub=document.getElementById('forecast-sub-'+bdrId);
-  const icon=document.getElementById('forecast-icon-'+bdrId);
-  const body=document.getElementById('forecast-body-'+bdrId);
-  const chv=card.querySelector('.collapse-icon');
-  card.dataset.fcstState=sent?'sent':'pending';
-  if(sent){
-    card.style.border='1.5px solid var(--accent-light)';
-    card.style.background='';
-    if(title){title.textContent='✓ Forecast enviado — toque para editar';title.style.color='var(--text)';}
-    if(sub){sub.textContent='Compromisso registrado com você e com o time';sub.style.color='var(--text3)';}
-    if(icon){icon.style.background='var(--accent-light)';icon.textContent='◈';}
-    if(body){body.style.display='none';}
-    if(chv){chv.style.transform='rotate(-90deg)';}
-  } else {
-    card.style.border='2px solid var(--red)';
-    card.style.background='var(--red-bg)';
-    if(title){title.textContent='⚠️ Você ainda não enviou seu forecast';title.style.color='var(--red)';}
-    if(sub){sub.textContent='Envie antes de terça 12h para combinarmos a semana';sub.style.color='var(--red)';}
-    if(icon){icon.style.background='rgba(248,113,113,0.15)';icon.textContent='⚠';}
-    if(body){body.style.display='block';}
-    if(chv){chv.style.transform='rotate(0deg)';}
-  }
 }
 
 async function loadBDRForecast(bdr, forceSemId){
@@ -6382,10 +5879,6 @@ async function loadBDRForecast(bdr, forceSemId){
     // Check if already submitted
     const existing=await supaFetch('gp_forecast',`semana_id=eq.${semId}&bdr_id=eq.${bdr.id}`);
     const isGestor=currentUser&&currentUser.isGestor;
-    const hasSubmitted=!!(existing&&existing.length>0&&((existing[0].fcst_op||0)>0||(existing[0].fcst_ra||0)>0));
-    // PR2 #2 — aplica o estado visual só na semana atual do próprio BDR
-    const isCurSem=!forceSemId||(function(){const cur=allSemanas.find(s=>s.sem_atual===DATA.semAtual);return cur&&cur.id===semId;})();
-    if(isCurSem) applyForecastCardState(bdr.id,hasSubmitted);
     if(existing&&existing.length>0){
       const f=existing[0];
       const dt=f.enviado_em?new Date(f.enviado_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
@@ -9065,35 +8558,6 @@ function jdcRender(pane){
     +'<span style="font-size:15px;font-weight:800;color:var(--text);letter-spacing:-.02em">Jornada de Crescimento 2.0</span></div>'
     +'<div style="font-size:11px;color:var(--text3)">Avaliação de Desempenho · Ciclo Jan-Dez 2025 · Pré-Vendas Outbound</div></div>';
 
-  // PR1 · Mudança 6: Card de status de avaliações no topo da aba Pessoas.
-  var total=JDC_PEOPLE.length;
-  var doneCount=JDC_PEOPLE.filter(function(p){return jdcCompStatus(p.id)==='done';}).length;
-  var pctDone=total>0?Math.round((doneCount/total)*100):0;
-  var pendentes=JDC_PEOPLE.filter(function(p){var st=jdcCompStatus(p.id);return st!=='done';});
-  var pendRows=pendentes.map(function(p){
-    var st=jdcCompStatus(p.id);
-    var stLabel=st==='partial'?'Em andamento':'Não iniciada';
-    var stCol=st==='partial'?'var(--amber)':'var(--text3)';
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">'
-      +'<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">'
-      +'<div style="width:26px;height:26px;border-radius:50%;background:'+p.color+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">'+jdcInitials(p.name)+'</div>'
-      +'<div style="min-width:0;flex:1"><div style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.name.split(' ')[0]+'</div>'
-      +'<div style="font-size:10px;color:'+stCol+';font-weight:600">'+stLabel+'</div></div></div>'
-      +'<div class="jdc-avaliar-agora" data-pid="'+p.id+'" style="cursor:pointer;font-size:10px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:8px;padding:6px 10px;flex-shrink:0">Avaliar agora</div>'
-      +'</div>';
-  }).join('');
-  html+='<div class="card" style="margin-bottom:16px">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-    +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em">Status de avaliações JDC 2026</div>'
-    +'<div style="font-size:11px;font-weight:700;color:'+(doneCount===total?'var(--green)':'var(--accent)')+';font-family:\'Inter\',sans-serif">'+doneCount+'/'+total+'</div>'
-    +'</div>'
-    +'<div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:8px">'
-    +'<div style="width:'+pctDone+'%;height:100%;background:'+(doneCount===total?'var(--green)':'var(--accent)')+';border-radius:4px;transition:width .3s"></div>'
-    +'</div>'
-    +'<div style="font-size:11px;color:var(--text3);margin-bottom:'+(pendentes.length>0?'12':'0')+'px">Você avaliou '+doneCount+' de '+total+' BDRs neste ciclo.</div>'
-    +(pendentes.length>0?'<div style="padding-top:10px;border-top:1px solid var(--border)"><div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Pendentes</div>'+pendRows+'</div>':'')
-    +'</div>';
-
   html+=viewTabs;
 
   if(jdcView==='eval'){
@@ -9146,8 +8610,6 @@ function jdcRender(pane){
     }
     var chip=e.target.closest('.jdc-chip');
     if(chip){jdcActive=chip.dataset.pid;jdcRender(pane);return;}
-    var avaliarBtn=e.target.closest('.jdc-avaliar-agora');
-    if(avaliarBtn){jdcActive=avaliarBtn.dataset.pid;jdcView='eval';track('jdc_avaliar_agora',avaliarBtn.dataset.pid);jdcRender(pane);window.scrollTo(0,0);return;}
     var vtab=e.target.closest('.jdc-vtab');
     if(vtab){jdcView=vtab.dataset.view;jdcRender(pane);return;}
     var act=e.target.closest('.jdc-action');
