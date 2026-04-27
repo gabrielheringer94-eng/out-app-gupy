@@ -6593,7 +6593,7 @@ async function loadBDRForecast(bdr, forceSemId){
           </div>`).join('')}
       </div>
       <div style="font-size:10px;color:var(--text3);text-align:center;margin-bottom:10px;font-family:'Inter',sans-serif">Preencha pelo menos um campo para enviar.</div>
-      <button id="fcst-submit-${bdr.id}" onclick="submitForecast('${bdr.id}','${bdr.name}',${semId},this)"
+      <button id="fcst-submit-${bdr.id}" onclick="submitForecast('${bdr.id}',${semId},this)"
         disabled style="opacity:0.4;width:100%;padding:14px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .2s">
         Assumir meu forecast ↗
       </button>`;
@@ -6602,7 +6602,9 @@ async function loadBDRForecast(bdr, forceSemId){
   }
 }
 
-async function submitForecast(bdrId,bdrNome,semId,btnRef){
+async function submitForecast(bdrId,semId,btnRef){
+  const bdr=DATA.bdrs.find(b=>b.id===bdrId);
+  const bdrNome=bdr?bdr.name:bdrId;
   const lc=parseInt(document.getElementById(`fcst-lc-${bdrId}`)?.value)||0;
   const ra=parseInt(document.getElementById(`fcst-ra-${bdrId}`)?.value)||0;
   const op=parseInt(document.getElementById(`fcst-op-${bdrId}`)?.value)||0;
