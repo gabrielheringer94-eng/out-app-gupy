@@ -2609,61 +2609,25 @@ function buildDiagnosticoSemana(pane){
       </div>
     </div>
 
-    <!-- ═══ BLOCO 5.5: EVENTOS / PASSIVOS ═══ -->
+    <!-- ═══ BLOCO 5.5: EVENTOS / PASSIVOS — apenas overview, detalhe na aba Time ═══ -->
     ${d.evento?`
     <div class="card" style="margin-bottom:12px;border-left:3px solid #8b5cf6">
-      <div class="collapsible-header" onclick="toggleCard('res-evento-body',this)" style="display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:10px;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.08em">🎪 ${d.evento.nome} — Passivos</div>
-        <span class="collapse-icon" style="font-size:14px;color:var(--text3)">▾</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:10px;font-weight:700;color:#8b5cf6;text-transform:uppercase;letter-spacing:.08em">🎪 ${d.evento.nome} — Passivos (Lead Scoring)</div>
+        <span style="font-size:10px;color:var(--text3)">detalhe por BDR → aba <strong style="color:var(--text2)">Time</strong></span>
       </div>
-      <div id="res-evento-body" style="margin-top:10px">
-        <!-- Funil do evento -->
-        <div style="display:flex;gap:4px;margin-bottom:10px">
-          ${[
-            ['Ativo PV',d.evento.ativoFunil,'#8b5cf6'],
-            ['AI',d.evento.ai,'#6366f1'],
-            ['LC',d.evento.lc,'#14b8a6'],
-            ['RA',d.evento.ra,'#f59e0b'],
-            ['Desq',d.evento.desq,'#6b7280']
-          ].map(([l,v,c])=>`<div style="flex:1;text-align:center;padding:8px 4px;background:rgba(139,92,246,0.04);border-radius:8px;border:1px solid rgba(139,92,246,0.12)">
-            <div style="font-size:16px;font-weight:700;color:${c};font-family:'Inter',sans-serif">${v}</div>
-            <div style="font-size:8px;color:var(--text3);margin-top:2px">${l}</div>
-          </div>`).join('')}
-        </div>
-        <!-- Por BDR -->
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-family:'Inter',sans-serif;min-width:360px">
-            <thead><tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:4px 8px;text-align:left;font-size:9px;color:var(--text3);font-weight:600">BDR</th>
-              <th style="padding:4px 4px;text-align:center;font-size:9px;color:var(--text3);font-weight:600">Ativo</th>
-              <th style="padding:4px 4px;text-align:center;font-size:9px;color:var(--text3);font-weight:600">AI</th>
-              <th style="padding:4px 4px;text-align:center;font-size:9px;color:var(--text3);font-weight:600">LC</th>
-              <th style="padding:4px 4px;text-align:center;font-size:9px;color:var(--text3);font-weight:600">RA</th>
-              <th style="padding:4px 4px;text-align:center;font-size:9px;color:var(--text3);font-weight:600">Desq</th>
-            </tr></thead>
-            <tbody>
-            ${d.hr4PassivosTime.bdrs.map(b=>{
-              const bdrData=d.bdrs.find(x=>x.id===b.id);
-              return `<tr style="border-bottom:1px solid var(--border)">
-                <td style="padding:5px 8px;font-size:11px;font-weight:600;color:var(--text)">${b.name.split(' ')[0]}</td>
-                <td style="padding:5px 4px;text-align:center;font-size:12px;font-weight:700;color:${b.ativo>0?'#8b5cf6':'var(--text3)'}">${b.ativo||'—'}</td>
-                <td style="padding:5px 4px;text-align:center;font-size:12px;color:${b.ai>0?'var(--text)':'var(--text3)'}">${b.ai||'—'}</td>
-                <td style="padding:5px 4px;text-align:center;font-size:12px;font-weight:600;color:${b.lc>0?'var(--teal)':'var(--text3)'}">${b.lc||'—'}</td>
-                <td style="padding:5px 4px;text-align:center;font-size:12px;font-weight:700;color:${b.ra>0?'var(--green)':'var(--text3)'}">${b.ra||'—'}</td>
-                <td style="padding:5px 4px;text-align:center;font-size:11px;color:var(--text3)">${b.desqLc||'—'}</td>
-              </tr>`;
-            }).join('')}
-            <tr style="background:var(--bg3);border-top:2px solid var(--border)">
-              <td style="padding:5px 8px;font-size:10px;font-weight:700;color:var(--text)">TOTAL</td>
-              <td style="padding:5px 4px;text-align:center;font-size:11px;font-weight:700;color:#8b5cf6">${d.hr4PassivosTime.total.ativo}</td>
-              <td style="padding:5px 4px;text-align:center;font-size:11px;font-weight:700">${d.hr4PassivosTime.total.ai}</td>
-              <td style="padding:5px 4px;text-align:center;font-size:11px;font-weight:700;color:var(--teal)">${d.hr4PassivosTime.total.lc}</td>
-              <td style="padding:5px 4px;text-align:center;font-size:11px;font-weight:700;color:var(--green)">${d.hr4PassivosTime.total.ra}</td>
-              <td style="padding:5px 4px;text-align:center;font-size:11px;color:var(--text3)">${d.hr4PassivosTime.total.desqLc}</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
+      <!-- Funil agregado do evento -->
+      <div style="display:flex;gap:4px">
+        ${[
+          ['Ativo PV',d.evento.ativoFunil,'#8b5cf6'],
+          ['AI',d.evento.ai,'#6366f1'],
+          ['LC',d.evento.lc,'#14b8a6'],
+          ['RA',d.evento.ra,'#f59e0b'],
+          ['Desq',d.evento.desq,'#6b7280']
+        ].map(([l,v,c])=>`<div style="flex:1;text-align:center;padding:8px 4px;background:rgba(139,92,246,0.04);border-radius:8px;border:1px solid rgba(139,92,246,0.12)">
+          <div style="font-size:18px;font-weight:700;color:${c};font-family:'Inter',sans-serif">${v}</div>
+          <div style="font-size:9px;color:var(--text3);margin-top:2px">${l}</div>
+        </div>`).join('')}
       </div>
     </div>`:''}
 
@@ -2979,6 +2943,51 @@ function buildTimeGestor(pane){
       <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📊 Histórico de Forecast WoW</div>
       <div id="forecast-history-table" style="font-size:11px;color:var(--text3);text-align:center;padding:6px">Carregando...</div>
     </div>
+
+    <!-- Passivos / Lead Scoring — detalhe individual por BDR -->
+    ${d.evento?`
+    <div style="font-size:12px;font-weight:700;color:var(--text);margin:0 0 10px;padding-bottom:7px;border-bottom:2px solid #8b5cf6;display:flex;align-items:center;gap:6px">
+      🎪 ${d.evento.nome} — Passivos (Lead Scoring) por BDR
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-family:'Inter',sans-serif;min-width:520px">
+          <thead><tr style="border-bottom:2px solid var(--border);background:rgba(139,92,246,0.04)">
+            <th style="padding:8px 10px;text-align:left;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">BDR</th>
+            <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Ativo</th>
+            <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">AI</th>
+            <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">LC</th>
+            <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">RA</th>
+            <th style="padding:8px 8px;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:600">Desq</th>
+          </tr></thead>
+          <tbody>
+            ${d.hr4PassivosTime.bdrs.map(b=>{
+              const bdrData=d.bdrs.find(x=>x.id===b.id);
+              const photoHtml=bdrData&&bdrData.photo
+                ?`<img src="${bdrData.photo}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0">`
+                :`<div style="width:24px;height:24px;border-radius:50%;background:${bdrData?bdrData.bg:'var(--bg3)'};color:${bdrData?bdrData.color:'var(--text3)'};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0">${b.id}</div>`;
+              return `<tr style="border-bottom:1px solid var(--border)">
+                <td style="padding:9px 10px"><div style="display:flex;align-items:center;gap:7px">${photoHtml}<span style="font-size:12px;font-weight:600;color:var(--text)">${b.name.split(' ')[0]}</span></div></td>
+                <td style="padding:9px 8px;text-align:center;font-size:13px;font-weight:700;color:${b.ativo>0?'#8b5cf6':'var(--text3)'}">${b.ativo||'—'}</td>
+                <td style="padding:9px 8px;text-align:center;font-size:13px;color:${b.ai>0?'var(--text)':'var(--text3)'}">${b.ai||'—'}</td>
+                <td style="padding:9px 8px;text-align:center;font-size:13px;font-weight:600;color:${b.lc>0?'var(--teal)':'var(--text3)'}">${b.lc||'—'}</td>
+                <td style="padding:9px 8px;text-align:center;font-size:13px;font-weight:700;color:${b.ra>0?'var(--green)':'var(--text3)'}">${b.ra||'—'}</td>
+                <td style="padding:9px 8px;text-align:center;font-size:12px;color:var(--text3)">${b.desqLc||'—'}</td>
+              </tr>`;
+            }).join('')}
+            <tr style="background:var(--bg3);border-top:2px solid var(--border)">
+              <td style="padding:9px 10px;font-size:11px;font-weight:700;color:var(--text)">TOTAL</td>
+              <td style="padding:9px 8px;text-align:center;font-size:12px;font-weight:700;color:#8b5cf6">${d.hr4PassivosTime.total.ativo}</td>
+              <td style="padding:9px 8px;text-align:center;font-size:12px;font-weight:700">${d.hr4PassivosTime.total.ai}</td>
+              <td style="padding:9px 8px;text-align:center;font-size:12px;font-weight:700;color:var(--teal)">${d.hr4PassivosTime.total.lc}</td>
+              <td style="padding:9px 8px;text-align:center;font-size:12px;font-weight:700;color:var(--green)">${d.hr4PassivosTime.total.ra}</td>
+              <td style="padding:9px 8px;text-align:center;font-size:11px;color:var(--text3)">${d.hr4PassivosTime.total.desqLc}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    `:''}
 
     <!-- MeetRox individual por BDR (movido de Meu Resultado) -->
     <div style="font-size:12px;font-weight:700;color:var(--text);margin:0 0 10px;padding-bottom:7px;border-bottom:2px solid #a855f7;display:flex;align-items:center;gap:6px">
