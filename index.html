@@ -2259,11 +2259,70 @@ function buildResumo(pane){
     return Object.assign({},b,{pacing:Math.round(ratio*100),paceRatio:ratio,paceInfo:bp});
   }).filter(b=>b.paceRatio<0.5).sort((a,b)=>a.paceRatio-b.paceRatio);
 
+  // ── HERO: ATINGIMENTO DA OPERAÇÃO (espelha o hero do BDR, com números da operação) ──
+  const teamOppsMes=d.mesAbril.opps;
+  const teamRAsMes=d.mesAbril.ras;
+  const teamLigMes=d.mesAbril.lig;
+  const teamAtivMes=d.mesAbril.ativ;
+  const META_OP=d.meta;
+  const pcOp=computePacing(teamOppsMes,META_OP);
+  const pctMetaOp=pcOp.pctAtingimento;
+  const pctPaceIdealOp=pcOp.pctPaceIdeal;
+  const paceGradOp=pcOp.corGrad;
+  const paceAccentOp=pcOp.corAccent;
+  let gapBigOp,gapSubOp;
+  if(pcOp.state==='above'){
+    if(teamOppsMes>=META_OP) gapBigOp='+'+(teamOppsMes-META_OP)+' opps acima da meta';
+    else gapBigOp='+'+Math.round(pcOp.gapPace)+' opps acima do pace';
+    gapSubOp='Time acima do ritmo esperado.';
+  } else if(pcOp.state==='ontrack'){
+    gapBigOp='Time no pace 🎯';
+    gapSubOp='Ritmo alinhado com a meta do mês.';
+  } else {
+    gapBigOp=`Faltam ${pcOp.gapMeta} opps para a meta`;
+    gapSubOp=pcOp.diasUteisRestantes>0?`Restam ${pcOp.diasUteisRestantes} dias úteis no mês — pace ideal hoje: ${pcOp.paceEsperado}.`:'Fim do ciclo — precisamos fechar a meta.';
+  }
+  const fcstPendentesCount=foraPace.length; // updated async after fcst load
+
   pane.innerHTML=`
     <!-- HEADER DINÂMICO -->
     <div style="margin-bottom:16px">
       <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">${dataFmt}</div>
       <div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em">${sauda}, líder.</div>
+    </div>
+
+    <!-- HERO: ATINGIMENTO DA OPERAÇÃO (espelha o hero do BDR) -->
+    <div style="margin-bottom:12px;background:${paceGradOp};border-radius:var(--radius);padding:20px 18px;box-shadow:0 4px 20px rgba(0,0,0,0.12)">
+      <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Atingimento da operação · Abril 2026</div>
+      <div style="font-size:48px;font-weight:700;font-family:'Inter',sans-serif;color:${paceAccentOp};line-height:1.05;letter-spacing:-.02em;margin-bottom:6px">${gapBigOp}</div>
+      <div style="font-size:20px;font-weight:600;font-family:'Inter',sans-serif;color:#fff;line-height:1.2;margin-bottom:12px">${teamOppsMes} de ${META_OP} opps · ${pctMetaOp}%</div>
+      <div style="height:10px;background:rgba(0,0,0,0.28);border-radius:5px;overflow:hidden;position:relative;margin-bottom:5px">
+        <div style="position:absolute;left:0;top:0;height:100%;width:${pctPaceIdealOp}%;background:rgba(255,255,255,0.22);border-radius:5px"></div>
+        <div style="position:absolute;left:0;top:0;height:100%;width:${pctMetaOp}%;background:${paceAccentOp};border-radius:5px;transition:width .3s"></div>
+      </div>
+      <div style="font-size:10px;color:rgba(255,255,255,.7);margin-bottom:14px;letter-spacing:.02em">Pace ideal: ${pctPaceIdealOp}% · Atual: ${pctMetaOp}%</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:10px 6px;text-align:center">
+          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:#fff">${teamOppsMes}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Opps</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:10px 6px;text-align:center">
+          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:#fff">${teamRAsMes}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">RAs</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:10px 6px;text-align:center">
+          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:#fff">${teamLigMes}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Lig.</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:10px 6px;text-align:center">
+          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:#fff">${(teamAtivMes/1000).toFixed(1)}k</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Ativ.</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);font-size:11px;color:rgba(255,255,255,.6)">
+        ${(d.bdrs||[]).length} BDRs · ${totalAt} reuniões venceram · ${foraPace.length} fora do pace
+      </div>
+      <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:6px">${gapSubOp}</div>
     </div>
 
     <!-- CARD PRINCIPAL: AÇÕES PENDENTES -->
