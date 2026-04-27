@@ -956,6 +956,15 @@ const DATA = {
     ]
   },
   funil:{novoLead:455,abordagemIniciada:355,leadConectado:267,reuniaoAgendada:98,oportunidades:34,desqualificados:458},
+  // Lead time entre data de criação do SQL (Reunião Agendada/Diagnóstico) e data da reunião acontecer
+  // Fonte: Salesforce relatório "Negócios por xDR Plataforma" + campo LT Reunião Agendada > Diagnóstico
+  // Captura em 27/04/2026
+  leadTime:{
+    agendamento:{
+      mesAtual:{ totalDias:134, reunioes:57 },  // Abril 2026
+      q1:{ totalDias:765, reunioes:164 }         // Q1 2026 (Jan-Mar) — referência
+    }
+  },
   conversoes:{aiLc:{real:29,meta:57},lcRa:{real:90,meta:37},raOp:{real:111,meta:75}},
   // ras = Reuniões Agendadas (negócios/SQLs), opps = Oportunidades (mundo)
   bdrs:[
@@ -4476,7 +4485,82 @@ function buildReunioes(pane){
       </div>
     </div>`;
 
+  buildLeadTimeAgendamentoPanel(pane);
   buildLeadTimePanel(pane);
+}
+
+
+// ─── LEAD TIME AGENDAMENTO (data agendamento → data reunião) ────────────
+// Quanto menor, mais "quente" o lead. Lead time alto = maior risco de no-show/cancel.
+function buildLeadTimeAgendamentoPanel(pane){
+  var lt = (DATA.leadTime && DATA.leadTime.agendamento) || null;
+  if(!lt) return;
+  var mes = lt.mesAtual, q1 = lt.q1;
+  var avgMes = mes.totalDias && mes.reunioes ? (mes.totalDias / mes.reunioes) : 0;
+  var avgQ1 = q1.totalDias && q1.reunioes ? (q1.totalDias / q1.reunioes) : 0;
+  var delta = avgQ1 ? Math.round(((avgMes - avgQ1) / avgQ1) * 100) : 0;
+  var melhorou = delta < 0;
+  var deltaColor = melhorou ? 'var(--green)' : (delta > 0 ? 'var(--red)' : 'var(--text2)');
+  var deltaArrow = melhorou ? '↓' : (delta > 0 ? '↑' : '→');
+  // Régua: compara mes vs Q1 lado a lado, max=Q1*1.2
+  var maxScale = Math.max(avgMes, avgQ1) * 1.2;
+  var pctMes = (avgMes / maxScale) * 100;
+  var pctQ1 = (avgQ1 / maxScale) * 100;
+  var corMes = avgMes <= 3 ? 'var(--green)' : avgMes <= 7 ? 'var(--amber)' : 'var(--red)';
+
+  var el = document.createElement('div');
+  el.style.cssText = 'margin-top:16px';
+  el.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;padding-bottom:7px;border-bottom:2px solid var(--accent-light);display:flex;align-items:center;gap:6px">'
+    + '<span>📅</span> Lead Time de Agendamento — comparativo Q1'
+    + '</div>'
+    // Cards resumo
+    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
+    + '<div class="metric-card" style="text-align:center;padding:12px 8px;border-top:3px solid '+corMes+'">'
+    + '<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Mês atual</div>'
+    + '<div style="font-size:28px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+corMes+';line-height:1">'+avgMes.toFixed(1)+'d</div>'
+    + '<div style="font-size:9px;color:var(--text3);margin-top:3px">'+mes.reunioes+' reuniões</div>'
+    + '</div>'
+    + '<div class="metric-card" style="text-align:center;padding:12px 8px;border-top:3px solid var(--text3)">'
+    + '<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Q1 (referência)</div>'
+    + '<div style="font-size:28px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text2);line-height:1">'+avgQ1.toFixed(1)+'d</div>'
+    + '<div style="font-size:9px;color:var(--text3);margin-top:3px">'+q1.reunioes+' reuniões</div>'
+    + '</div>'
+    + '<div class="metric-card" style="text-align:center;padding:12px 8px;border-top:3px solid '+deltaColor+'">'
+    + '<div style="font-size:9px;color:var(--text3);text-transform:uppercase;font-weight:600;margin-bottom:4px">Variação</div>'
+    + '<div style="font-size:28px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+deltaColor+';line-height:1">'+deltaArrow+' '+Math.abs(delta)+'%</div>'
+    + '<div style="font-size:9px;color:var(--text3);margin-top:3px">'+(melhorou ? 'mais rápido' : delta > 0 ? 'mais lento' : 'estável')+'</div>'
+    + '</div>'
+    + '</div>'
+    // Régua visual
+    + '<div class="card" style="padding:14px;margin-bottom:12px">'
+    + '<div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:10px">Régua comparativa (lead time médio em dias)</div>'
+    + '<div style="margin-bottom:14px">'
+    + '<div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--text2);margin-bottom:4px"><span>Mês atual</span><span style="color:'+corMes+'">'+avgMes.toFixed(1)+' dias</span></div>'
+    + '<div style="height:14px;background:var(--bg3);border-radius:4px;overflow:hidden;position:relative">'
+    + '<div style="height:100%;width:'+pctMes+'%;background:'+corMes+';border-radius:4px;transition:width .3s"></div>'
+    + '</div>'
+    + '</div>'
+    + '<div>'
+    + '<div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--text2);margin-bottom:4px"><span>Q1 (Jan-Mar 2026)</span><span style="color:var(--text2)">'+avgQ1.toFixed(1)+' dias</span></div>'
+    + '<div style="height:14px;background:var(--bg3);border-radius:4px;overflow:hidden">'
+    + '<div style="height:100%;width:'+pctQ1+'%;background:var(--text3);border-radius:4px;transition:width .3s"></div>'
+    + '</div>'
+    + '</div>'
+    + '<div style="font-size:10px;color:var(--text3);margin-top:10px;line-height:1.5">'
+    + '<strong style="color:var(--text2)">Como ler:</strong> tempo médio entre o BDR agendar a reunião e ela acontecer. '
+    + '<span style="color:var(--green)">≤3d ótimo</span> · <span style="color:var(--amber)">4-7d médio</span> · <span style="color:var(--red)">≥8d alto risco de no-show</span>.'
+    + '</div>'
+    + '</div>'
+    // Insight
+    + '<div class="alert-banner '+(melhorou?'ab-green':'ab-amber')+'" style="margin-bottom:0">'
+    + '<span>'+(melhorou?'✓':'⚠️')+'</span>'
+    + '<div>'+(melhorou
+        ? '<strong>Lead time melhorou '+Math.abs(delta)+'%</strong> vs Q1. Reuniões marcadas para acontecer mais cedo → menos chance de no-show/cancel. Manter o ritmo.'
+        : delta > 0
+          ? '<strong>Lead time piorou '+Math.abs(delta)+'%</strong> vs Q1. Reuniões agendadas com mais antecedência aumentam risco de cancel. Investigar causa.'
+          : 'Lead time estável vs Q1.')+'</div>'
+    + '</div>';
+  pane.appendChild(el);
 }
 
 
