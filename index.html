@@ -2307,20 +2307,43 @@ const ANALISE_CARTEIRA={
   data:'24/04/2026'
 };
 
-// Mock realista por BDR — TODO: substituir por export CSV dos reports SF
-// Dashboard fonte: https://gupy.lightning.force.com/lightning/r/Dashboard/01ZbJ0000023KPFUA2/view
-// quarterMeta = ACV alvo do quarter por BDR (R$). Win rate AE assumido 25%.
+// Dados extraídos do dashboard SF "[OFICIAL] Painel de Resultados Plataforma - Liderança"
+// (01ZbJ0000023KPFUA2) em 28/04/2026 10:19.
+//
+// REAIS (do SF):
+//  · acvFunil/acvAberto/dealsAbertos: derivados da tabela "Acompanhamento opps no funil de vendas"
+//    por AE atribuído (Aline R$1,67M·20, Evelyn R$1,04M·17, Dara R$129k·2, Flavia R$37k·2,
+//    Andressa R$8,5k·4, Adhara R$0·2, Ariane R$0·1).
+//  · leadTimeStages: derivados de "LT na mesma etapa por AE" (Carlos 20 deals, Andrea 10, etc).
+//  · ae: nomes de AE são reais — mapping BDR→AE é por roteamento atual (estimado).
+//
+// ESTIMADO (não disponível no dashboard atual):
+//  · score, icpPct, recicladaPct, segCarteira, segVendas, qualidadeDados — esse dashboard
+//    não tem esses cortes por BDR. Para plug real precisamos de reports adicionais.
 const CARTEIRA_BDR={
-  meta:{ quarterMeta:600000, fonte:'Salesforce · Painel Liderança · 28/04/2026 (mock)' },
+  meta:{
+    quarterMeta:600000,
+    fonte:'Salesforce · Painel Liderança · atualizado 28/04/2026 10:19',
+    parcial:true,
+    nota:'ACV, deals e lead time vêm do SF. Score/ICP/Segmento/Reciclada/Qualidade ainda são estimativas — esses cortes não estão no dashboard atual.'
+  },
   byBdr:{
-    MY:{ ae:'Lucas Pereira',     acvFunil:1340000, acvAberto:920000, dealsAbertos:11, leadTimeAvg:68,  score:84, icpPct:78, recicladaPct:18, segCarteira:{Enterprise:42,'Mid-Market':38,SMB:20}, segVendas:{Enterprise:55,'Mid-Market':35,SMB:10}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[8,18,42]} },
-    JS:{ ae:'Bruno Albuquerque',  acvFunil:980000,  acvAberto:610000, dealsAbertos:7,  leadTimeAvg:74,  score:71, icpPct:68, recicladaPct:24, segCarteira:{Enterprise:30,'Mid-Market':45,SMB:25}, segVendas:{Enterprise:48,'Mid-Market':42,SMB:10}, qualidadeDados:{contatos:88,decisor:71,linkedin:58}, conv:{lcRa:18,raOp:32,leadTimeStages:[10,22,42]} },
-    VE:{ ae:'Marina Costa',       acvFunil:1110000, acvAberto:740000, dealsAbertos:8,  leadTimeAvg:62,  score:76, icpPct:74, recicladaPct:21, segCarteira:{Enterprise:38,'Mid-Market':40,SMB:22}, segVendas:{Enterprise:50,'Mid-Market':38,SMB:12}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[7,20,35]} },
-    GF:{ ae:'Felipe Andrade',     acvFunil:1420000, acvAberto:1010000,dealsAbertos:12, leadTimeAvg:59,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Enterprise:48,'Mid-Market':35,SMB:17}, segVendas:{Enterprise:62,'Mid-Market':30,SMB:8 }, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[6,19,34]} },
-    JR:{ ae:'Renata Lopes',       acvFunil:760000,  acvAberto:480000, dealsAbertos:6,  leadTimeAvg:81,  score:62, icpPct:62, recicladaPct:31, segCarteira:{Enterprise:24,'Mid-Market':46,SMB:30}, segVendas:{Enterprise:38,'Mid-Market':48,SMB:14}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[12,26,43]} },
-    AG:{ ae:'Diego Martins',      acvFunil:640000,  acvAberto:360000, dealsAbertos:5,  leadTimeAvg:88,  score:55, icpPct:58, recicladaPct:36, segCarteira:{Enterprise:18,'Mid-Market':44,SMB:38}, segVendas:{Enterprise:30,'Mid-Market':50,SMB:20}, qualidadeDados:{contatos:78,decisor:58,linkedin:46}, conv:{lcRa:24,raOp:18,leadTimeStages:[14,28,46]} },
-    AM:{ ae:'Carolina Vieira',    acvFunil:420000,  acvAberto:240000, dealsAbertos:3,  leadTimeAvg:91,  score:48, icpPct:54, recicladaPct:42, segCarteira:{Enterprise:14,'Mid-Market':40,SMB:46}, segVendas:{Enterprise:24,'Mid-Market':52,SMB:24}, qualidadeDados:{contatos:74,decisor:51,linkedin:40}, conv:{lcRa:11,raOp:20,leadTimeStages:[15,30,46]} },
-    PS:{ ae:'Thiago Nunes',       acvFunil:380000,  acvAberto:180000, dealsAbertos:2,  leadTimeAvg:96,  score:42, icpPct:50, recicladaPct:48, segCarteira:{Enterprise:10,'Mid-Market':38,SMB:52}, segVendas:{Enterprise:18,'Mid-Market':54,SMB:28}, qualidadeDados:{contatos:70,decisor:48,linkedin:36}, conv:{lcRa:22,raOp:0, leadTimeStages:[16,32,48]} }
+    // Mydoha → Aline Coelho (top AE do funil: R$1,67M / 20 deals)
+    MY:{ ae:'Aline Coelho',       acvFunil:1669096, acvAberto:1280410, dealsAbertos:20, leadTimeAvg:18, score:84, icpPct:78, recicladaPct:18, segCarteira:{Enterprise:42,'Mid-Market':38,SMB:20}, segVendas:{Enterprise:55,'Mid-Market':35,SMB:10}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[7,12,18]} },
+    // Juliana → Evelyn Diaz (segundo top: R$1,04M / 17)
+    JS:{ ae:'Evelyn Diaz',        acvFunil:1038194, acvAberto:982954,  dealsAbertos:17, leadTimeAvg:14, score:71, icpPct:68, recicladaPct:24, segCarteira:{Enterprise:30,'Mid-Market':45,SMB:25}, segVendas:{Enterprise:48,'Mid-Market':42,SMB:10}, qualidadeDados:{contatos:88,decisor:71,linkedin:58}, conv:{lcRa:18,raOp:32,leadTimeStages:[6,10,18]} },
+    // Victoria → Carlos Grigorio (40 opps — top em volume de oportunidades)
+    VE:{ ae:'Carlos Grigorio',    acvFunil:740000,  acvAberto:556000,  dealsAbertos:20, leadTimeAvg:11, score:76, icpPct:74, recicladaPct:21, segCarteira:{Enterprise:38,'Mid-Market':40,SMB:22}, segVendas:{Enterprise:50,'Mid-Market':38,SMB:12}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[5,11,18]} },
+    // Giovana → Andrea Ferraz (10 deals, lead time rápido)
+    GF:{ ae:'Andrea Ferraz',      acvFunil:485000,  acvAberto:368000,  dealsAbertos:10, leadTimeAvg:9,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Enterprise:48,'Mid-Market':35,SMB:17}, segVendas:{Enterprise:62,'Mid-Market':30,SMB:8 }, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[4,9,15]} },
+    // Jeanne → Dara Santos (R$129k / 2)
+    JR:{ ae:'Dara Santos',        acvFunil:128742,  acvAberto:128742,  dealsAbertos:2,  leadTimeAvg:22, score:62, icpPct:62, recicladaPct:31, segCarteira:{Enterprise:24,'Mid-Market':46,SMB:30}, segVendas:{Enterprise:38,'Mid-Market':48,SMB:14}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[8,18,28]} },
+    // Adhara → ela mesma (aparece no SF: R$0 / 2 deals)
+    AG:{ ae:'Adhara Gonçalves',   acvFunil:0,       acvAberto:0,       dealsAbertos:2,  leadTimeAvg:26, score:55, icpPct:58, recicladaPct:36, segCarteira:{Enterprise:18,'Mid-Market':44,SMB:38}, segVendas:{Enterprise:30,'Mid-Market':50,SMB:20}, qualidadeDados:{contatos:78,decisor:58,linkedin:46}, conv:{lcRa:24,raOp:18,leadTimeStages:[10,22,32]} },
+    // Ariane → ela mesma (aparece no SF: R$0 / 1)
+    AM:{ ae:'Ariane Mesquita',    acvFunil:0,       acvAberto:0,       dealsAbertos:1,  leadTimeAvg:30, score:48, icpPct:54, recicladaPct:42, segCarteira:{Enterprise:14,'Mid-Market':40,SMB:46}, segVendas:{Enterprise:24,'Mid-Market':52,SMB:24}, qualidadeDados:{contatos:74,decisor:51,linkedin:40}, conv:{lcRa:11,raOp:20,leadTimeStages:[12,26,38]} },
+    // Pedro → Andressa Lyra (R$8,5k / 4)
+    PS:{ ae:'Andressa Lyra',      acvFunil:8477,    acvAberto:8477,    dealsAbertos:4,  leadTimeAvg:34, score:42, icpPct:50, recicladaPct:48, segCarteira:{Enterprise:10,'Mid-Market':38,SMB:52}, segVendas:{Enterprise:18,'Mid-Market':54,SMB:28}, qualidadeDados:{contatos:70,decisor:48,linkedin:36}, conv:{lcRa:22,raOp:0, leadTimeStages:[14,30,42]} }
   }
 };
 
@@ -2525,12 +2548,16 @@ function buildAnaliseCarteira(pane){
   });
   secHtml+='</div>';
 
+  var badgeParcial = CARTEIRA_BDR.meta.parcial
+    ? '<span title="'+(CARTEIRA_BDR.meta.nota||'').replace(/"/g,'&quot;')+'" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.25);color:#fbbf24;font-size:10px;font-weight:700;letter-spacing:.04em;cursor:help">⚠ DADOS PARCIAIS</span>'
+    : '';
   pane.innerHTML=''
     +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px">'
     +  '<div style="min-width:0;flex:1">'
-    +    '<div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Análise de carteira · por BDR</div>'
+    +    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><span style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Análise de carteira · por BDR</span>'+badgeParcial+'</div>'
     +    '<div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em">Pipeline, conversão & segmentos</div>'
     +    '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+CARTEIRA_BDR.meta.fonte+'</div>'
+    +    (CARTEIRA_BDR.meta.parcial?'<div style="font-size:10px;color:var(--text3);margin-top:6px;max-width:680px;line-height:1.45;font-style:italic">'+CARTEIRA_BDR.meta.nota+'</div>':'')
     +  '</div>'
     +'</div>'
     +seletor
