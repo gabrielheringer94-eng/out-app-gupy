@@ -1774,11 +1774,11 @@ function buildTicker(user){
 
 // ─── TAB BUILDER (Bottom Nav) ─────────────────────────────────
 const NAV_ICONS={
-  resumo:'◈',time:'◉',mrr:'◆',reunioes:'◷',noticias:'◉',analise:'◎',
+  resumo:'◈',time:'◉',mrr:'◆',reunioes:'◷',noticias:'◉',analise:'◎',log:'☰',
   hoje:'⌂',semana:'↗',funil:'▽',mrr_bdr:'◆',time_bdr:'◉',pdi:'◈',jdc:'◉'
 };
 const NAV_LABELS={
-  resumo:'Hoje',time:'Time',base:'Base',reunioes:'Agenda',weekly:'Weekly',analise:'Análise',
+  resumo:'Hoje',time:'Time',base:'Base',reunioes:'Agenda',weekly:'Weekly',analise:'Análise',log:'Log',
   hoje:'Início',resultado:'Meu Resultado',performance:'Performance',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI',jdc:'Pessoas'
 };
 
@@ -1976,8 +1976,105 @@ function buildGestorApp(){
     {id:'time',     label:'Time'},
     {id:'reunioes', label:'Agenda'},
     {id:'jdc',      label:'Pessoas'},
-  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildReunioes,buildJDC]);
+    {id:'log',      label:'Log'},
+  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildReunioes,buildJDC,buildLogGestor]);
 }
+
+// ─── LOG GESTOR (Análises e materiais) ────────────────────────
+const LOG_TEMAS=[
+  {id:'analise-carteira',
+   nome:'Análise de carteira',
+   desc:'Auditoria Pre Vendas · M Q1 2026',
+   src:'analises/auditoria_pre_vendas_M_Q1_2026.html',
+   data:'24/04/2026'},
+];
+function buildLogGestor(pane){
+  pane.innerHTML=`
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Log do gestor</div>
+      <div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em">Análises e materiais</div>
+    </div>
+    <div id="log-shell" style="display:flex;gap:0;height:calc(100vh - 220px);min-height:480px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:relative">
+      <!-- Sidebar -->
+      <aside id="log-side" data-open="0" style="width:48px;flex-shrink:0;background:var(--bg);border-right:1px solid var(--border);transition:width .22s ease;display:flex;flex-direction:column;overflow:hidden">
+        <button id="log-toggle" aria-label="Expandir log" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 14px;border-bottom:1px solid var(--border);color:var(--text2);font-size:13px;font-weight:600">
+          <span id="log-toggle-icon" style="font-size:16px;line-height:1">☰</span>
+          <span class="log-side-label" style="white-space:nowrap;opacity:0;transition:opacity .15s">Temas</span>
+        </button>
+        <nav id="log-list" style="flex:1;overflow-y:auto;padding:6px 0"></nav>
+      </aside>
+      <!-- Content -->
+      <main id="log-main" style="flex:1;min-width:0;display:flex;flex-direction:column;background:var(--card)">
+        <div id="log-head" style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div style="min-width:0">
+            <div id="log-title" style="font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+            <div id="log-subtitle" style="font-size:11px;color:var(--text3);margin-top:2px"></div>
+          </div>
+          <a id="log-open-tab" href="#" target="_blank" rel="noopener" style="display:none;font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:8px;padding:6px 10px;text-decoration:none;white-space:nowrap">Abrir em aba ↗</a>
+        </div>
+        <div id="log-frame-wrap" style="flex:1;position:relative;background:#fff">
+          <iframe id="log-frame" src="about:blank" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff"></iframe>
+          <div id="log-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--text3);font-size:13px;text-align:center;padding:24px">
+            <div style="font-size:32px;opacity:.4">☰</div>
+            <div>Selecione um tema na lateral</div>
+            <div style="font-size:11px;opacity:.7">Clique no ícone ao lado para expandir a lista de temas</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  `;
+
+  const side=pane.querySelector('#log-side');
+  const list=pane.querySelector('#log-list');
+  const toggle=pane.querySelector('#log-toggle');
+  const toggleIcon=pane.querySelector('#log-toggle-icon');
+  const labels=pane.querySelectorAll('.log-side-label');
+  const titleEl=pane.querySelector('#log-title');
+  const subEl=pane.querySelector('#log-subtitle');
+  const frame=pane.querySelector('#log-frame');
+  const empty=pane.querySelector('#log-empty');
+  const openTab=pane.querySelector('#log-open-tab');
+
+  function setOpen(open){
+    side.dataset.open=open?'1':'0';
+    side.style.width=open?'240px':'48px';
+    toggleIcon.textContent=open?'×':'☰';
+    toggle.setAttribute('aria-label',open?'Recolher log':'Expandir log');
+    labels.forEach(function(l){ l.style.opacity=open?'1':'0'; });
+    list.querySelectorAll('[data-tema-label]').forEach(function(l){ l.style.opacity=open?'1':'0'; });
+  }
+  toggle.onclick=function(){ setOpen(side.dataset.open!=='1'); track('log_toggle',side.dataset.open); };
+
+  function renderList(activeId){
+    list.innerHTML=LOG_TEMAS.map(function(t){
+      var active=t.id===activeId;
+      return '<button data-tema="'+t.id+'" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border-left:3px solid '+(active?'var(--accent)':'transparent')+';background:'+(active?'var(--accent-light)':'transparent')+';color:'+(active?'var(--accent)':'var(--text2)')+';font-size:12px;font-weight:'+(active?'700':'600')+';box-sizing:border-box">'
+        +'<span style="font-size:14px;line-height:1;flex-shrink:0">📄</span>'
+        +'<span data-tema-label style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:'+(side.dataset.open==='1'?'1':'0')+';transition:opacity .15s">'+t.nome+'</span>'
+        +'</button>';
+    }).join('');
+    list.querySelectorAll('[data-tema]').forEach(function(btn){
+      btn.onclick=function(){ openTema(btn.dataset.tema); };
+    });
+  }
+
+  function openTema(id){
+    var t=LOG_TEMAS.find(function(x){return x.id===id;});
+    if(!t) return;
+    titleEl.textContent=t.nome;
+    subEl.textContent=(t.desc||'')+(t.data?' · '+t.data:'');
+    frame.src=t.src;
+    empty.style.display='none';
+    openTab.href=t.src;
+    openTab.style.display='inline-block';
+    renderList(id);
+    track('log_open',id);
+  }
+
+  renderList(null);
+  // Não abre nenhum tema automaticamente — sidebar fica minimizada e área principal mostra estado vazio.
+}
+
 
 
 // ─── RESULTADO GESTOR ─────────────────────────────────────────
