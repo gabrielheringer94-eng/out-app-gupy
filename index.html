@@ -214,28 +214,50 @@ body{font-family:\'Inter\',sans-serif;background:var(--bg);color:var(--text);fon
 }
 
 /* Bottom navigation */
+/* Side nav (drawer) — substitui o bottom-nav antigo */
 .bottom-nav{
-  display:flex;align-items:center;justify-content:space-around;
-  height:calc(var(--bottom-nav-h) + var(--safe-bottom));
-  padding-bottom:var(--safe-bottom);
-  background:rgba(10,10,15,0.9);
+  position:fixed;top:0;left:0;bottom:0;width:248px;
+  display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;
+  padding:calc(72px + var(--safe-top)) 0 calc(20px + var(--safe-bottom));
+  background:rgba(10,10,15,0.96);
   backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
-  border-top:1px solid rgba(255,255,255,0.06);
-  flex-shrink:0;
+  border-right:1px solid rgba(255,255,255,0.08);
+  box-shadow:6px 0 24px rgba(0,0,0,0.4);
+  z-index:100;
+  transform:translateX(-100%);
+  transition:transform .25s cubic-bezier(.25,.46,.45,.94);
+  overflow-y:auto;
 }
+.bottom-nav.open{transform:translateX(0);}
 .nav-item{
-  display:flex;flex-direction:column;align-items:center;gap:0;
-  padding:10px 8px;cursor:pointer;flex:1;
-  color:var(--text3);transition:color .2s,transform .2s;
+  display:flex;flex-direction:row;align-items:center;justify-content:flex-start;
+  gap:14px;padding:14px 22px;cursor:pointer;flex:0 0 auto;
+  color:var(--text3);transition:color .15s,background .15s;
   background:none;border:none;font-family:'Inter',sans-serif;
+  text-align:left;border-left:3px solid transparent;
 }
-.nav-item.active{color:var(--gupy-green);text-shadow:0 0 12px rgba(205,255,130,0.4);}
-.nav-icon{display:none;}
-.nav-label{font-size:10px;font-weight:400;}
-.nav-item.active .nav-icon-dot{
-  width:5px;height:5px;border-radius:50%;
-  background:var(--gupy-green);margin:0 auto;box-shadow:0 0 8px rgba(205,255,130,0.5);
+.nav-item:hover{background:rgba(255,255,255,0.04);color:var(--text2);}
+.nav-item.active{color:var(--gupy-green);background:rgba(205,255,130,0.08);border-left-color:var(--gupy-green);}
+.nav-icon{display:inline-block;font-size:17px;line-height:1;width:20px;text-align:center;}
+.nav-label{font-size:13px;font-weight:500;}
+.nav-item.active .nav-label{font-weight:700;}
+.nav-item.active .nav-icon-dot{display:none;}
+/* Overlay quando o drawer está aberto */
+#nav-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.5);
+  z-index:99;display:none;
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
 }
+#nav-overlay.open{display:block;}
+/* Hamburger no header */
+#nav-toggle{
+  width:34px;height:34px;border-radius:8px;
+  background:var(--bg3);border:1px solid var(--border);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:var(--text2);flex-shrink:0;margin-right:10px;
+  transition:background .15s;
+}
+#nav-toggle:hover{background:var(--accent-light);color:var(--accent);}
 
 /* Content panes */
 .tab-content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
@@ -499,12 +521,14 @@ body, button, input, select, textarea {
   letter-spacing: .02em;
 }
 
-/* Bottom nav — clean white with navy accent */
-#bottom-nav {
-  background: #ffffff;
-  border-top: 1.5px solid rgba(255,255,255,0.06);
-  box-shadow: 0 -2px 16px rgba(255,255,255,0.04);
+/* Side drawer override (light theme adjustments) */
+body[data-theme="light"] #bottom-nav{
+  background:#ffffff!important;
+  border-right:1px solid rgba(0,18,47,0.08)!important;
+  box-shadow:6px 0 24px rgba(0,18,47,0.08)!important;
 }
+body[data-theme="light"] .nav-item{color:var(--text2)!important;}
+body[data-theme="light"] .nav-item.active{color:var(--accent)!important;background:var(--accent-light)!important;border-left-color:var(--accent)!important;}
 
 .nav-item {
   font-family: 'Inter', sans-serif;
@@ -709,6 +733,7 @@ input[type="number"]:focus {
 <div id="screen-app" class="screen">
   <div class="app-header">
     <div class="app-header-left">
+      <button id="nav-toggle" onclick="toggleSideNav()" aria-label="Abrir menu" title="Menu">☰</button>
       <div id="app-av" class="app-avatar"></div>
       <div>
         <div class="app-user-name" id="app-name"></div>
@@ -724,6 +749,7 @@ input[type="number"]:focus {
   </div>
 
   <div class="tab-content" id="tab-content"></div>
+  <div id="nav-overlay" onclick="toggleSideNav(false)"></div>
   <nav class="bottom-nav" id="bottom-nav"></nav>
 
   <!-- SETTINGS PANEL -->
@@ -1956,6 +1982,14 @@ function makePaneDraggable(pane, storageKey){
   },80);
 }
 
+function toggleSideNav(force){
+  var nav=document.getElementById('bottom-nav');
+  var ov=document.getElementById('nav-overlay');
+  if(!nav||!ov) return;
+  var open=(force===undefined)?!nav.classList.contains('open'):!!force;
+  nav.classList.toggle('open',open);
+  ov.classList.toggle('open',open);
+}
 function buildTabs(tabs,builders){
   const nav=document.getElementById('bottom-nav');
   const content=document.getElementById('tab-content');
@@ -1979,6 +2013,7 @@ function buildTabs(tabs,builders){
         builders[i](pane);
         makePaneDraggable(pane,'drag-order-'+t.id+'-'+(currentUser?currentUser.id:'g'));
       }
+      toggleSideNav(false); // fecha drawer após selecionar
     };
     nav.appendChild(btn);
     // Pane
@@ -2015,90 +2050,57 @@ const LOG_TEMAS=[
    data:'24/04/2026'},
 ];
 function buildLogGestor(pane){
-  pane.innerHTML=`
-    <div style="margin-bottom:14px">
-      <div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Log do gestor</div>
-      <div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em">Análises e materiais</div>
-    </div>
-    <div id="log-shell" style="display:flex;gap:0;height:calc(100vh - 220px);min-height:480px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;position:relative">
-      <!-- Sidebar -->
-      <aside id="log-side" data-open="0" style="width:48px;flex-shrink:0;background:var(--bg);border-right:1px solid var(--border);transition:width .22s ease;display:flex;flex-direction:column;overflow:hidden">
-        <button id="log-toggle" aria-label="Expandir log" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 14px;border-bottom:1px solid var(--border);color:var(--text2);font-size:13px;font-weight:600">
-          <span id="log-toggle-icon" style="font-size:16px;line-height:1">☰</span>
-          <span class="log-side-label" style="white-space:nowrap;opacity:0;transition:opacity .15s">Temas</span>
-        </button>
-        <nav id="log-list" style="flex:1;overflow-y:auto;padding:6px 0"></nav>
-      </aside>
-      <!-- Content -->
-      <main id="log-main" style="flex:1;min-width:0;display:flex;flex-direction:column;background:var(--card)">
-        <div id="log-head" style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px">
-          <div style="min-width:0">
-            <div id="log-title" style="font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
-            <div id="log-subtitle" style="font-size:11px;color:var(--text3);margin-top:2px"></div>
-          </div>
-          <a id="log-open-tab" href="#" target="_blank" rel="noopener" style="display:none;font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:8px;padding:6px 10px;text-decoration:none;white-space:nowrap">Abrir em aba ↗</a>
-        </div>
-        <div id="log-frame-wrap" style="flex:1;position:relative;background:#fff">
-          <iframe id="log-frame" src="about:blank" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff"></iframe>
-          <div id="log-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--text3);font-size:13px;text-align:center;padding:24px">
-            <div style="font-size:32px;opacity:.4">☰</div>
-            <div>Selecione um tema na lateral</div>
-            <div style="font-size:11px;opacity:.7">Clique no ícone ao lado para expandir a lista de temas</div>
-          </div>
-        </div>
-      </main>
-    </div>
-  `;
-
-  const side=pane.querySelector('#log-side');
-  const list=pane.querySelector('#log-list');
-  const toggle=pane.querySelector('#log-toggle');
-  const toggleIcon=pane.querySelector('#log-toggle-icon');
-  const labels=pane.querySelectorAll('.log-side-label');
-  const titleEl=pane.querySelector('#log-title');
-  const subEl=pane.querySelector('#log-subtitle');
-  const frame=pane.querySelector('#log-frame');
-  const empty=pane.querySelector('#log-empty');
-  const openTab=pane.querySelector('#log-open-tab');
-
-  function setOpen(open){
-    side.dataset.open=open?'1':'0';
-    side.style.width=open?'240px':'48px';
-    toggleIcon.textContent=open?'×':'☰';
-    toggle.setAttribute('aria-label',open?'Recolher log':'Expandir log');
-    labels.forEach(function(l){ l.style.opacity=open?'1':'0'; });
-    list.querySelectorAll('[data-tema-label]').forEach(function(l){ l.style.opacity=open?'1':'0'; });
+  // Estado interno do pane (lista vs. tema aberto). Mobile-first: 1 coluna.
+  if(!pane._logTema){
+    renderLogList(pane);
+  } else {
+    renderLogTema(pane, pane._logTema);
   }
-  toggle.onclick=function(){ setOpen(side.dataset.open!=='1'); track('log_toggle',side.dataset.open); };
-
-  function renderList(activeId){
-    list.innerHTML=LOG_TEMAS.map(function(t){
-      var active=t.id===activeId;
-      return '<button data-tema="'+t.id+'" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;padding:11px 14px;border-left:3px solid '+(active?'var(--accent)':'transparent')+';background:'+(active?'var(--accent-light)':'transparent')+';color:'+(active?'var(--accent)':'var(--text2)')+';font-size:12px;font-weight:'+(active?'700':'600')+';box-sizing:border-box">'
-        +'<span style="font-size:14px;line-height:1;flex-shrink:0">📄</span>'
-        +'<span data-tema-label style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:'+(side.dataset.open==='1'?'1':'0')+';transition:opacity .15s">'+t.nome+'</span>'
-        +'</button>';
-    }).join('');
-    list.querySelectorAll('[data-tema]').forEach(function(btn){
-      btn.onclick=function(){ openTema(btn.dataset.tema); };
-    });
-  }
-
-  function openTema(id){
-    var t=LOG_TEMAS.find(function(x){return x.id===id;});
-    if(!t) return;
-    titleEl.textContent=t.nome;
-    subEl.textContent=(t.desc||'')+(t.data?' · '+t.data:'');
-    frame.src=t.src;
-    empty.style.display='none';
-    openTab.href=t.src;
-    openTab.style.display='inline-block';
-    renderList(id);
-    track('log_open',id);
-  }
-
-  renderList(null);
-  // Não abre nenhum tema automaticamente — sidebar fica minimizada e área principal mostra estado vazio.
+}
+function renderLogList(pane){
+  pane._logTema=null;
+  pane.innerHTML=''
+    +'<div style="margin-bottom:14px">'
+    +'<div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Log do gestor</div>'
+    +'<div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em">Análises e materiais</div>'
+    +'<div style="font-size:12px;color:var(--text3);margin-top:4px">Toque em um tema para abrir.</div>'
+    +'</div>'
+    +'<div id="log-cards" style="display:flex;flex-direction:column;gap:10px"></div>';
+  var list=pane.querySelector('#log-cards');
+  list.innerHTML=LOG_TEMAS.map(function(t){
+    return '<button data-tema="'+t.id+'" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);transition:transform .15s,box-shadow .15s,border-color .15s" onmouseenter="this.style.borderColor=\'var(--accent-mid)\';this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.15)\'" onmouseleave="this.style.borderColor=\'var(--border)\';this.style.boxShadow=\'none\'">'
+      +'<div style="width:42px;height:42px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📄</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px">'+t.nome+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(t.desc||'')+(t.data?' · '+t.data:'')+'</div>'
+      +'</div>'
+      +'<div style="font-size:18px;color:var(--text3);flex-shrink:0">›</div>'
+      +'</button>';
+  }).join('');
+  list.querySelectorAll('[data-tema]').forEach(function(btn){
+    btn.onclick=function(){
+      pane._logTema=btn.dataset.tema;
+      renderLogTema(pane, pane._logTema);
+      track('log_open',pane._logTema);
+    };
+  });
+}
+function renderLogTema(pane, temaId){
+  var t=LOG_TEMAS.find(function(x){return x.id===temaId;});
+  if(!t){ renderLogList(pane); return; }
+  pane.innerHTML=''
+    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+    +'<button id="log-back" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:var(--text2)">‹ Voltar</button>'
+    +'<div style="flex:1;min-width:0">'
+    +'<div style="font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.nome+'</div>'
+    +'<div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(t.desc||'')+(t.data?' · '+t.data:'')+'</div>'
+    +'</div>'
+    +'<a href="'+t.src+'" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:8px;padding:6px 10px;text-decoration:none;white-space:nowrap;flex-shrink:0">Tela cheia ↗</a>'
+    +'</div>'
+    +'<div style="position:relative;background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:calc(100vh - 200px);min-height:520px">'
+    +'<iframe src="'+t.src+'" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff"></iframe>'
+    +'</div>';
+  pane.querySelector('#log-back').onclick=function(){ renderLogList(pane); };
 }
 
 
