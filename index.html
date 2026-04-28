@@ -700,6 +700,163 @@ input[type="number"]:focus {
   background: var(--gupy-orange);
 }
 
+/* ─────────────────────────────────────────────────────────────
+   DESIGN 2 — PREMIUM DASHBOARD (Stripe/Mercury inspired)
+   Sobrescreve aparência base. Mantém variáveis e layout existentes.
+   ───────────────────────────────────────────────────────────── */
+
+/* Body — radial glow sutil ao fundo */
+#screen-app{
+  background:
+    radial-gradient(circle at 18% 0%,rgba(99,102,241,0.08),transparent 50%),
+    radial-gradient(circle at 82% 100%,rgba(205,255,130,0.04),transparent 50%),
+    var(--bg) !important;
+}
+
+/* Cards — gradient depth + lift no hover */
+.card{
+  background:linear-gradient(180deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.018) 100%) !important;
+  border:1px solid rgba(255,255,255,0.08) !important;
+  border-radius:14px !important;
+  box-shadow:0 8px 24px -6px rgba(0,0,0,0.5),0 1px 0 0 rgba(255,255,255,0.04) inset !important;
+  backdrop-filter:none !important;-webkit-backdrop-filter:none !important;
+  transition:all .25s cubic-bezier(.4,0,.2,1) !important;
+  position:relative;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);
+  pointer-events:none;
+}
+.card:hover{
+  background:linear-gradient(180deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.025) 100%) !important;
+  border-color:rgba(99,102,241,0.24) !important;
+  transform:translateY(-2px) !important;
+  box-shadow:0 24px 56px -12px rgba(0,0,0,0.6),0 1px 0 0 rgba(255,255,255,0.05) inset !important;
+}
+
+/* Metric cards — mesma linguagem */
+.metric-card{
+  background:linear-gradient(180deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.018) 100%) !important;
+  border:1px solid rgba(255,255,255,0.08) !important;
+  backdrop-filter:none !important;-webkit-backdrop-filter:none !important;
+  box-shadow:0 4px 12px -4px rgba(0,0,0,0.4),0 1px 0 0 rgba(255,255,255,0.04) inset !important;
+}
+.metric-card:hover{
+  border-color:rgba(99,102,241,0.24) !important;
+  transform:translateY(-2px) !important;
+  box-shadow:0 12px 28px -8px rgba(0,0,0,0.5) !important;
+}
+
+/* Header — premium glass */
+.app-header{
+  background:rgba(8,8,13,0.7) !important;
+  backdrop-filter:blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter:blur(20px) saturate(180%) !important;
+  border-bottom:1px solid rgba(255,255,255,0.06) !important;
+}
+
+/* Avatar do usuário no header — gradient + glow */
+.app-avatar{
+  background:linear-gradient(135deg,#6366f1 0%,#818cf8 100%) !important;
+  color:#fff !important;font-weight:700 !important;
+  box-shadow:0 0 0 2px rgba(99,102,241,0.2),0 4px 12px rgba(99,102,241,0.4) !important;
+}
+
+/* Hamburger / icon-buttons no header */
+#nav-toggle, #settings-btn{
+  background:rgba(255,255,255,0.03) !important;
+  border:1px solid rgba(255,255,255,0.06) !important;
+  color:var(--text2) !important;
+  border-radius:8px !important;
+  width:36px !important;height:36px !important;
+  transition:all .2s cubic-bezier(.4,0,.2,1) !important;
+}
+#nav-toggle:hover, #settings-btn:hover{
+  background:var(--accent-light) !important;
+  color:var(--accent) !important;
+  border-color:var(--accent-mid) !important;
+  box-shadow:0 0 32px rgba(99,102,241,0.25) !important;
+}
+.logout-btn{
+  background:rgba(255,255,255,0.03) !important;
+  border:1px solid rgba(255,255,255,0.06) !important;
+  border-radius:8px !important;
+}
+.logout-btn:hover{
+  background:rgba(248,113,113,0.1) !important;
+  color:var(--red) !important;
+  border-color:rgba(248,113,113,0.3) !important;
+}
+
+/* Drawer (side nav) — glass premium */
+#bottom-nav{
+  background:linear-gradient(180deg,rgba(8,8,13,0.95) 0%,rgba(8,8,13,0.85) 100%) !important;
+  backdrop-filter:blur(20px) !important;-webkit-backdrop-filter:blur(20px) !important;
+  border-right:1px solid rgba(255,255,255,0.06) !important;
+  box-shadow:0 24px 56px -12px rgba(0,0,0,0.6) !important;
+}
+.nav-item{
+  margin:2px 8px !important;
+  border-radius:8px !important;
+  border-left:none !important;
+  padding:11px 14px !important;
+  transition:all .2s cubic-bezier(.4,0,.2,1) !important;
+}
+.nav-item:hover{
+  background:rgba(255,255,255,0.04) !important;
+}
+.nav-item.active{
+  background:linear-gradient(135deg,rgba(99,102,241,0.14) 0%,rgba(99,102,241,0.06) 100%) !important;
+  border:1px solid rgba(99,102,241,0.32) !important;
+  box-shadow:0 0 0 1px rgba(99,102,241,0.32),inset 0 1px 0 rgba(255,255,255,0.05) !important;
+  color:var(--text) !important;
+  text-shadow:none !important;
+}
+.nav-item.active .nav-icon{color:var(--accent) !important;}
+.nav-icon{
+  width:20px !important;height:20px !important;
+  display:inline-flex !important;align-items:center !important;justify-content:center !important;
+  font-size:0 !important;
+}
+.nav-icon svg{
+  width:18px !important;height:18px !important;
+  stroke-width:1.75 !important;stroke:currentColor !important;fill:none !important;
+  stroke-linecap:round !important;stroke-linejoin:round !important;
+}
+/* Drawer um pouco mais estreito em mobile */
+@media (max-width:480px){
+  #bottom-nav{width:min(280px,82vw) !important;}
+}
+
+/* Update chip */
+.update-chip{
+  background:rgba(255,255,255,0.04) !important;
+  border:1px solid rgba(255,255,255,0.08) !important;
+  color:var(--text2) !important;
+  border-radius:999px !important;
+}
+
+/* Botões CTA primary — gradient + glow */
+button[onclick*="track"][style*="background:var(--accent)"],
+[style*="background:var(--accent);color:#fff"],
+button[style*="background:var(--accent)"][style*="color:#fff"]{
+  background:linear-gradient(135deg,#6366f1 0%,#4f46e5 100%) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,0.15) inset,0 4px 16px -4px rgba(99,102,241,0.5) !important;
+  transition:all .2s cubic-bezier(.4,0,.2,1) !important;
+}
+
+/* Pills com border sutil pra mais "premium" */
+.pill, [class*="pill-"]{
+  border:1px solid transparent;
+}
+
+/* Progress bar com glow */
+[style*="background:var(--accent)"][style*="height:"][style*="border-radius"]{
+  background:linear-gradient(90deg,#6366f1 0%,#818cf8 100%) !important;
+  box-shadow:0 0 12px rgba(99,102,241,0.5) !important;
+}
+
 </style>
 </head>
 <body>
@@ -1825,9 +1982,26 @@ function buildTicker(user){
 }
 
 // ─── TAB BUILDER (Bottom Nav) ─────────────────────────────────
+// SVG line icons (Lucide-style). Cada chave retorna um <svg> 20x20 que herda currentColor.
 const NAV_ICONS={
-  resumo:'◈',time:'◉',mrr:'◆',reunioes:'◷',noticias:'◉',analise:'◎',log:'☰',
-  hoje:'⌂',semana:'↗',funil:'▽',mrr_bdr:'◆',time_bdr:'◉',pdi:'◈',jdc:'◉'
+  // ── Gestor ──
+  resumo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  resultado:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>',
+  time:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  reunioes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  jdc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  log:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>',
+  // ── BDR ──
+  hoje:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  performance:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>',
+  funil:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
+  semana:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>',
+  pdi:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 6v6c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V6l-8-4z"/></svg>',
+  time_bdr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  mrr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  mrr_bdr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+  noticias:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
+  analise:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'
 };
 const NAV_LABELS={
   resumo:'Hoje',time:'Time',base:'Base',reunioes:'Agenda',weekly:'Weekly',analise:'Análise',log:'Log',
