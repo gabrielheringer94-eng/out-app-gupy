@@ -829,6 +829,45 @@ input[type="number"]:focus {
   #bottom-nav{width:min(280px,82vw) !important;}
 }
 
+/* ─── BOTTOM SHORTCUTS (rodapé do BDR) ─────────────────────── */
+#bottom-shortcuts{
+  display:none;
+  position:fixed;left:0;right:0;bottom:0;
+  height:calc(64px + var(--safe-bottom));
+  padding-bottom:var(--safe-bottom);
+  background:linear-gradient(180deg,rgba(8,8,13,0.92) 0%,rgba(8,8,13,0.98) 100%);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-top:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 -8px 24px rgba(0,0,0,0.3);
+  z-index:90;
+  align-items:stretch;justify-content:space-around;
+}
+#bottom-shortcuts.visible{display:flex;}
+.shortcut-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;padding:8px 2px;cursor:pointer;
+  background:none;border:none;color:var(--text3);
+  font-family:'Inter',sans-serif;font-size:9px;font-weight:600;
+  letter-spacing:.02em;line-height:1.2;text-align:center;
+  transition:color .15s;
+}
+.shortcut-item:hover{color:var(--text);}
+.shortcut-item.active{color:var(--accent);}
+.shortcut-item .ic{
+  width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;
+}
+.shortcut-item .ic svg{
+  width:20px;height:20px;stroke:currentColor;fill:none;
+  stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;
+}
+.shortcut-item .sc-label{
+  display:block;max-width:100%;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+/* Body padding pra não cobrir o último conteúdo */
+body[data-bdr="1"] .tab-content{padding-bottom:calc(64px + var(--safe-bottom)) !important;}
+
 /* Update chip */
 .update-chip{
   background:rgba(255,255,255,0.04) !important;
@@ -908,6 +947,7 @@ button[style*="background:var(--accent)"][style*="color:#fff"]{
   <div class="tab-content" id="tab-content"></div>
   <div id="nav-overlay" onclick="toggleSideNav(false)"></div>
   <nav class="bottom-nav" id="bottom-nav"></nav>
+  <nav id="bottom-shortcuts" aria-label="Atalhos"></nav>
 
   <!-- SETTINGS PANEL -->
   <div id="settings-overlay" onclick="closeSettings()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)"></div>
@@ -2187,6 +2227,7 @@ function buildTabs(tabs,builders){
     const isShortcut=!!t.shortcut;
     btn.className='nav-item'+(i===0?' active':'');
     btn.dataset.idx=i;
+    btn.dataset.tabId=t.id;
     if(isShortcut) btn.dataset.shortcutOf=t.shortcut;
     const iconKey=t.id.replace('-','_').replace('_shortcut','');
     btn.innerHTML=`<span class="nav-icon">${NAV_ICONS[iconKey]||'◦'}</span><span class="nav-label">${NAV_LABELS[iconKey]||t.label}</span>`;
@@ -2233,6 +2274,10 @@ function buildTabs(tabs,builders){
 
 // ─── GESTOR APP ───────────────────────────────────────────────
 function buildGestorApp(){
+  // Esconde o rodapé de atalhos (apenas BDR usa)
+  delete document.body.dataset.bdr;
+  var bar=document.getElementById('bottom-shortcuts');
+  if(bar){ bar.classList.remove('visible'); bar.innerHTML=''; }
   buildTabs([
     {id:'resumo',   label:'Hoje'},
     {id:'resultado',label:'Resultado'},
@@ -5757,15 +5802,13 @@ function buildBDRApp(user){
   const bdr=DATA.bdrs.find(b=>b.id===user.id);
   if(!bdr)return;
   const hasPDI=DATA.pdiUsers.includes(bdr.id);
-  // Drawer customizado pro BDR: 4 itens principais (Calendário e MRR são atalhos
-  // que abrem a aba Meu Resultado e expandem o bloco correspondente).
-  // Performance/Funil/Time/PDI ficam acessíveis via dentro do Meu Resultado ou
-  // como tabs ocultos (no DOM mas não no drawer).
+  // Drawer (☰) = navegação secundária: Performance, Funil, Time, PDI.
+  // As 4 ações principais (Home, Resultado, Calendário, MRR) ficam no
+  // rodapé fixo (bottom-shortcuts) — pattern mobile native.
+  // hoje + resultado existem no array de tabs porque shortcuts dependem deles.
   const tabs=[
     {id:'hoje',           label:'Home'},
     {id:'resultado',      label:'Meu Resultado'},
-    {id:'cal_shortcut',   label:'Meu Calendário do Mês', shortcut:'resultado', expand:'cal'},
-    {id:'mrr_shortcut',   label:'Meu MRR',               shortcut:'resultado', expand:'mrr'},
     {id:'performance',    label:'Performance'},
     {id:'funil',          label:'Funil'},
     {id:'time_bdr',       label:'Time'},
@@ -5773,8 +5816,6 @@ function buildBDRApp(user){
   const builders=[
     p=>buildHoje(p,bdr),
     p=>buildMeuResultado(p,bdr),
-    function(){}, // shortcut — não constrói pane
-    function(){}, // shortcut — não constrói pane
     p=>buildPerformanceBDR(p,bdr),
     p=>buildBDRFunil(p,bdr),
     p=>buildTimeView(p,bdr),
@@ -5784,6 +5825,63 @@ function buildBDRApp(user){
     builders.push(p=>buildPDI(p,bdr));
   }
   buildTabs(tabs,builders);
+  buildBottomShortcuts([
+    {id:'hoje',         label:'Home',        iconKey:'hoje'},
+    {id:'resultado',    label:'Meu Resultado', iconKey:'resultado'},
+    {id:'cal_shortcut', label:'Calendário',   iconKey:'reunioes', shortcut:'resultado', expand:'cal'},
+    {id:'mrr_shortcut', label:'Meu MRR',      iconKey:'mrr_bdr', shortcut:'resultado', expand:'mrr'},
+  ]);
+  document.body.dataset.bdr='1';
+}
+
+// Rodapé fixo com atalhos (BDR-only). Cada item ou ativa uma aba do drawer
+// (procurando o nav-item pelo dataset.tabId) ou aciona um shortcut que abre
+// a aba "shortcut" e expande um bloco colapsável dentro dela.
+function buildBottomShortcuts(items){
+  var bar=document.getElementById('bottom-shortcuts');
+  if(!bar) return;
+  bar.innerHTML='';
+  function findNavBtn(tabId){
+    return document.querySelector('#bottom-nav .nav-item[data-tab-id="'+tabId+'"]');
+  }
+  function activateTab(tabId){
+    var nb=findNavBtn(tabId);
+    if(nb) nb.click(); // delega pro handler nativo do buildTabs (que já fecha o drawer)
+  }
+  function expandResultadoBlock(blockId){
+    var body=document.getElementById('mres-'+blockId);
+    if(!body) return;
+    if(body.style.display==='none'){
+      var hdr=body.previousElementSibling;
+      if(hdr && hdr.click) hdr.click();
+      else body.style.display='block';
+    }
+    if(body.scrollIntoView) body.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  items.forEach(function(it){
+    var btn=document.createElement('button');
+    btn.className='shortcut-item';
+    btn.dataset.scId=it.id;
+    btn.innerHTML='<span class="ic">'+(NAV_ICONS[it.iconKey]||'')+'</span>'
+      +'<span class="sc-label">'+it.label+'</span>';
+    btn.onclick=function(){
+      document.querySelectorAll('.shortcut-item').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      if(it.shortcut){
+        activateTab(it.shortcut);
+        setTimeout(function(){ expandResultadoBlock(it.expand); }, 140);
+      } else {
+        activateTab(it.id);
+        var tc=document.getElementById('tab-content');
+        if(tc) tc.scrollTop=0;
+      }
+      track('shortcut',it.id);
+    };
+    bar.appendChild(btn);
+  });
+  // Marca o primeiro item como ativo por padrão (geralmente "Home")
+  if(bar.firstChild) bar.firstChild.classList.add('active');
+  bar.classList.add('visible');
 }
 
 
