@@ -1,7 +1,7 @@
 {
-  "name": "LOBXS",
-  "short_name": "LOBXS",
-  "description": "Outbound Pre-Sales · A Alcateia que Vence",
+  "name": "Outbound Gupy",
+  "short_name": "Outbound Gupy",
+  "description": "Outbound Gupy · Pré-Vendas",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0d0d0d",
