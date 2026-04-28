@@ -833,6 +833,10 @@ input[type="number"]:focus {
 @media (max-width:760px){
   .desq-hero{grid-template-columns:1fr !important;}
 }
+/* Carteira por BDR — colapsa funil + segmentos em coluna em telas estreitas */
+@media (max-width:760px){
+  .carteira-grid{grid-template-columns:1fr !important;}
+}
 
 /* ─── BOTTOM SHORTCUTS (rodapé do BDR) ─────────────────────── */
 #bottom-shortcuts{
@@ -2294,28 +2298,253 @@ function buildGestorApp(){
 }
 
 // ─── ANÁLISE DE CARTEIRA (gestor) ─────────────────────────────
-// Aba abre direto no iframe da auditoria (sem lista intermediária).
+// Aba abre numa view por BDR (3 indicadores MVP: ACV+Forecast,
+// Funil+Lead time, Segmentos). Auditoria estática vira link no footer.
 const ANALISE_CARTEIRA={
   nome:'Análise de carteira',
   desc:'Auditoria Pre Vendas · M Q1 2026',
   src:'analises/auditoria_pre_vendas_M_Q1_2026.html',
   data:'24/04/2026'
 };
+
+// Mock realista por BDR — TODO: substituir por export CSV dos reports SF
+// Dashboard fonte: https://gupy.lightning.force.com/lightning/r/Dashboard/01ZbJ0000023KPFUA2/view
+// quarterMeta = ACV alvo do quarter por BDR (R$). Win rate AE assumido 25%.
+const CARTEIRA_BDR={
+  meta:{ quarterMeta:600000, fonte:'Salesforce · Painel Liderança · 28/04/2026 (mock)' },
+  byBdr:{
+    MY:{ ae:'Lucas Pereira',     acvFunil:1340000, acvAberto:920000, dealsAbertos:11, leadTimeAvg:68,  score:84, icpPct:78, recicladaPct:18, segCarteira:{Enterprise:42,'Mid-Market':38,SMB:20}, segVendas:{Enterprise:55,'Mid-Market':35,SMB:10}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[8,18,42]} },
+    JS:{ ae:'Bruno Albuquerque',  acvFunil:980000,  acvAberto:610000, dealsAbertos:7,  leadTimeAvg:74,  score:71, icpPct:68, recicladaPct:24, segCarteira:{Enterprise:30,'Mid-Market':45,SMB:25}, segVendas:{Enterprise:48,'Mid-Market':42,SMB:10}, qualidadeDados:{contatos:88,decisor:71,linkedin:58}, conv:{lcRa:18,raOp:32,leadTimeStages:[10,22,42]} },
+    VE:{ ae:'Marina Costa',       acvFunil:1110000, acvAberto:740000, dealsAbertos:8,  leadTimeAvg:62,  score:76, icpPct:74, recicladaPct:21, segCarteira:{Enterprise:38,'Mid-Market':40,SMB:22}, segVendas:{Enterprise:50,'Mid-Market':38,SMB:12}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[7,20,35]} },
+    GF:{ ae:'Felipe Andrade',     acvFunil:1420000, acvAberto:1010000,dealsAbertos:12, leadTimeAvg:59,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Enterprise:48,'Mid-Market':35,SMB:17}, segVendas:{Enterprise:62,'Mid-Market':30,SMB:8 }, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[6,19,34]} },
+    JR:{ ae:'Renata Lopes',       acvFunil:760000,  acvAberto:480000, dealsAbertos:6,  leadTimeAvg:81,  score:62, icpPct:62, recicladaPct:31, segCarteira:{Enterprise:24,'Mid-Market':46,SMB:30}, segVendas:{Enterprise:38,'Mid-Market':48,SMB:14}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[12,26,43]} },
+    AG:{ ae:'Diego Martins',      acvFunil:640000,  acvAberto:360000, dealsAbertos:5,  leadTimeAvg:88,  score:55, icpPct:58, recicladaPct:36, segCarteira:{Enterprise:18,'Mid-Market':44,SMB:38}, segVendas:{Enterprise:30,'Mid-Market':50,SMB:20}, qualidadeDados:{contatos:78,decisor:58,linkedin:46}, conv:{lcRa:24,raOp:18,leadTimeStages:[14,28,46]} },
+    AM:{ ae:'Carolina Vieira',    acvFunil:420000,  acvAberto:240000, dealsAbertos:3,  leadTimeAvg:91,  score:48, icpPct:54, recicladaPct:42, segCarteira:{Enterprise:14,'Mid-Market':40,SMB:46}, segVendas:{Enterprise:24,'Mid-Market':52,SMB:24}, qualidadeDados:{contatos:74,decisor:51,linkedin:40}, conv:{lcRa:11,raOp:20,leadTimeStages:[15,30,46]} },
+    PS:{ ae:'Thiago Nunes',       acvFunil:380000,  acvAberto:180000, dealsAbertos:2,  leadTimeAvg:96,  score:42, icpPct:50, recicladaPct:48, segCarteira:{Enterprise:10,'Mid-Market':38,SMB:52}, segVendas:{Enterprise:18,'Mid-Market':54,SMB:28}, qualidadeDados:{contatos:70,decisor:48,linkedin:36}, conv:{lcRa:22,raOp:0, leadTimeStages:[16,32,48]} }
+  }
+};
+
+var _carteiraSel=null; // null = Time todo (agregado)
+
+function _carteiraAggregate(){
+  // Agrega métricas de todos os BDRs para a view "Time todo"
+  var all=Object.keys(CARTEIRA_BDR.byBdr).map(function(k){return CARTEIRA_BDR.byBdr[k];});
+  var sum=function(f){return all.reduce(function(s,x){return s+(f(x)||0);},0);};
+  var avg=function(f){return Math.round(sum(f)/all.length);};
+  var avgSeg=function(seg){
+    var keys=Object.keys(all[0][seg]);
+    var out={};
+    keys.forEach(function(k){ out[k]=Math.round(all.reduce(function(s,x){return s+(x[seg][k]||0);},0)/all.length); });
+    return out;
+  };
+  return {
+    ae:'Time todo · '+all.length+' BDRs',
+    acvFunil: sum(function(x){return x.acvFunil;}),
+    acvAberto: sum(function(x){return x.acvAberto;}),
+    dealsAbertos: sum(function(x){return x.dealsAbertos;}),
+    leadTimeAvg: avg(function(x){return x.leadTimeAvg;}),
+    score: avg(function(x){return x.score;}),
+    icpPct: avg(function(x){return x.icpPct;}),
+    recicladaPct: avg(function(x){return x.recicladaPct;}),
+    segCarteira: avgSeg('segCarteira'),
+    segVendas: avgSeg('segVendas'),
+    qualidadeDados: {
+      contatos: avg(function(x){return x.qualidadeDados.contatos;}),
+      decisor: avg(function(x){return x.qualidadeDados.decisor;}),
+      linkedin: avg(function(x){return x.qualidadeDados.linkedin;})
+    },
+    conv:{
+      lcRa: avg(function(x){return x.conv.lcRa;}),
+      raOp: avg(function(x){return x.conv.raOp;}),
+      leadTimeStages:[avg(function(x){return x.conv.leadTimeStages[0];}),avg(function(x){return x.conv.leadTimeStages[1];}),avg(function(x){return x.conv.leadTimeStages[2];})]
+    }
+  };
+}
+
+function _fmtMoney(v){
+  if(v>=1000000) return 'R$ '+(v/1000000).toFixed(2).replace('.',',')+'M';
+  if(v>=1000)    return 'R$ '+Math.round(v/1000)+'k';
+  return 'R$ '+v;
+}
+
+function _topMotivoDesqByBdr(bdrId){
+  var recs=(DATA.desqDetalhe||[]);
+  if(bdrId) recs=recs.filter(function(r){return r.b===bdrId;});
+  if(!recs.length) return {motivo:'—',count:0,total:0};
+  var by={}; recs.forEach(function(r){by[r.m]=(by[r.m]||0)+1;});
+  var top=Object.keys(by).map(function(k){return{motivo:k,count:by[k]};}).sort(function(a,b){return b.count-a.count;})[0];
+  return {motivo:top.motivo,count:top.count,total:recs.length};
+}
+
+function selectCarteiraBDR(bdrId){
+  _carteiraSel = bdrId || null;
+  var pane=document.querySelector('#pane-analise');
+  if(pane){ pane.innerHTML=''; buildAnaliseCarteira(pane); }
+  if(typeof track==='function') track('analise_carteira_bdr', bdrId||'time');
+}
+
+function _renderDonut(seg, size){
+  size = size || 110;
+  var keys=Object.keys(seg);
+  var palette=['#6366f1','#10b981','#f59e0b','#a855f7','#ec4899'];
+  var total=keys.reduce(function(s,k){return s+seg[k];},0);
+  var cx=size/2, cy=size/2, r=size/2-8, sw=14;
+  var circ=2*Math.PI*r;
+  var off=0;
+  var svg='<svg viewBox="0 0 '+size+' '+size+'" style="width:'+size+'px;height:'+size+'px">';
+  svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="'+sw+'"/>';
+  keys.forEach(function(k,i){
+    var pct=seg[k]/total;
+    var len=circ*pct;
+    svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+palette[i%palette.length]+'" stroke-width="'+sw+'" stroke-dasharray="'+len.toFixed(2)+' '+circ.toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" transform="rotate(-90 '+cx+' '+cy+')" stroke-linecap="butt"/>';
+    off+=len;
+  });
+  svg+='</svg>';
+  // Legenda
+  var leg='<div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0">';
+  keys.forEach(function(k,i){
+    leg+='<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)">'
+      +'<span style="width:8px;height:8px;border-radius:2px;background:'+palette[i%palette.length]+';flex-shrink:0"></span>'
+      +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+k+'</span>'
+      +'<span style="font-weight:700;color:var(--text);font-feature-settings:\'tnum\'">'+seg[k]+'%</span>'
+      +'</div>';
+  });
+  leg+='</div>';
+  return '<div style="display:flex;align-items:center;gap:14px">'+svg+leg+'</div>';
+}
+
 function buildAnaliseCarteira(pane){
   var t=ANALISE_CARTEIRA;
-  pane.innerHTML=''
-    +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px">'
-    +'<div style="min-width:0;flex:1">'
-    +'<div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Auditoria · M Q1 2026</div>'
-    +'<div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.nome+'</div>'
-    +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+t.desc+' · '+t.data+'</div>'
+  var bdrs=DATA.bdrs||[];
+  var sel=_carteiraSel;
+  var c = sel ? CARTEIRA_BDR.byBdr[sel] : _carteiraAggregate();
+  var bdrObj = sel ? bdrs.find(function(b){return b.id===sel;}) : null;
+  var nomeExibido = bdrObj ? bdrObj.name : 'Time todo';
+  var meta = CARTEIRA_BDR.meta.quarterMeta * (sel ? 1 : bdrs.length);
+  var pctMeta = Math.min(Math.round((c.acvAberto/meta)*100),200);
+  var heroCol = pctMeta>=80?'#16a34a':pctMeta>=50?'#d97706':'#dc2626';
+  var heroBg  = pctMeta>=80?'linear-gradient(145deg,#166534 0%,#064e3b 60%,#0a0a0f 100%)'
+              : pctMeta>=50?'linear-gradient(145deg,#92400e 0%,#451a03 60%,#0a0a0f 100%)'
+              :             'linear-gradient(145deg,#991b1b 0%,#450a0a 60%,#0a0a0f 100%)';
+  var heroAccent=pctMeta>=80?'#bbf7d0':pctMeta>=50?'#fde68a':'#fecaca';
+
+  // ── Seletor de BDR (chips com avatares) ──
+  var seletor='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px">';
+  seletor+='<button onclick="selectCarteiraBDR(null)" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:'+(!sel?'rgba(99,102,241,0.14)':'rgba(255,255,255,0.03)')+';border:1px solid '+(!sel?'rgba(99,102,241,0.32)':'var(--border)')+';color:'+(!sel?'var(--text)':'var(--text2)')+';font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">'
+    +'<span style="width:18px;height:18px;border-radius:50%;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--accent)">∑</span>'
+    +'Time</button>';
+  bdrs.forEach(function(b){
+    var isAtivo=sel===b.id;
+    var av = b.photo
+      ? '<img src="'+b.photo+'" style="width:18px;height:18px;border-radius:50%;object-fit:cover">'
+      : '<span style="width:18px;height:18px;border-radius:50%;background:'+b.bg+';color:'+b.color+';display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700">'+b.id+'</span>';
+    seletor+='<button onclick="selectCarteiraBDR(\''+b.id+'\')" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:'+(isAtivo?'rgba(99,102,241,0.14)':'rgba(255,255,255,0.03)')+';border:1px solid '+(isAtivo?'rgba(99,102,241,0.32)':'var(--border)')+';color:'+(isAtivo?'var(--text)':'var(--text2)')+';font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">'+av+b.name.split(' ')[0]+'</button>';
+  });
+  seletor+='</div>';
+
+  // ── Hero ACV + Forecast ──
+  var hero='<div style="background:'+heroBg+';border-radius:var(--radius);padding:22px 24px;margin-bottom:14px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden">'
+    +'<div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)"></div>'
+    +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">'
+    +  '<div style="flex:1;min-width:240px">'
+    +    '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">ACV potencial · '+nomeExibido+(sel?' · AE '+c.ae:'')+'</div>'
+    +    '<div style="font-size:46px;font-weight:800;color:'+heroAccent+';line-height:1;letter-spacing:-.03em;margin-bottom:6px;font-feature-settings:\'tnum\'">'+_fmtMoney(c.acvAberto)+'</div>'
+    +    '<div style="font-size:13px;color:#fff;font-weight:500">'+c.dealsAbertos+' deals abertos · ACV total no funil '+_fmtMoney(c.acvFunil)+'</div>'
+    +  '</div>'
+    +  '<div style="min-width:220px;text-align:right">'
+    +    '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Forecast atingimento</div>'
+    +    '<div style="font-size:38px;font-weight:800;color:'+heroAccent+';line-height:1;letter-spacing:-.03em;font-feature-settings:\'tnum\'">'+pctMeta+'%</div>'
+    +    '<div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:4px">meta '+_fmtMoney(meta)+' · gap '+_fmtMoney(c.acvAberto-meta)+'</div>'
+    +  '</div>'
     +'</div>'
-    +'<a href="'+t.src+'" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:8px;padding:6px 10px;text-decoration:none;white-space:nowrap;flex-shrink:0">Tela cheia ↗</a>'
+    +'<div style="height:8px;background:rgba(0,0,0,0.28);border-radius:4px;overflow:hidden;margin-top:14px">'
+    +  '<div style="height:100%;width:'+Math.min(pctMeta,100)+'%;background:'+heroAccent+';border-radius:4px;transition:width .3s"></div>'
     +'</div>'
-    +'<div style="position:relative;background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:calc(100vh - 180px);min-height:520px">'
-    +'<iframe src="'+t.src+'" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff"></iframe>'
     +'</div>';
-  track('analise_carteira_open',t.src);
+
+  // ── Funil + Lead time (esq) | Segmentos dual donut (dir) ──
+  var funilStages=[
+    {label:'Lead Conectado→RA',pct:c.conv.lcRa,leadTime:c.conv.leadTimeStages[0]},
+    {label:'RA→Oportunidade',  pct:c.conv.raOp,leadTime:c.conv.leadTimeStages[1]},
+    {label:'Op→Closed Won',    pct:25,           leadTime:c.conv.leadTimeStages[2]}
+  ];
+  var funilHtml='<div class="card" style="margin:0">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Funil · conversão & lead time</div>'
+    +'<div style="display:flex;flex-direction:column;gap:10px">';
+  funilStages.forEach(function(st){
+    var col=st.pct>=30?'#10b981':st.pct>=15?'#f59e0b':'#ef4444';
+    funilHtml+='<div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:11px 14px">'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+      +'<div style="font-size:11px;font-weight:600;color:var(--text)">'+st.label+'</div>'
+      +'<div style="display:flex;align-items:center;gap:10px">'
+      +'<span style="font-size:16px;font-weight:800;color:'+col+';font-feature-settings:\'tnum\'">'+st.pct+'%</span>'
+      +'<span style="font-size:10px;color:var(--text3)">'+st.leadTime+'d médios</span>'
+      +'</div></div>'
+      +'<div style="height:4px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden">'
+      +'<div style="height:100%;width:'+Math.min(st.pct*2,100)+'%;background:'+col+';border-radius:2px"></div>'
+      +'</div></div>';
+  });
+  funilHtml+='</div>'
+    +'<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:11px">'
+    +'<span style="color:var(--text3)">Lead time total médio</span>'
+    +'<span style="color:var(--text);font-weight:700;font-feature-settings:\'tnum\'">'+c.leadTimeAvg+' dias</span>'
+    +'</div>'
+    +'</div>';
+
+  var segHtml='<div class="card" style="margin:0">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Distribuição por segmento</div>'
+    +'<div style="margin-bottom:14px">'
+    +'<div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Carteira do AE</div>'
+    +_renderDonut(c.segCarteira,96)
+    +'</div>'
+    +'<div style="padding-top:14px;border-top:1px solid var(--border)">'
+    +'<div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Convertidas em Vendas</div>'
+    +_renderDonut(c.segVendas,96)
+    +'</div>'
+    +'</div>';
+
+  // ── Strip 5 indicadores secundários ──
+  var topDesq=_topMotivoDesqByBdr(sel);
+  var qd=c.qualidadeDados;
+  var qdAvg=Math.round((qd.contatos+qd.decisor+qd.linkedin)/3);
+  var sec=[
+    {lbl:'ICP',                 val:c.icpPct+'%',                                col:c.icpPct>=70?'#10b981':c.icpPct>=55?'#f59e0b':'#ef4444', sub:'opps dentro do ICP'},
+    {lbl:'Reciclada',           val:c.recicladaPct+'%',                          col:c.recicladaPct<=20?'#10b981':c.recicladaPct<=35?'#f59e0b':'#ef4444', sub:'da carteira reaproveitada'},
+    {lbl:'Score',               val:c.score,                                     col:c.score>=75?'#10b981':c.score>=55?'#f59e0b':'#ef4444', sub:'qualidade ponderada (0-100)'},
+    {lbl:'Top motivo desq.',    val:topDesq.count?topDesq.count:'—',             col:'#a855f7', sub:topDesq.motivo||'sem dados'},
+    {lbl:'Qualidade de dados',  val:qdAvg+'%',                                   col:qdAvg>=80?'#10b981':qdAvg>=65?'#f59e0b':'#ef4444', sub:'contatos · decisor · linkedin'}
+  ];
+  var secHtml='<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px">';
+  sec.forEach(function(x){
+    secHtml+='<div style="position:relative;padding:14px 12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;overflow:hidden">'
+      +'<div style="position:absolute;top:0;left:0;right:0;height:2px;background:'+x.col+';opacity:.7"></div>'
+      +'<div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">'+x.lbl+'</div>'
+      +'<div style="font-size:24px;font-weight:800;color:'+x.col+';letter-spacing:-.03em;line-height:1;font-feature-settings:\'tnum\';margin-bottom:6px">'+x.val+'</div>'
+      +'<div style="font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+x.sub+'</div>'
+      +'</div>';
+  });
+  secHtml+='</div>';
+
+  pane.innerHTML=''
+    +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px">'
+    +  '<div style="min-width:0;flex:1">'
+    +    '<div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Análise de carteira · por BDR</div>'
+    +    '<div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em">Pipeline, conversão & segmentos</div>'
+    +    '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+CARTEIRA_BDR.meta.fonte+'</div>'
+    +  '</div>'
+    +'</div>'
+    +seletor
+    +hero
+    +'<div class="carteira-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">'
+    +funilHtml+segHtml
+    +'</div>'
+    +secHtml
+    +'<div style="margin-top:18px;padding:14px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'
+    +'<div><div style="font-size:11px;color:var(--text2);font-weight:600">Auditoria completa · '+t.desc+'</div>'
+    +'<div style="font-size:10px;color:var(--text3);margin-top:2px">'+t.data+' · análise estática trimestral</div></div>'
+    +'<a href="'+t.src+'" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:8px;padding:7px 12px;text-decoration:none">Abrir auditoria ↗</a>'
+    +'</div>';
+  track('analise_carteira_open', sel||'time');
 }
 
 
