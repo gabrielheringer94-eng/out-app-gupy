@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  LOBXS HUNTER · Pre Vendas
+  Outbound Gupy · Pre Vendas
   Modificado em: 2026-04-23 (Atualização de dados Salesforce)
   Mudanças aplicadas:
     · PR1 #1  Home do gestor (buildResumo) virou tela acionável: ações pendentes no topo, diagnóstico colapsado.
@@ -16,10 +16,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="LOBXS HUNTER">
+<meta name="apple-mobile-web-app-title" content="Outbound Gupy">
 <meta name="theme-color" content="#ffffff">
 <link rel="manifest" href="manifest.json">
-<title>LOBXS HUNTER · Pre Vendas</title>
+<title>Outbound Gupy · Pre Vendas</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -696,7 +696,7 @@ input[type="number"]:focus {
     <svg width="120" height="34" viewBox="0 0 200 56" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:24px">
       <circle cx="26" cy="28" r="24" fill="rgba(255,255,255,0.15)"/>
       <path d="M35 28h-7.5v5.5h4.8c-1.4 2.8-4.2 4.7-7.3 4.7A9.5 9.5 0 1 1 34.2 22l3.9-3.9A15.5 15.5 0 1 0 25.5 44v-2H35V28z" fill="white"/>
-      <text x="58" y="39" font-family="Inter,sans-serif" font-weight="700" font-size="27" fill="white" letter-spacing="-0.5">LOBXS HUNTER</text>
+      <text x="58" y="39" font-family="Inter,sans-serif" font-weight="700" font-size="27" fill="white" letter-spacing="-0.5">Outbound Gupy</text>
     </svg>
     <div id="login-greeting" style="font-size:22px;font-weight:700;color:white;margin-bottom:6px;letter-spacing:-.02em"></div>
     <div style="font-size:13px;color:rgba(255,255,255,.65);margin-bottom:4px">Pre Vendas · OTB M</div>
@@ -2467,41 +2467,10 @@ function buildDiagnosticoSemana(pane){
 
   pane.innerHTML=`
 
-    <!-- ═══ BLOCO 1: META & FORECAST HERO ═══ -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-    <div style="background:linear-gradient(145deg,${gapProj>=0?'#166534 0%,#064e3b 40%,#0a0a0f':'#991b1b 0%,#581c1c 40%,#12121a'} 100%);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-lg)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.07em">Meta Abril · ${d.meta} opps</div>
-        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.9);background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:20px">${gapProj>=0?'No pace ▲':'Risco ▼'}</div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;text-align:center">
-        <div>
-          <div onclick="showOppsModal()" style="cursor:pointer;font-size:24px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">${oppsAcumMes}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Atual (mês)</div>
-        </div>
-        <div style="border-left:1px solid rgba(255,255,255,0.1);border-right:1px solid rgba(255,255,255,0.1)">
-          <div style="font-size:24px;font-weight:700;font-family:\'Inter\',sans-serif;color:white;line-height:1">${proj}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Projeção</div>
-        </div>
-        <div>
-          <div style="font-size:24px;font-weight:700;font-family:\'Inter\',sans-serif;color:${gapProj>=0?'#bbf7d0':'#fecaca'};line-height:1">${gapProj>=0?'+':''}${gapProj}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px">Gap</div>
-        </div>
-      </div>
-      <div style="height:5px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;position:relative;margin-bottom:4px">
-        <div style="position:absolute;left:0;top:0;height:100%;width:${Math.round((paceEsp/d.meta)*100)}%;background:rgba(255,255,255,0.15);border-radius:3px"></div>
-        <div style="position:absolute;left:0;top:0;height:100%;width:${pctAtual}%;background:var(--bg3);border-radius:3px"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.5)">
-        <span>${pctAtual}% real · ${Math.round((paceEsp/d.meta)*100)}% pace</span>
-        <span>Proj ${pctProj}%</span>
-      </div>
-    </div>
-    <!-- FORECAST DA SEMANA -->
-    <div style="background:linear-gradient(145deg,#6366f1 0%,#a855f7 40%,#1a1a26 100%);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-lg)">
+    <!-- ═══ BLOCO 1: FORECAST DA SEMANA (Meta Abril removida — já no hero do topo) ═══ -->
+    <div style="background:linear-gradient(145deg,#6366f1 0%,#a855f7 40%,#1a1a26 100%);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-lg);margin-bottom:14px">
       <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Forecast · Semana ${d.semAtual}</div>
       <div id="resumo-fcst-semana" style="text-align:center;color:rgba(255,255,255,.5);font-size:11px">Carregando...</div>
-    </div>
     </div>
 
     <!-- ═══ BLOCO 2: ALERTAS CRÍTICOS ═══ -->
@@ -2587,27 +2556,6 @@ function buildDiagnosticoSemana(pane){
         </div>`).join('')}
     </div>
 
-    <!-- ═══ BLOCO 5: ALAVANCAS ═══ -->
-    <div class="card" style="margin-bottom:12px">
-      <div class="collapsible-header" onclick="toggleCard('res-alav-body',this)" style="display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em">Alavancas de crescimento</div>
-        <span class="collapse-icon" style="font-size:14px;color:var(--text3)">▾</span>
-      </div>
-      <div id="res-alav-body" style="margin-top:8px">
-      ${alavancas.map((a,i)=>`
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="width:6px;height:6px;border-radius:50%;background:${a.cor}"></div>
-            <span style="font-size:12px;font-weight:500;color:var(--text)">${a.label}</span>
-            <span style="font-size:10px;color:var(--text3)">${a.detail||''}</span>
-          </div>
-          <span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${a.cor}">+${a.opps} opps</span>
-        </div>`).join('')}
-      <div style="padding-top:10px;font-size:11px;color:var(--text3);text-align:center">
-        Potencial total: +${alavancas.reduce((s,a)=>s+a.opps,0)} oportunidades adicionais
-      </div>
-      </div>
-    </div>
 
     <!-- ═══ BLOCO 5.5: EVENTOS / PASSIVOS — apenas overview, detalhe na aba Time ═══ -->
     ${d.evento?`
@@ -4123,7 +4071,7 @@ function previewWeeklyEmail(){
       </div>
       <div id="weekly-content">
       <h1>Weekly — S${semReview} · ${semData.datas||''}</h1>
-      <div class="sub">Resumo semanal · Pré-Vendas Outbound · LOBXS HUNTER</div>
+      <div class="sub">Resumo semanal · Pré-Vendas Outbound · Outbound Gupy</div>
 
       <h2>✨ Destaques</h2>
       <ul>
@@ -4145,7 +4093,7 @@ function previewWeeklyEmail(){
         <li><strong>Prioridades:</strong> ${prioridades?prioridades.replace(/\n/g,'<br>'):'— preencher em "weekly_notes_s'+semReview+'" no localStorage.'}</li>
       </ul>
 
-      <div class="foot">Gerado automaticamente pelo LOBXS HUNTER · ${new Date().toLocaleDateString('pt-BR')}</div>
+      <div class="foot">Gerado automaticamente pelo Outbound Gupy · ${new Date().toLocaleDateString('pt-BR')}</div>
       </div>
     </div>`;
 
@@ -4167,7 +4115,7 @@ function previewWeeklyEmail(){
     +'}'
     +'<'+'/script>';
 
-  const doc='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Weekly S'+semReview+' — LOBXS HUNTER</title><style>'+css+'</style></head><body>'+body+previewScript+'</body></html>';
+  const doc='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Weekly S'+semReview+' — Outbound Gupy</title><style>'+css+'</style></head><body>'+body+previewScript+'</body></html>';
   const w=window.open('about:blank','_blank');
   if(w){ w.document.open(); w.document.write(doc); w.document.close(); }
   else { alert('Libere pop-ups para visualizar o preview do weekly.'); }
