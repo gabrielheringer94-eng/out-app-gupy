@@ -829,6 +829,11 @@ input[type="number"]:focus {
   #bottom-nav{width:min(280px,82vw) !important;}
 }
 
+/* Desq hero — colapsa KPI + chart em coluna em telas estreitas */
+@media (max-width:760px){
+  .desq-hero{grid-template-columns:1fr !important;}
+}
+
 /* ─── BOTTOM SHORTCUTS (rodapé do BDR) ─────────────────────── */
 #bottom-shortcuts{
   display:none;
@@ -2553,10 +2558,16 @@ function buildResultadoGestor(pane){
     if(!DATA.desqDetalhe||!DATA.desqDetalhe.length) return;
     var card=document.createElement('div');
     card.className='card';
-    card.style.cssText='margin-top:12px;padding:14px';
-    card.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-      +'<div style="font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px">🚫 Desqualificações · Análise</div>'
-      +'<div style="font-size:10px;color:var(--text3)">filtre por BDR, motivo, canal ou período</div>'
+    card.style.cssText='margin-top:12px;padding:22px 24px;background:linear-gradient(145deg,var(--bg2) 0%,var(--bg) 100%);border:1px solid var(--border);position:relative;overflow:hidden';
+    card.innerHTML='<div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(248,113,113,0.35),transparent);opacity:.6"></div>'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:16px;flex-wrap:wrap">'
+      +'<div style="display:flex;align-items:center;gap:10px">'
+      +'<div style="width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,rgba(248,113,113,0.15),rgba(248,113,113,0.04));border:1px solid rgba(248,113,113,0.2);display:flex;align-items:center;justify-content:center;font-size:14px">🚫</div>'
+      +'<div>'
+      +'<div style="font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.01em">Desqualificações · Análise</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:2px">filtre por BDR, motivo, canal ou período</div>'
+      +'</div>'
+      +'</div>'
       +'</div>'
       +'<div id="desq-panel-gestor"></div>';
     pane.appendChild(card);
@@ -7373,23 +7384,51 @@ function renderDesqPanelContent(panelId){
     el.innerHTML='<div style="text-align:center;padding:30px 20px;color:var(--text3);font-size:12px">Nenhuma desqualificação nesses filtros.</div>';
     return;
   }
-  // WoW line chart (baseado nos records filtrados) — únicas cores ficam aqui
-  html+=renderDesqWoWChart(recs);
-  // Header with total — neutro
-  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px">';
-  html+='<div><div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:700">Total filtrado</div>';
-  html+='<div style="font-size:22px;font-weight:700;color:var(--text);font-family:\'Inter\',sans-serif;line-height:1">'+total+'</div></div>';
-  html+='<button onclick="showDesqModal('+(state.bdr&&state.bdr!=='all'?"'"+state.bdr+"'":'null')+')" style="font-size:11px;padding:7px 12px;background:var(--bg2);color:var(--text2);border:1px solid var(--border);border-radius:8px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">Ver modal completa →</button>';
+  // ═══ HERO: KPI grande + chart com area gradient (substitui o header de total) ═══
+  html+=renderDesqWoWChart(recs, total);
+  // ═══ POR CANAL: cards coloridos com sparkline ═══
+  var weeksAll=aggDesqByWeekFonte(recs);
+  var todayPC=new Date(); todayPC.setHours(0,0,0,0);
+  var weeksPC=weeksAll.filter(function(w){return w.start<=todayPC;});
+  var lastW=weeksPC[weeksPC.length-1]||{byFonte:{}};
+  var prevW=weeksPC[weeksPC.length-2]||{byFonte:{}};
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+  html+='<div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em">Por canal</div>';
+  html+='<div style="font-size:10px;color:var(--text3)">delta vs '+(prevW.label||'sem ant.')+'</div>';
   html+='</div>';
-  // Pills por Fonte — neutro
-  html+='<div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Por canal</div>';
-  html+='<div style="display:grid;grid-template-columns:repeat('+Math.min(byFonte.length,5)+',1fr);gap:6px;margin-bottom:12px">';
+  html+='<div style="display:grid;grid-template-columns:repeat('+Math.min(byFonte.length||1,5)+',1fr);gap:10px;margin-bottom:18px">';
   byFonte.forEach(function(x){
     var pct=total>0?Math.round(x.val/total*100):0;
-    html+='<div style="text-align:center;padding:8px 6px;border-radius:8px;background:var(--bg3);border:1px solid var(--border)">';
-    html+='<div style="font-size:16px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text);line-height:1">'+x.val+'</div>';
-    html+='<div style="font-size:9px;color:var(--text3);margin-top:3px;font-weight:600">'+(fontes[x.fonte]||x.fonte)+'</div>';
-    html+='<div style="font-size:8px;color:var(--text3);margin-top:1px">'+pct+'%</div>';
+    var col=getDesqFonteColor(x.fonte);
+    var nome=fontes[x.fonte]||x.fonte;
+    var lastVal=lastW.byFonte[x.fonte]||0;
+    var prevVal=prevW.byFonte[x.fonte]||0;
+    var dlt=lastVal-prevVal;
+    var dltStr= dlt===0 ? '—' : ((dlt>0?'▲ +':'▼ ')+dlt);
+    var dltCol= dlt>0 ? '#f87171' : (dlt<0 ? '#4ade80' : 'var(--text3)');
+    // Sparkline (todas as semanas, só essa fonte)
+    var sparkPts=weeksPC.map(function(w){return w.byFonte[x.fonte]||0;});
+    var sparkMax=Math.max.apply(null,sparkPts.concat([1]));
+    var sw=100, sh=24;
+    var pathD='';
+    if(sparkPts.length>1){
+      pathD = sparkPts.map(function(v,i){
+        var px=(i/(sparkPts.length-1))*sw;
+        var py=sh-(v/sparkMax*(sh-2))-1;
+        return (i===0?'M':'L')+px.toFixed(1)+' '+py.toFixed(1);
+      }).join(' ');
+    }
+    html+='<div onclick="showDesqModal(null,\''+x.fonte+'\')" style="position:relative;padding:14px 14px 12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;cursor:pointer;overflow:hidden;transition:transform .15s,background .15s" onmouseenter="this.style.background=\'rgba(255,255,255,0.04)\';this.style.transform=\'translateY(-1px)\'" onmouseleave="this.style.background=\'rgba(255,255,255,0.02)\';this.style.transform=\'translateY(0)\'">';
+    html+='<div style="position:absolute;top:0;left:0;right:0;height:2px;background:'+col+';opacity:.7"></div>';
+    html+='<div style="font-size:11px;color:var(--text2);font-weight:600;letter-spacing:-.01em;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nome+'</div>';
+    html+='<div style="font-size:26px;font-weight:800;color:var(--text);letter-spacing:-.03em;line-height:1;font-feature-settings:\'tnum\';margin-bottom:6px">'+x.val+'</div>';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;font-feature-settings:\'tnum\'">';
+    html+='<span style="font-size:10px;color:var(--text3);font-weight:600">'+pct+'%</span>';
+    html+='<span style="font-size:10px;font-weight:700;color:'+dltCol+'">'+dltStr+'</span>';
+    html+='</div>';
+    if(pathD){
+      html+='<svg viewBox="0 0 '+sw+' '+sh+'" preserveAspectRatio="none" style="width:100%;height:24px;display:block;margin-top:8px;overflow:visible"><path d="'+pathD+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/></svg>';
+    }
     html+='</div>';
   });
   html+='</div>';
@@ -7433,6 +7472,11 @@ function renderDesqPanelContent(panelId){
     });
     html+='</tbody></table></div>';
   }
+  // Footer com CTA
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">';
+  html+='<div style="font-size:10px;color:var(--text3)">'+total+' registros · '+byMotivo.length+' motivos · '+bdrOrder.length+' BDRs</div>';
+  html+='<button onclick="showDesqModal('+(state.bdr&&state.bdr!=='all'?"'"+state.bdr+"'":'null')+')" style="font-size:11px;padding:8px 14px;background:rgba(255,255,255,0.04);color:var(--text);border:1px solid var(--border2);border-radius:9px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif;letter-spacing:-.01em" onmouseenter="this.style.background=\'rgba(255,255,255,0.08)\'" onmouseleave="this.style.background=\'rgba(255,255,255,0.04)\'">Ver modal completa →</button>';
+  html+='</div>';
   el.innerHTML=html;
 }
 function desqFilterChange(panelId, field, value){
@@ -7455,38 +7499,33 @@ function buildDesqPanel(container, opts){
   // Add MP (Mayara SDR) se aparecer
   if((DATA.desqDetalhe||[]).some(function(r){return r.b==='MP';})) bdrsAll.push({id:'MP',name:'Mayara (SDR)'});
 
-  var html='';
-  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;padding:10px;margin-bottom:10px;background:var(--bg3);border-radius:10px;border:1px solid var(--border);align-items:center">';
-  // BDR filter
-  if(!opts.hideBDR){
-    html+='<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:100px">';
-    html+='<span style="font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em">BDR</span>';
-    html+='<select onchange="desqFilterChange(\''+panelId+'\',\'bdr\',this.value)" style="padding:5px 6px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:\'Inter\',sans-serif">';
-    html+='<option value="all">Todos</option>';
-    bdrsAll.forEach(function(b){ html+='<option value="'+b.id+'"'+(_desqPanels[panelId].bdr===b.id?' selected':'')+'>'+b.name+'</option>'; });
-    html+='</select></div>';
+  // Helper para chip de filtro (select escondido + display tipo pill)
+  function chip(field, label, options, currentVal){
+    var s='<label style="position:relative;display:inline-flex;align-items:center;gap:6px;padding:6px 11px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:999px;font-size:11px;font-weight:600;color:var(--text);cursor:pointer;transition:all .15s;font-family:\'Inter\',sans-serif" onmouseenter="this.style.background=\'rgba(255,255,255,0.06)\';this.style.borderColor=\'var(--border2)\'" onmouseleave="this.style.background=\'rgba(255,255,255,0.03)\';this.style.borderColor=\'var(--border)\'">';
+    s+='<span style="color:var(--text3);font-weight:500">'+label+'</span>';
+    var curLbl='Todos';
+    options.forEach(function(o){ if(String(o[0])===String(currentVal)) curLbl=o[1]; });
+    s+='<span style="color:var(--text)">'+curLbl+'</span>';
+    s+='<span style="color:var(--text3);font-size:9px;margin-left:1px">▾</span>';
+    s+='<select onchange="desqFilterChange(\''+panelId+'\',\''+field+'\',this.value)" style="position:absolute;inset:0;opacity:0;cursor:pointer;font-family:\'Inter\',sans-serif">';
+    options.forEach(function(o){
+      s+='<option value="'+String(o[0]).replace(/"/g,'&quot;')+'"'+(String(o[0])===String(currentVal)?' selected':'')+'>'+o[1]+'</option>';
+    });
+    s+='</select></label>';
+    return s;
   }
-  // Motivo filter
-  html+='<div style="display:flex;flex-direction:column;gap:2px;flex:2;min-width:140px">';
-  html+='<span style="font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Motivo</span>';
-  html+='<select onchange="desqFilterChange(\''+panelId+'\',\'motivo\',this.value)" style="padding:5px 6px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:\'Inter\',sans-serif">';
-  html+='<option value="all">Todos motivos</option>';
-  motivosAll.forEach(function(m){ html+='<option value="'+m.replace(/"/g,'&quot;')+'">'+m+'</option>'; });
-  html+='</select></div>';
-  // Fonte filter
-  html+='<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:100px">';
-  html+='<span style="font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Canal</span>';
-  html+='<select onchange="desqFilterChange(\''+panelId+'\',\'fonte\',this.value)" style="padding:5px 6px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:\'Inter\',sans-serif">';
-  html+='<option value="all">Todos canais</option>';
-  ['PBDR','LS','OTB','EV','LM'].forEach(function(f){ html+='<option value="'+f+'">'+(fontes[f]||f)+' ('+f+')</option>'; });
-  html+='</select></div>';
-  // Período filter
-  html+='<div style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:120px">';
-  html+='<span style="font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Período</span>';
-  html+='<select onchange="desqFilterChange(\''+panelId+'\',\'periodo\',this.value)" style="padding:5px 6px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:\'Inter\',sans-serif">';
+  var html='';
+  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:14px">';
+  if(!opts.hideBDR){
+    var bdrOpts=[['all','Todos']].concat(bdrsAll.map(function(b){return [b.id,b.name];}));
+    html+=chip('bdr','BDR',bdrOpts,_desqPanels[panelId].bdr);
+  }
+  var motivoOpts=[['all','Todos motivos']].concat(motivosAll.map(function(m){return [m,m];}));
+  html+=chip('motivo','Motivo',motivoOpts,_desqPanels[panelId].motivo);
+  var canalOpts=[['all','Todos canais']].concat(['PBDR','LS','OTB','EV','LM'].map(function(f){return [f,(fontes[f]||f)];}));
+  html+=chip('fonte','Canal',canalOpts,_desqPanels[panelId].fonte);
   var pOpts=[['all','Mês inteiro'],['semana','Essa semana'],['7','Últimos 7 dias'],['10','Últimos 10 dias'],['14','Últimos 14 dias'],['30','Últimos 30 dias']];
-  pOpts.forEach(function(p){ html+='<option value="'+p[0]+'"'+(_desqPanels[panelId].periodo===p[0]?' selected':'')+'>'+p[1]+'</option>'; });
-  html+='</select></div>';
+  html+=chip('periodo','Período',pOpts,_desqPanels[panelId].periodo);
   html+='</div>';
   html+='<div id="'+panelId+'-content"></div>';
   container.innerHTML=html;
@@ -7549,39 +7588,56 @@ function aggDesqByWeekFonte(records){
   });
   return weeks;
 }
-function renderDesqWoWChart(records){
+function renderDesqWoWChart(records, totalArg){
   var allWeeks=aggDesqByWeekFonte(records);
   var today=new Date(); today.setHours(0,0,0,0);
   var weeks=allWeeks.filter(function(w){return w.start<=today;});
   if(weeks.length<2) return '';
   var fontes=['PBDR','LS','OTB','EV','LM'];
   var fontesNomes=DATA.desqFontes||{};
-  // Calcular totais por semana + max global
   weeks.forEach(function(w){ w.total=fontes.reduce(function(s,f){return s+(w.byFonte[f]||0);},0); });
-  // Max = maior valor em uma fonte × semana (para séries individuais)
-  var maxSerie=0, maxTotal=0;
-  weeks.forEach(function(w){
-    fontes.forEach(function(f){ if(w.byFonte[f]>maxSerie) maxSerie=w.byFonte[f]; });
-    if(w.total>maxTotal) maxTotal=w.total;
-  });
+  var maxSerie=0;
+  weeks.forEach(function(w){ fontes.forEach(function(f){ if(w.byFonte[f]>maxSerie) maxSerie=w.byFonte[f]; }); });
   var max = Math.ceil((maxSerie||10)/10)*10 || 10;
-  var W=340, H=130, padL=22, padR=16, padT=16, padB=28;
-  var plotW=W-padL-padR, plotH=H-padT-padB;
-  // Delta total mais recente
+  var total = (totalArg!=null) ? totalArg : weeks.reduce(function(s,w){return s+w.total;},0);
   var last=weeks[weeks.length-1], prev=weeks[weeks.length-2];
   var delta = last.total - prev.total;
   var pct = prev.total>0 ? Math.round((delta/prev.total)*100) : 0;
-  var deltaCol = delta>0 ? '#ef4444' : (delta<0 ? '#22c55e' : 'var(--text3)');
-  var deltaArrow = delta>0 ? '▲' : (delta<0 ? '▼' : '—');
-  var midY = padT+plotH/2;
-  var svg='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="width:100%;height:140px;display:block;overflow:visible" aria-label="Evolução semanal por canal">';
-  // Grid sutil (meio e top)
-  svg+='<line x1="'+padL+'" y1="'+midY+'" x2="'+(W-padR)+'" y2="'+midY+'" stroke="rgba(255,255,255,0.04)" stroke-dasharray="2 3"/>';
-  svg+='<line x1="'+padL+'" y1="'+padT+'" x2="'+(W-padR)+'" y2="'+padT+'" stroke="rgba(255,255,255,0.03)" stroke-dasharray="2 3"/>';
+  var isDown = delta<0; var isUp = delta>0;
+  var deltaCol = isUp ? '#f87171' : (isDown ? '#4ade80' : 'var(--text3)');
+  var deltaBg  = isUp ? 'rgba(248,113,113,0.10)' : (isDown ? 'rgba(74,222,128,0.10)' : 'rgba(255,255,255,0.04)');
+  var deltaBd  = isUp ? 'rgba(248,113,113,0.22)' : (isDown ? 'rgba(74,222,128,0.22)' : 'rgba(255,255,255,0.08)');
+  var deltaArrow = isUp ? '▲' : (isDown ? '▼' : '—');
+
+  // Totais por canal pra ordenar e decidir quem ganha area gradient
+  var totalsByFonte={}; fontes.forEach(function(f){ totalsByFonte[f]=weeks.reduce(function(s,w){return s+(w.byFonte[f]||0);},0); });
+  var topFontes=fontes.slice().sort(function(a,b){return totalsByFonte[b]-totalsByFonte[a];}).slice(0,2);
+
+  var W=600, H=200, padL=42, padR=58, padT=24, padB=46;
+  var plotW=W-padL-padR, plotH=H-padT-padB;
+
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" style="width:100%;height:200px;display:block;overflow:visible" aria-label="Evolução semanal por canal">';
+  // Defs (gradientes pra área das top 2 séries)
+  svg+='<defs>';
+  topFontes.forEach(function(f){
+    var col=getDesqFonteColor(f);
+    svg+='<linearGradient id="desq-grad-'+f+'" x1="0" y1="0" x2="0" y2="1">';
+    svg+='<stop offset="0%" stop-color="'+col+'" stop-opacity="0.32"/>';
+    svg+='<stop offset="100%" stop-color="'+col+'" stop-opacity="0"/>';
+    svg+='</linearGradient>';
+  });
+  svg+='</defs>';
+  // Grid horizontal sutil (3 linhas)
+  [0,0.5,1].forEach(function(t){
+    var y=padT+plotH*t;
+    svg+='<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="rgba(255,255,255,0.04)" stroke-dasharray="2 4"/>';
+  });
   // Y axis labels
-  svg+='<text x="'+(padL-4)+'" y="'+(padT+3)+'" text-anchor="end" fill="var(--text3)" font-size="8" font-family="Inter,sans-serif">'+max+'</text>';
-  svg+='<text x="'+(padL-4)+'" y="'+(padT+plotH+3)+'" text-anchor="end" fill="var(--text3)" font-size="8" font-family="Inter,sans-serif">0</text>';
-  // Linhas por fonte
+  svg+='<text x="'+(padL-8)+'" y="'+(padT+4)+'" text-anchor="end" fill="#475569" font-size="10" font-family="Inter,sans-serif">'+max+'</text>';
+  svg+='<text x="'+(padL-8)+'" y="'+(padT+plotH/2+4)+'" text-anchor="end" fill="#475569" font-size="10" font-family="Inter,sans-serif">'+Math.round(max/2)+'</text>';
+  svg+='<text x="'+(padL-8)+'" y="'+(padT+plotH+4)+'" text-anchor="end" fill="#475569" font-size="10" font-family="Inter,sans-serif">0</text>';
+
+  // Séries
   var seriesInfo=[];
   fontes.forEach(function(f){
     var pts=weeks.map(function(w,i){
@@ -7590,50 +7646,68 @@ function renderDesqWoWChart(records){
       return {x:x, y:y, val:w.byFonte[f]||0};
     });
     var col=getDesqFonteColor(f);
-    var pathD = pts.map(function(p,i){return (i===0?'M':'L')+p.x.toFixed(1)+' '+p.y.toFixed(1);}).join(' ');
-    // Line
-    svg+='<path d="'+pathD+'" fill="none" stroke="'+col+'" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>';
-    // Points
-    pts.forEach(function(p,i){
-      var isLast=i===pts.length-1;
-      svg+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+(isLast?3.2:2.4)+'" fill="'+(isLast?col:'var(--bg)')+'" stroke="'+col+'" stroke-width="1.3"/>';
-    });
-    // Label valor na última ponta (só se >0)
-    var lastP=pts[pts.length-1];
-    if(lastP.val>0){
-      svg+='<text x="'+(lastP.x+6).toFixed(1)+'" y="'+(lastP.y+3).toFixed(1)+'" fill="'+col+'" font-size="9" font-weight="700" font-family="Inter,sans-serif">'+lastP.val+'</text>';
+    var totF=totalsByFonte[f];
+    if(totF===0){ seriesInfo.push({fonte:f, color:col, total:0}); return; }
+    var lineD = pts.map(function(p,i){return (i===0?'M':'L')+p.x.toFixed(1)+' '+p.y.toFixed(1);}).join(' ');
+    // Area gradient só pra top 2
+    if(topFontes.indexOf(f)>=0){
+      var areaD = lineD+' L '+pts[pts.length-1].x.toFixed(1)+' '+(padT+plotH).toFixed(1)+' L '+pts[0].x.toFixed(1)+' '+(padT+plotH).toFixed(1)+' Z';
+      svg+='<path d="'+areaD+'" fill="url(#desq-grad-'+f+')"/>';
     }
-    seriesInfo.push({fonte:f, color:col, total:pts.reduce(function(s,p){return s+p.val;},0)});
+    var op = topFontes.indexOf(f)>=0 ? '1' : '0.85';
+    var sw = topFontes.indexOf(f)>=0 ? '2.5' : '2';
+    svg+='<path d="'+lineD+'" fill="none" stroke="'+col+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-linejoin="round" opacity="'+op+'"/>';
+    // Pontos: só último com destaque
+    var lastP=pts[pts.length-1];
+    svg+='<circle cx="'+lastP.x.toFixed(1)+'" cy="'+lastP.y.toFixed(1)+'" r="4.5" fill="var(--bg)" stroke="'+col+'" stroke-width="2.5"/>';
+    if(lastP.val>0){
+      svg+='<text x="'+(lastP.x+10).toFixed(1)+'" y="'+(lastP.y+4).toFixed(1)+'" fill="'+col+'" font-size="11" font-weight="700" font-family="Inter,sans-serif">'+lastP.val+'</text>';
+    }
+    seriesInfo.push({fonte:f, color:col, total:totF});
   });
-  // Labels de semana X
+
+  // X axis labels (semana + total grande)
   weeks.forEach(function(w,i){
     var x=padL+(weeks.length>1?(i*plotW/(weeks.length-1)):plotW/2);
-    svg+='<text x="'+x.toFixed(1)+'" y="'+(H-10).toFixed(1)+'" text-anchor="middle" fill="var(--text3)" font-size="9" font-weight="600" font-family="Inter,sans-serif">'+w.label+'</text>';
-    svg+='<text x="'+x.toFixed(1)+'" y="'+(H-1).toFixed(1)+'" text-anchor="middle" fill="var(--text)" font-size="10" font-weight="700" font-family="Inter,sans-serif">'+w.total+'</text>';
+    var isLast=(i===weeks.length-1);
+    svg+='<text x="'+x.toFixed(1)+'" y="'+(H-26).toFixed(1)+'" text-anchor="middle" fill="'+(isLast?'#cbd5e1':'#64748b')+'" font-size="10" font-weight="'+(isLast?'700':'600')+'" font-family="Inter,sans-serif">'+w.label+(isLast?' · atual':'')+'</text>';
+    svg+='<text x="'+x.toFixed(1)+'" y="'+(H-10).toFixed(1)+'" text-anchor="middle" fill="'+(isLast?'#f1f5f9':'#475569')+'" font-size="11" font-weight="700" font-family="Inter,sans-serif">'+w.total+'</text>';
   });
   svg+='</svg>';
-  // Legenda interativa
-  var legend='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.05)">';
+
+  // Legenda compacta
+  var legend='<div style="display:flex;flex-wrap:wrap;gap:14px">';
   seriesInfo.forEach(function(s){
     if(s.total===0) return;
-    legend+='<div style="display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text2);font-weight:600">';
-    legend+='<span style="width:10px;height:2px;background:'+s.color+';border-radius:1px;display:inline-block"></span>';
+    legend+='<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#cbd5e1;font-weight:500">';
+    legend+='<span style="width:8px;height:8px;border-radius:50%;background:'+s.color+';display:inline-block"></span>';
     legend+='<span style="font-family:\'Inter\',sans-serif">'+(fontesNomes[s.fonte]||s.fonte)+'</span>';
-    legend+='<span style="color:var(--text3);font-family:\'Inter\',sans-serif">('+s.total+')</span>';
     legend+='</div>';
   });
   legend+='</div>';
-  // Wrapper com header
-  var html='<div style="padding:12px 14px;background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.15);border-radius:10px;margin-bottom:12px">';
-  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
-  html+='<div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">📈 Evolução WoW por canal</div>';
-  html+='<div style="display:flex;align-items:center;gap:4px">';
-  html+='<span style="font-size:10px;color:var(--text3)">vs '+prev.label+':</span>';
-  html+='<span style="font-size:12px;font-weight:700;color:'+deltaCol+';font-family:\'Inter\',sans-serif">'+deltaArrow+' '+(delta>=0?'+':'')+delta+(prev.total>0?' ('+(pct>=0?'+':'')+pct+'%)':'')+'</span>';
+
+  // ═══ HERO: KPI esquerda + chart direita ═══
+  var html='<div class="desq-hero" style="display:grid;grid-template-columns:240px 1fr;gap:18px;margin-bottom:16px">';
+  // KPI lateral
+  html+='<div style="padding:18px 20px;background:linear-gradient(160deg,rgba(248,113,113,0.06),rgba(248,113,113,0.01));border:1px solid rgba(248,113,113,0.12);border-radius:14px;display:flex;flex-direction:column;justify-content:space-between">';
+  html+='<div>';
+  html+='<div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Total no período</div>';
+  html+='<div style="font-size:54px;font-weight:800;color:var(--text);letter-spacing:-.04em;line-height:1;font-feature-settings:\'tnum\';margin-bottom:6px">'+total+'</div>';
+  html+='<div style="font-size:11px;color:var(--text3);font-weight:500">desqualificações no funil</div>';
   html+='</div>';
+  html+='<div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+  html+='<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:7px;background:'+deltaBg+';border:1px solid '+deltaBd+';color:'+deltaCol+';font-size:13px;font-weight:700;font-feature-settings:\'tnum\'">'+deltaArrow+' '+(delta>=0?'+':'')+delta+(prev.total>0?' ('+(pct>=0?'+':'')+pct+'%)':'')+'</span>';
+  html+='<span style="font-size:11px;color:var(--text3)">vs '+prev.label+' · '+prev.total+'</span>';
+  html+='</div>';
+  html+='</div>';
+  // Chart wrap
+  html+='<div style="background:rgba(255,255,255,0.015);border:1px solid var(--border);border-radius:14px;padding:14px 18px 8px">';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">';
+  html+='<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Evolução semanal · por canal</div>';
+  html+=legend;
   html+='</div>';
   html+=svg;
-  html+=legend;
+  html+='</div>';
   html+='</div>';
   return html;
 }
