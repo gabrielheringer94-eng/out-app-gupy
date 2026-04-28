@@ -2001,10 +2001,10 @@ const NAV_ICONS={
   mrr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
   mrr_bdr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
   noticias:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
-  analise:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'
+  analise:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>'
 };
 const NAV_LABELS={
-  resumo:'Hoje',time:'Time',base:'Base',reunioes:'Agenda',weekly:'Weekly',analise:'Análise',log:'Log',
+  resumo:'Hoje',time:'Time',base:'Base',reunioes:'Agenda',weekly:'Weekly',analise:'Análise de carteira',log:'Log',
   hoje:'Início',resultado:'Meu Resultado',performance:'Performance',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI',jdc:'Pessoas'
 };
 
@@ -2211,70 +2211,33 @@ function buildGestorApp(){
     {id:'time',     label:'Time'},
     {id:'reunioes', label:'Agenda'},
     {id:'jdc',      label:'Pessoas'},
-    {id:'log',      label:'Log'},
-  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildReunioes,buildJDC,buildLogGestor]);
+    {id:'analise',  label:'Análise de carteira'},
+  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildReunioes,buildJDC,buildAnaliseCarteira]);
 }
 
-// ─── LOG GESTOR (Análises e materiais) ────────────────────────
-const LOG_TEMAS=[
-  {id:'analise-carteira',
-   nome:'Análise de carteira',
-   desc:'Auditoria Pre Vendas · M Q1 2026',
-   src:'analises/auditoria_pre_vendas_M_Q1_2026.html',
-   data:'24/04/2026'},
-];
-function buildLogGestor(pane){
-  // Estado interno do pane (lista vs. tema aberto). Mobile-first: 1 coluna.
-  if(!pane._logTema){
-    renderLogList(pane);
-  } else {
-    renderLogTema(pane, pane._logTema);
-  }
-}
-function renderLogList(pane){
-  pane._logTema=null;
+// ─── ANÁLISE DE CARTEIRA (gestor) ─────────────────────────────
+// Aba abre direto no iframe da auditoria (sem lista intermediária).
+const ANALISE_CARTEIRA={
+  nome:'Análise de carteira',
+  desc:'Auditoria Pre Vendas · M Q1 2026',
+  src:'analises/auditoria_pre_vendas_M_Q1_2026.html',
+  data:'24/04/2026'
+};
+function buildAnaliseCarteira(pane){
+  var t=ANALISE_CARTEIRA;
   pane.innerHTML=''
-    +'<div style="margin-bottom:14px">'
-    +'<div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Log do gestor</div>'
-    +'<div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em">Análises e materiais</div>'
-    +'<div style="font-size:12px;color:var(--text3);margin-top:4px">Toque em um tema para abrir.</div>'
-    +'</div>'
-    +'<div id="log-cards" style="display:flex;flex-direction:column;gap:10px"></div>';
-  var list=pane.querySelector('#log-cards');
-  list.innerHTML=LOG_TEMAS.map(function(t){
-    return '<button data-tema="'+t.id+'" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);transition:transform .15s,box-shadow .15s,border-color .15s" onmouseenter="this.style.borderColor=\'var(--accent-mid)\';this.style.boxShadow=\'0 4px 16px rgba(0,0,0,0.15)\'" onmouseleave="this.style.borderColor=\'var(--border)\';this.style.boxShadow=\'none\'">'
-      +'<div style="width:42px;height:42px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📄</div>'
-      +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px">'+t.nome+'</div>'
-      +'<div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(t.desc||'')+(t.data?' · '+t.data:'')+'</div>'
-      +'</div>'
-      +'<div style="font-size:18px;color:var(--text3);flex-shrink:0">›</div>'
-      +'</button>';
-  }).join('');
-  list.querySelectorAll('[data-tema]').forEach(function(btn){
-    btn.onclick=function(){
-      pane._logTema=btn.dataset.tema;
-      renderLogTema(pane, pane._logTema);
-      track('log_open',pane._logTema);
-    };
-  });
-}
-function renderLogTema(pane, temaId){
-  var t=LOG_TEMAS.find(function(x){return x.id===temaId;});
-  if(!t){ renderLogList(pane); return; }
-  pane.innerHTML=''
-    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
-    +'<button id="log-back" style="all:unset;cursor:pointer;display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;color:var(--text2)">‹ Voltar</button>'
-    +'<div style="flex:1;min-width:0">'
-    +'<div style="font-size:14px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.nome+'</div>'
-    +'<div style="font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(t.desc||'')+(t.data?' · '+t.data:'')+'</div>'
+    +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px">'
+    +'<div style="min-width:0;flex:1">'
+    +'<div style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">Auditoria · M Q1 2026</div>'
+    +'<div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.nome+'</div>'
+    +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+t.desc+' · '+t.data+'</div>'
     +'</div>'
     +'<a href="'+t.src+'" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:8px;padding:6px 10px;text-decoration:none;white-space:nowrap;flex-shrink:0">Tela cheia ↗</a>'
     +'</div>'
-    +'<div style="position:relative;background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:calc(100vh - 200px);min-height:520px">'
+    +'<div style="position:relative;background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:calc(100vh - 180px);min-height:520px">'
     +'<iframe src="'+t.src+'" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff"></iframe>'
     +'</div>';
-  pane.querySelector('#log-back').onclick=function(){ renderLogList(pane); };
+  track('analise_carteira_open',t.src);
 }
 
 
