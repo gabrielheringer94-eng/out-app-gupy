@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Auditoria PV-M | Forecast Q2</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f7; color: #1d1d1f; padding: 20px; font-size: 12px; line-height: 1.35; }
+  .page { max-width: 1400px; margin: 0 auto; background: white; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 8px; }
+  header { border-bottom: 2px solid #1d1d1f; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end; }
+  h1 { font-size: 22px; font-weight: 700; }
+  h2 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .sub { font-size: 11px; color: #86868b; }
+  .verdict { background: linear-gradient(135deg, #d70015 0%, #8b0000 100%); color: white; padding: 14px 18px; border-radius: 8px; margin-bottom: 14px; }
+  .verdict h1 { font-size: 18px; margin-bottom: 4px; }
+  .verdict p { font-size: 13px; opacity: 0.95; }
+  .kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 14px; }
+  .kpi { background: #f5f5f7; padding: 10px; border-radius: 6px; border-left: 3px solid #0071e3; }
+  .kpi-value { font-size: 20px; font-weight: 700; line-height: 1.1; }
+  .kpi-sub { font-size: 10px; color: #86868b; }
+  .kpi-label { font-size: 10px; color: #86868b; text-transform: uppercase; }
+  .kpi.critical { border-left-color: #d70015; background: #fff5f5; }
+  .kpi.warn { border-left-color: #ff9500; background: #fffaf0; }
+  .kpi.ok { border-left-color: #34c759; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .grid-5 { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .card { background: white; border: 1px solid #d2d2d7; border-radius: 6px; padding: 10px; }
+  .card.critical { border-left: 4px solid #d70015; }
+  .card.warn { border-left: 4px solid #ff9500; }
+  .card.ok { border-left: 4px solid #34c759; }
+  .card.info { border-left: 4px solid #0071e3; }
+  .card.dark { background: #1d1d1f; color: white; }
+  .card.dark h2 { color: white; }
+  .card.dark .muted { color: #98989d; }
+  .badge { display: inline-block; font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 600; text-transform: uppercase; margin-left: 4px; }
+  .badge.red { background: #ffe5e7; color: #d70015; }
+  .badge.orange { background: #fff2e0; color: #ff9500; }
+  .badge.green { background: #e0f7ea; color: #34c759; }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 11px; }
+  th { text-align: left; padding: 3px 4px; border-bottom: 1px solid #d2d2d7; font-weight: 600; color: #86868b; font-size: 10px; }
+  td { padding: 3px 4px; border-bottom: 1px solid #f0f0f0; }
+  tr:last-child td { border-bottom: none; }
+  .big { font-size: 16px; font-weight: 700; }
+  .huge { font-size: 22px; font-weight: 700; }
+  .red { color: #d70015; }
+  .green { color: #34c759; }
+  .orange { color: #ff9500; }
+  .blue { color: #0071e3; }
+  .muted { color: #86868b; }
+  .rec { font-size: 11px; margin-bottom: 4px; }
+  .rec-num { display: inline-block; width: 18px; height: 18px; line-height: 18px; text-align: center; background: #1d1d1f; color: white; border-radius: 50%; font-size: 10px; margin-right: 5px; font-weight: 700; }
+  .section-title { margin: 14px 0 8px 0; padding-bottom: 4px; border-bottom: 1px solid #d2d2d7; font-size: 13px; font-weight: 700; }
+  .note { font-size: 10px; color: #86868b; margin-top: 4px; font-style: italic; }
+  .nav { position: sticky; top: 0; background: white; padding: 6px 0; border-bottom: 1px solid #d2d2d7; margin-bottom: 10px; display: flex; gap: 6px; font-size: 10px; flex-wrap: wrap; z-index: 10; }
+  .nav a { color: #0071e3; text-decoration: none; padding: 2px 8px; border-radius: 3px; background: #f5f5f7; }
+  .nav a:hover { background: #0071e3; color: white; }
+  .bar-row { display: flex; align-items: center; gap: 6px; margin: 2px 0; font-size: 10px; }
+  .bar-label { width: 120px; }
+  .bar-track { flex: 1; background: #e8e8ed; height: 12px; border-radius: 3px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; background: #d70015; }
+  .bar-fill.ok { background: #34c759; }
+  .bar-fill.warn { background: #ff9500; }
+  .bar-value { width: 60px; text-align: right; font-weight: 600; }
+  @media print { body { padding: 0; background: white; } .page { box-shadow: none; padding: 12px; } .nav { position: static; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div>
+    <h1>Auditoria Pré-Vendas M (Gabriel) + Forecast Q2</h1>
+    <div class="sub">Baseline: Q1 2026 · Meta: Q2 2026 (01/abr → 30/jun) · 8 BDRs · 4.706 contas</div>
+  </div>
+  <div class="sub">Atualizado: 24/04/2026</div>
+</header>
+
+<!-- VEREDICTO -->
+<div class="verdict">
+  <h1>🔴 VEREDICTO: Meta de ACV (R$ 1,44M) é difícil — precisa multiplicar Won por 4,3x</h1>
+  <p>Meta volumétrica (252 opps mundo): viável com esforço. Meta ACV (180k/BDR × 8 = 1,44M): Q1 realizou 23% disso. <strong>Precisa 43 Won em Q2 (vs 10 no Q1 = 4,3x).</strong> Difícil, mas não matematicamente impossível como parecia.</p>
+</div>
+
+<nav class="nav">
+  <a href="#kpis">KPIs</a>
+  <a href="#acv">💰 ACV/MRR</a>
+  <a href="#forecast">🎯 Forecast</a>
+  <a href="#individual">👤 Individual</a>
+  <a href="#funnel">🔀 Funil</a>
+  <a href="#leadtime">⏱ Lead Time</a>
+  <a href="#cortex">🔴 Cortex</a>
+  <a href="#reciclada">🔴 Carteira reciclada</a>
+  <a href="#icp">🎯 ICP</a>
+  <a href="#motivos">Motivos DQ</a>
+  <a href="#recomendacoes">🎬 Ações</a>
+</nav>
+
+<!-- KPIS ATUALIZADOS -->
+<section id="kpis">
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-value">R$ 337.953</div><div class="kpi-label">ACV Q1 (realizado)</div></div>
+  <div class="kpi critical"><div class="kpi-value">R$ 1,44M</div><div class="kpi-label">Meta ACV Q2 (4,3x)</div></div>
+  <div class="kpi warn"><div class="kpi-value">10</div><div class="kpi-label">Won Q1 (total time)</div></div>
+  <div class="kpi critical"><div class="kpi-value">43</div><div class="kpi-label">Won necessário Q2</div></div>
+  <div class="kpi"><div class="kpi-value">R$ 33.795</div><div class="kpi-label">ACV médio/Won</div></div>
+  <div class="kpi warn"><div class="kpi-value">6,4%</div><div class="kpi-label">Opps mundo → Won</div></div>
+</div>
+</section>
+
+<!-- ACV/MRR -->
+<div class="grid-2" id="acv">
+  <div class="card critical">
+    <h2>💰 ACV Q1 2026 por BDR <span class="badge red">3 BDRs zerados</span></h2>
+    <table>
+      <tr><th>BDR</th><th>ACV</th><th>CMRR</th><th>Won</th><th>% da meta 180k</th></tr>
+      <tr><td>Adhara Gonçalves</td><td class="big">R$ 107.997</td><td>R$ 9.754</td><td>2</td><td class="orange">60%</td></tr>
+      <tr><td>Ariane Mesquita</td><td>R$ 75.488</td><td>R$ 6.291</td><td>3</td><td class="orange">42%</td></tr>
+      <tr><td>Mydoha Seydo</td><td>R$ 70.037</td><td>R$ 6.743</td><td>2</td><td class="orange">39%</td></tr>
+      <tr><td>Giovana Faceto</td><td>R$ 53.557</td><td>R$ 4.463</td><td>2</td><td class="orange">30%</td></tr>
+      <tr><td>Victoria Eilers</td><td>R$ 30.875</td><td>R$ 3.931</td><td>1</td><td class="orange">17%</td></tr>
+      <tr class="red"><td><strong>Jeanne Rodrigues</strong></td><td>R$ 0</td><td>R$ 0</td><td>0</td><td class="red">0% 🔴</td></tr>
+      <tr class="red"><td><strong>Juliana Sant'Anna</strong></td><td>R$ 0</td><td>R$ 0</td><td>0</td><td class="red">0% 🔴</td></tr>
+      <tr class="red"><td><strong>Pedro Souza</strong></td><td>R$ 0</td><td>R$ 0</td><td>0</td><td class="red">0% 🔴</td></tr>
+      <tr style="background:#f5f5f7"><td><strong>TOTAL</strong></td><td><strong>R$ 337.953</strong></td><td><strong>R$ 31.183</strong></td><td><strong>10</strong></td><td><strong>23%</strong></td></tr>
+    </table>
+    <div class="note"><strong>Meta Q1 foi 160k/BDR (1,28M total) — atingido: 26%.</strong> Meta Q2 aumenta para 180k/BDR (1,44M).</div>
+  </div>
+
+  <div class="card dark" id="forecast">
+    <h2>🎯 Forecast Q2 — 3 cenários</h2>
+    <p style="margin-bottom:8px">Baseline: 157 opps mundo Q1 · WR opp→Won 6,4% · ACV médio R$ 33,8k</p>
+
+    <p style="font-weight:600;margin-top:6px">Cenário 1: Replica Q1</p>
+    <table>
+      <tr><td class="muted">Opps mundo:</td><td>157</td><td>× WR 6,4%</td><td>= 10 Won</td></tr>
+      <tr><td class="muted">ACV projetado:</td><td colspan="3" class="red"><strong>R$ 337.953 (23% da meta)</strong></td></tr>
+    </table>
+
+    <p style="font-weight:600;margin-top:8px">Cenário 2: Bate volume (252)</p>
+    <table>
+      <tr><td class="muted">Opps mundo:</td><td>252</td><td>× WR 6,4%</td><td>= 16 Won</td></tr>
+      <tr><td class="muted">ACV projetado:</td><td colspan="3" class="orange"><strong>R$ 542.448 (38% da meta)</strong></td></tr>
+    </table>
+
+    <p style="font-weight:600;margin-top:8px">Cenário 3: Bate ACV (1,44M)</p>
+    <table>
+      <tr><td class="muted">Won necessários:</td><td colspan="3">43 (4,3x o Q1)</td></tr>
+      <tr><td class="muted">Opções:</td><td colspan="3">(a) 43 Won @ R$33,8k · (b) 10 Won @ R$144k · (c) 22 Won @ R$65k</td></tr>
+    </table>
+
+    <div class="note" style="color:#98989d;margin-top:8px">
+      💡 Pipeline aberto atual (47 opps em Dev = R$ 1,35M) × 11,3% WR = <strong style="color:white">R$ 152k esperado</strong> dessas. Resto (R$ 1,29M) precisa vir de opps NOVAS com conversão maior que Q1.
+    </div>
+  </div>
+</div>
+
+<!-- INDIVIDUAL -->
+<div class="card critical" id="individual">
+  <h2>👤 Gap individual — R$ 180k por BDR <span class="badge red">3 zerados</span></h2>
+  <div class="grid-2">
+    <table>
+      <tr><th>BDR</th><th>ACV Q1</th><th>% meta</th><th>Gap R$</th><th>+Won @33,8k</th></tr>
+      <tr><td>Adhara</td><td>R$ 107.997</td><td class="orange">60%</td><td>R$ 72.003</td><td>+2</td></tr>
+      <tr><td>Ariane</td><td>R$ 75.488</td><td class="orange">42%</td><td>R$ 104.512</td><td>+3</td></tr>
+      <tr><td>Mydoha</td><td>R$ 70.037</td><td class="orange">39%</td><td>R$ 109.963</td><td>+3</td></tr>
+      <tr><td>Giovana</td><td>R$ 53.557</td><td class="orange">30%</td><td>R$ 126.443</td><td>+4</td></tr>
+      <tr><td>Victoria</td><td>R$ 30.875</td><td class="orange">17%</td><td>R$ 149.125</td><td>+4</td></tr>
+      <tr class="red"><td>Jeanne</td><td>R$ 0</td><td class="red">0%</td><td>R$ 180.000</td><td>+5</td></tr>
+      <tr class="red"><td>Juliana</td><td>R$ 0</td><td class="red">0%</td><td>R$ 180.000</td><td>+5</td></tr>
+      <tr class="red"><td>Pedro</td><td>R$ 0</td><td class="red">0%</td><td>R$ 180.000</td><td>+5</td></tr>
+    </table>
+    <div>
+      <p style="margin-bottom:6px"><strong>Volume de Won necessário por BDR:</strong></p>
+      <div class="bar-row"><div class="bar-label">Adhara (já tem 2)</div><div class="bar-track"><div class="bar-fill warn" style="width:20%"></div></div><div class="bar-value">+2</div></div>
+      <div class="bar-row"><div class="bar-label">Ariane (já tem 3)</div><div class="bar-track"><div class="bar-fill warn" style="width:30%"></div></div><div class="bar-value">+3</div></div>
+      <div class="bar-row"><div class="bar-label">Mydoha (já tem 2)</div><div class="bar-track"><div class="bar-fill warn" style="width:30%"></div></div><div class="bar-value">+3</div></div>
+      <div class="bar-row"><div class="bar-label">Giovana (já tem 2)</div><div class="bar-track"><div class="bar-fill warn" style="width:40%"></div></div><div class="bar-value">+4</div></div>
+      <div class="bar-row"><div class="bar-label">Victoria (já tem 1)</div><div class="bar-track"><div class="bar-fill warn" style="width:40%"></div></div><div class="bar-value">+4</div></div>
+      <div class="bar-row"><div class="bar-label">Jeanne (zerou)</div><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><div class="bar-value">+5</div></div>
+      <div class="bar-row"><div class="bar-label">Juliana (zerou)</div><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><div class="bar-value">+5</div></div>
+      <div class="bar-row"><div class="bar-label">Pedro (zerou)</div><div class="bar-track"><div class="bar-fill" style="width:50%"></div></div><div class="bar-value">+5</div></div>
+      <div class="note" style="margin-top:6px">Total: +31 Won em 3 meses. Time fez 10 em Q1. <strong>Precisa multiplicar por 4,1x.</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- FUNIL + LEAD TIME -->
+<div class="grid-2" id="funnel">
+  <div class="card warn">
+    <h2>🔀 Conversão do funil (Q1)</h2>
+    <table>
+      <tr><th>Etapa</th><th>Volume</th><th>Conv.</th></tr>
+      <tr><td>Leads tocados (DQ+Opp)</td><td class="big">1.250</td><td>—</td></tr>
+      <tr><td>↓ Viraram Opp (passou gate Reunião→Dev)</td><td>105 distintas / 157 mundo</td><td class="orange">8,4% / 12,6%</td></tr>
+      <tr><td>↓ Closed Won</td><td class="red"><strong>10</strong></td><td class="red"><strong>9,5% das opps / 6,4% das opps mundo</strong></td></tr>
+      <tr><td>ACV total</td><td class="red"><strong>R$ 337.953</strong></td><td></td></tr>
+    </table>
+    <p style="margin-top:8px"><strong>Gargalo real:</strong> de 105 opps que passaram o gate, 10 fecharam (<span class="red">9,5%</span>). 47 Perdido + 41 em Dev stale + 5 DQ + outros. A conversão final é o problema, não o volume de topo.</p>
+  </div>
+
+  <div class="card warn" id="leadtime">
+    <h2>⏱ Lead Time — pipeline aberto (47 opps em Dev)</h2>
+    <table>
+      <tr><th>Métrica</th><th>Valor</th></tr>
+      <tr><td>Pipeline aberto total</td><td class="big">R$ 1.352.592</td></tr>
+      <tr><td>Média dias na etapa (Dev)</td><td class="orange">52 dias</td></tr>
+      <tr><td>Média dias <strong>sem atividade</strong></td><td class="red">40 dias</td></tr>
+      <tr><td>Opps &gt;90 dias abertas</td><td class="red">19 de 41 (46%)</td></tr>
+      <tr><td>ACV esperado pipeline × WR 11%</td><td class="orange">R$ 152.842</td></tr>
+    </table>
+    <p style="margin-top:6px"><strong>Top stale:</strong> POLATO (Adhara) 275d · Energética Serranópolis (Pedro) 228d · SESC MT (Jeanne) 227d · KION (Mydoha) 169d.</p>
+    <div class="note">Um pipeline que passa 40 dias sem atividade em média não fecha. <strong>"Limpar ou fechar"</strong> os 19 stale pode liberar capacidade do time pra novas opps.</div>
+  </div>
+</div>
+
+<!-- CORTEX + CARTEIRA RECICLADA -->
+<div class="grid-3">
+  <div class="card critical" id="cortex">
+    <h2>🔴 Score Cortex quebrado</h2>
+    <p><strong>Numérico:</strong> 26% preenchido · valores em bilhões (bugados).</p>
+    <p style="margin-top:4px"><strong>Categórico:</strong> correlação INVERSA com ganho.</p>
+    <table>
+      <tr><th>Propensão</th><th>Carteira</th><th>Taxa DQ</th></tr>
+      <tr><td>MUITO ALTO</td><td>185</td><td class="red big">46,5%</td></tr>
+      <tr><td>ALTO</td><td>1.275</td><td class="orange">20,8%</td></tr>
+      <tr><td>Vazio</td><td>2.674</td><td class="green">9,3%</td></tr>
+    </table>
+    <div class="note">Os 6 ganhos Q1 não estavam na carteira do time.</div>
+  </div>
+
+  <div class="card critical" id="reciclada">
+    <h2>🔴 Carteira é reciclagem, não nova</h2>
+    <table>
+      <tr><th>Tempo último DQ</th><th>Contas</th><th>%</th></tr>
+      <tr><td class="red">Até 3 meses</td><td>2.537</td><td class="red big">53,9%</td></tr>
+      <tr><td>3-6 meses</td><td>761</td><td>16,2%</td></tr>
+      <tr><td>6-9 meses</td><td>489</td><td>10,4%</td></tr>
+      <tr><td>Mais de 9 meses</td><td>648</td><td>13,8%</td></tr>
+      <tr><td class="green">Virgens</td><td>271</td><td>5,8%</td></tr>
+    </table>
+    <div class="note">71% das opps Q1 eram contas já DQ antes. <strong>7 reaberturas foram duvidosas</strong> (motivo prévio: "Não tem interesse", "Lead duplicado").</div>
+  </div>
+
+  <div class="card warn" id="icp">
+    <h2>🎯 ICP — alavanca real de conversão</h2>
+    <table>
+      <tr><th>Tipo</th><th>n</th><th>WR</th></tr>
+      <tr><td class="green">ICP (Varejo/Tech/Alim/etc)</td><td>25</td><td class="green big">21,4%</td></tr>
+      <tr><td>Não-ICP</td><td>61</td><td>10,3%</td></tr>
+      <tr><td class="red">Sem segmento</td><td>19</td><td class="red"><strong>0%</strong></td></tr>
+    </table>
+    <p style="margin-top:6px"><strong>ICP converte 2x.</strong> Mas só se ACV médio ICP ≥ não-ICP (dado não disponível).</p>
+    <div class="note">Agro: só 12 contas · Alimentação: 30 · Serviços Profissionais (não-ICP): 411 + 0 ganhos = vampiro.</div>
+  </div>
+</div>
+
+<!-- MOTIVOS E DADOS -->
+<div class="grid-2" id="motivos">
+  <div class="card info">
+    <h2>🔵 Motivos DQ — 34% é "sem resposta"</h2>
+    <table>
+      <tr><th>Motivo</th><th>Qtd</th><th>%</th></tr>
+      <tr><td class="red">Não tem interesse</td><td>303</td><td>26,5%</td></tr>
+      <tr><td class="red">Cliente não respondeu</td><td>282</td><td>24,6%</td></tr>
+      <tr><td>Sem resposta</td><td>108</td><td>9,4%</td></tr>
+      <tr><td>Tempo máximo de posse</td><td>107</td><td>9,3%</td></tr>
+      <tr><td>Satisfeito com concorrente</td><td>49</td><td>4,3%</td></tr>
+    </table>
+    <div class="note"><strong>34% dos DQs = problema de cadência</strong>, não fit.</div>
+  </div>
+
+  <div class="card warn">
+    <h2>🟠 Qualidade de dados</h2>
+    <table>
+      <tr><th>Issue</th><th>Impacto</th></tr>
+      <tr><td>Estado vazio nos DQs</td><td class="red">45,3%</td></tr>
+      <tr><td>Segmento vazio/Outros</td><td class="red">47,5%</td></tr>
+      <tr><td>Score Cortex preenchido</td><td class="red">26% opps</td></tr>
+      <tr><td>Estado inconsistente</td><td>"Paraná" vs "Paráraná" vs "PR"</td></tr>
+      <tr><td>Propensão Cortex vazia</td><td class="orange">56,8%</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- O QUE PRECISA PRA BATER -->
+<div class="card dark">
+  <h2 style="color:white">📐 O que realmente precisa pra bater 1,44M</h2>
+  <div class="grid-3">
+    <div>
+      <p class="huge green">Caminho A</p>
+      <p style="font-weight:600">Multiplicar Won por 4,3x</p>
+      <p style="font-size:11px" class="muted">43 Won em 3 meses, mantendo ACV médio R$ 33,8k. Precisa WR subir de 6,4% → ~27%. Exige: foco 80% ICP + limpar pipeline stale + ativar as 170 priorizadas.</p>
+      <p style="color:#ff9500;margin-top:4px">Probabilidade: ~20%</p>
+    </div>
+    <div>
+      <p class="huge blue">Caminho B</p>
+      <p style="font-weight:600">Aumentar ACV médio 4,3x</p>
+      <p style="font-size:11px" class="muted">Manter 10 Won, mas com ticket R$ 144k médio. Implica ir atrás de empresas maiores (enterprise, 5k+ funcs). Contraria ICP atual (201-500 funcs).</p>
+      <p style="color:#d70015;margin-top:4px">Probabilidade: ~10%</p>
+    </div>
+    <div>
+      <p class="huge orange">Caminho C</p>
+      <p style="font-weight:600">Mix: 22 Won @ R$ 65k</p>
+      <p style="font-size:11px" class="muted">~2x ACV médio (foco em ICP que paga mais) + 2,2x mais Won. Mais realista. Requer: pausar fontes zeradas, foco mid-market, triplicar atividade nas priorizadas.</p>
+      <p style="color:#34c759;margin-top:4px">Probabilidade: ~30-35%</p>
+    </div>
+  </div>
+</div>
+
+<div class="note" style="margin-top:14px;text-align:center;padding:8px;background:#f5f5f7;border-radius:4px">
+  Arquivos no ~/Desktop/: oportunidades_q1_2026.csv · desqualificados_q1_2026.csv · carteira_completa.csv · carteira_priorizada.csv (294 contas)
+</div>
+
+</div>
+</body>
+</html>
