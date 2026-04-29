@@ -471,20 +471,24 @@ def main():
         except Exception as e:
             print(f"  ✗ alocadasControle: erro · {e}", file=sys.stderr)
 
-    # Extrai DATA do Dashboard ICP (operação do dia)
-    icp_html_path = DATA_DIR / "saidas" / "Dashboard_ICP_2026-04-29.html"
-    if icp_html_path.exists():
+    # Extrai DATA do Dashboard ICP mais recente (operação do dia)
+    saidas_dir = DATA_DIR / "saidas"
+    icp_candidates = sorted(saidas_dir.glob("Dashboard_ICP_*.html"), reverse=True) if saidas_dir.exists() else []
+    if icp_candidates:
+        icp_html_path = icp_candidates[0]
         try:
             html = icp_html_path.read_text(encoding="utf-8")
             m = re.search(r'const DATA = (\{.*?\});\s*\n', html, re.DOTALL)
             if m:
                 icp_data = json.loads(m.group(1))
                 out["icp"] = icp_data
-                print(f"  ✓ {'icp (operação dia)':<24} deals={len(icp_data.get('deals',[]))} carteira={len(icp_data.get('carteira',[]))} atv={len(icp_data.get('activities',[]))} opps={len(icp_data.get('opps',[]))}")
+                print(f"  ✓ {'icp (operação dia)':<24} deals={len(icp_data.get('deals',[]))} carteira={len(icp_data.get('carteira',[]))} atv={len(icp_data.get('activities',[]))} opps={len(icp_data.get('opps',[]))} · {icp_html_path.name}")
             else:
                 print(f"  ✗ icp: bloco DATA não encontrado em {icp_html_path.name}", file=sys.stderr)
         except Exception as e:
             print(f"  ✗ icp: erro · {e}", file=sys.stderr)
+    else:
+        print(f"  ✗ icp: nenhum Dashboard_ICP_*.html encontrado em {saidas_dir}", file=sys.stderr)
 
     OUT_PATH.write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")))
     size_mb = OUT_PATH.stat().st_size / (1024 * 1024)
