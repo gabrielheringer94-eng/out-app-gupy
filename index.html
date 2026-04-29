@@ -2466,20 +2466,139 @@ var ETAPA_COLORS={
   'Closed Won':                '#10b981',  // verde — ganho
   'Closed Lost':               '#ef4444'   // vermelho — perdido
 };
-function _renderFunilEtapas(etapas, totalDeals, totalAcv){
+
+// Deals individuais REAIS extraídos do report SF "Acompanhamento opps no funil de vendas"
+// Chave: 'BDR_ID|Etapa' · valor: lista parcial (resto é completado por mock)
+var DEALS_REAIS={
+  'MY|Desenvolvimento de negócio':[
+    {empresa:'GRM AGRICOLA',          acv:45603,  diasEtapa:6, diasSemAtividade:6,  sfId:'006bJ00000iHtmm', titulo:'[NN - LM] TM - GRM AGRICOLA'},
+    {empresa:'WN multiservicos',      acv:183022, diasEtapa:5, diasSemAtividade:11, sfId:'006bJ00000iTESr', titulo:'[NN - LM] TA + TM - WN multiservicos'},
+    {empresa:'Servnac',                acv:0,      diasEtapa:5, diasSemAtividade:5,  sfId:'006bJ00000iilbR', titulo:'[NN - LM] TM - Servnac'}
+  ],
+  'AG|Desenvolvimento de negócio':[
+    {empresa:'Supermercados Ideal',   acv:0,      diasEtapa:5, diasSemAtividade:0,  sfId:'006bJ00000cuvQu', titulo:'[NN - PBDR] TA + TM - Supermercados Ideal'},
+    {empresa:'Grupo Opersan',         acv:0,      diasEtapa:5, diasSemAtividade:12, sfId:'006bJ00000iO1Hr', titulo:'[NN - PBDR] TA - Grupo Opersan - Solucoes Ambientais'},
+    {empresa:'Ativa Investimentos',   acv:0,      diasEtapa:0, diasSemAtividade:0,  sfId:'006bJ00000iT2Jt', titulo:'[NN - PBDR] TA - Ativa Investimentos'}
+  ]
+};
+
+// Pool de empresas pra completar mock por vertical/setor — os mais conhecidos primeiro
+var DEAL_MOCK_POOL=['Renner','TOTVS','Magazine Luiza','Madero','JBS','VTEX','Casas Bahia','Stefanini','Outback','BRF','C&A','Accenture','KPMG','Stone','Riachuelo','Bob\'s','SLC Agrícola','Linx','Falconi','Hi Platform','Centauro','Spoleto','Marfrig','PagSeguro','Hering','Bain','Hotmart','Petz','Drogaria São Paulo','Locaweb'];
+
+function _dealsForEtapa(bdrId, etapaName, n, totalAcv, avgLeadTime){
+  if(!n) return [];
+  var keyId = (bdrId && bdrId!=='time') ? bdrId : null;
+  var reais = keyId ? (DEALS_REAIS[keyId+'|'+etapaName]||[]) : [];
+  // Time todo: junta reais de todos os BDRs
+  if(!keyId){
+    reais=[];
+    Object.keys(DEALS_REAIS).forEach(function(k){
+      if(k.split('|')[1]===etapaName){ reais=reais.concat(DEALS_REAIS[k]); }
+    });
+  }
+  reais=reais.slice(0,n).map(function(d){return Object.assign({},d);});
+  var faltam = Math.max(0, n - reais.length);
+  var acvRest = Math.max(0, totalAcv - reais.reduce(function(s,d){return s+(d.acv||0);},0));
+  var avgAcvMock = faltam>0 ? Math.round(acvRest/faltam) : 0;
+  var seedBase = (keyId||'time').charCodeAt(0)*13 + etapaName.length*7;
+  var pool = DEAL_MOCK_POOL;
+  for(var i=0;i<faltam;i++){
+    var seed = seedBase + i*17;
+    var empresa = pool[seed % pool.length];
+    var jitter = ((seed%9)-4); // -4..+4
+    var acvMult = 0.5 + ((seed*3)%9)*0.12; // 0.5..1.5
+    reais.push({
+      empresa: empresa,
+      acv: Math.max(0, Math.round(avgAcvMock*acvMult)),
+      diasEtapa: Math.max(0, avgLeadTime + jitter),
+      diasSemAtividade: Math.max(0, Math.round(avgLeadTime*0.6) + jitter),
+      sfId: null,
+      mock: true
+    });
+  }
+  return reais.slice(0,n);
+}
+
+function showCarteiraDealsModal(bdrId, etapaName){
+  if(typeof track==='function') track('carteira_deals_modal', bdrId+'|'+etapaName);
+  var old=document.getElementById('carteira-deals-modal'); if(old) old.remove();
+  var b = bdrId==='time' ? null : (DATA.bdrs||[]).find(function(x){return x.id===bdrId;});
+  var bdrName = b ? b.name : 'Time todo';
+  var c = bdrId && bdrId!=='time' ? CARTEIRA_BDR.byBdr[bdrId] : _carteiraAggregate();
+  if(!c) return;
+  var etapaData = (c.funilEtapas||[]).find(function(e){return e.n===etapaName;});
+  if(!etapaData) return;
+  var deals = _dealsForEtapa(bdrId, etapaName, etapaData.deals, etapaData.acv, etapaData.leadTimeAvg);
+  var col = ETAPA_COLORS[etapaName] || '#64748b';
+  var staleCount = deals.filter(function(d){return d.diasSemAtividade>=15;}).length;
+  var overlay=document.createElement('div');
+  overlay.id='carteira-deals-modal';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(4px)';
+  overlay.onclick=function(e){if(e.target===overlay) overlay.remove();};
+  var html='<div style="background:var(--bg2);border-radius:14px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;border:1px solid var(--border);margin:auto">';
+  // Header
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:2">';
+  html+='<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">';
+  html+='<div style="width:6px;height:40px;border-radius:3px;background:'+col+';flex-shrink:0"></div>';
+  html+='<div style="min-width:0">';
+  html+='<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:700">Pipeline · '+bdrName+(c.ae&&bdrId!=='time'?' · '+c.ae:'')+'</div>';
+  html+='<div style="font-size:16px;font-weight:700;color:var(--text);margin-top:2px">'+etapaName+' <span style="font-size:11px;color:var(--text3);font-weight:500">· '+etapaData.deals+' deals · '+_fmtMoney(etapaData.acv)+' · '+etapaData.leadTimeAvg+'d médios</span></div>';
+  html+='</div></div>';
+  html+='<button onclick="document.getElementById(\'carteira-deals-modal\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);padding:4px 8px">✕</button>';
+  html+='</div>';
+  // Body
+  html+='<div style="padding:14px 18px">';
+  if(staleCount>0){
+    html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:9px 12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.18);border-radius:8px;font-size:11px;color:var(--text2)"><span style="color:#f87171;font-weight:700">⚠ '+staleCount+'</span> deal'+(staleCount>1?'s':'')+' sem atividade há mais de 15 dias</div>';
+  }
+  html+='<div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Deals na etapa ('+deals.length+')</div>';
+  // Tabela
+  html+='<div style="display:flex;flex-direction:column;gap:4px">';
+  // Header da tabela
+  html+='<div style="display:grid;grid-template-columns:1fr 100px 70px 70px 30px;gap:8px;padding:6px 10px;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;font-weight:700;border-bottom:1px solid var(--border)">'
+    +'<span>Empresa</span><span style="text-align:right">ACV</span><span style="text-align:right;cursor:help" title="Dias na etapa atual">Etapa</span><span style="text-align:right;cursor:help" title="Dias sem atividade">Sem ativ.</span><span></span></div>';
+  deals.forEach(function(d){
+    var stale = d.diasSemAtividade>=15;
+    var hasReal = !d.mock && d.sfId;
+    var sfHref = d.sfId ? 'https://gupy.lightning.force.com/lightning/r/Opportunity/'+d.sfId+'/view' : null;
+    html+='<div style="display:grid;grid-template-columns:1fr 100px 70px 70px 30px;gap:8px;align-items:center;padding:9px 10px;border-radius:7px;background:var(--bg3);border:1px solid '+(stale?'rgba(248,113,113,0.15)':'var(--border)')+'">'
+      +'<div style="display:flex;align-items:center;gap:6px;min-width:0">'
+      +(hasReal?'<span title="Dado real do SF" style="width:6px;height:6px;border-radius:50%;background:#10b981;flex-shrink:0"></span>':'<span title="Mock — completar com export SF" style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15);flex-shrink:0"></span>')
+      +'<span style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(d.titulo||d.empresa).replace(/"/g,'&quot;')+'">'+d.empresa+'</span>'
+      +'</div>'
+      +'<span style="font-size:12px;font-weight:700;color:var(--text);text-align:right;font-feature-settings:\'tnum\'">'+(d.acv>0?_fmtMoney(d.acv):'—')+'</span>'
+      +'<span style="font-size:12px;color:var(--text);text-align:right;font-feature-settings:\'tnum\';font-weight:600">'+d.diasEtapa+'d</span>'
+      +'<span style="font-size:12px;text-align:right;font-feature-settings:\'tnum\';font-weight:'+(stale?'700':'500')+';color:'+(stale?'#f87171':'var(--text2)')+'">'+d.diasSemAtividade+'d</span>'
+      +(sfHref?'<a href="'+sfHref+'" target="_blank" rel="noopener" title="Abrir no Salesforce" style="font-size:14px;color:var(--text3);text-decoration:none;text-align:center;padding:2px">↗</a>':'<span></span>')
+      +'</div>';
+  });
+  html+='</div>';
+  // Legenda dot real/mock
+  var realCount = deals.filter(function(d){return !d.mock && d.sfId;}).length;
+  html+='<div style="margin-top:14px;padding:10px 12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;font-size:10px;color:var(--text3);line-height:1.6">'
+    +'<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px"><span style="width:6px;height:6px;border-radius:50%;background:#10b981"></span>Dado real SF ('+realCount+')</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.15)"></span>Mock ('+(deals.length-realCount)+')</span>'
+    +'<div style="margin-top:6px;font-style:italic">Lista completa virá real ao gerar export do report SF (filtrar por AE + etapa).</div>'
+    +'</div>';
+  html+='</div></div>';
+  overlay.innerHTML=html;
+  document.body.appendChild(overlay);
+}
+function _renderFunilEtapas(etapas, totalDeals, totalAcv, bdrId){
   if(!etapas || etapas.length===0) return '';
   var maxDeals = Math.max.apply(null, etapas.map(function(e){return e.deals;}).concat([1]));
   var html='<div class="card" style="margin-bottom:14px">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">'
     +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Pipeline · por etapa de Vendas</div>'
-    +'<div style="font-size:11px;color:var(--text3);font-feature-settings:\'tnum\'">'+totalDeals+' deals · '+_fmtMoney(totalAcv)+'</div>'
+    +'<div style="font-size:11px;color:var(--text3);font-feature-settings:\'tnum\'">'+totalDeals+' deals · '+_fmtMoney(totalAcv)+' · clique pra ver lista</div>'
     +'</div>'
     +'<div style="display:flex;flex-direction:column;gap:8px">';
   etapas.forEach(function(e){
     var col = ETAPA_COLORS[e.n] || '#64748b';
     var pctBar = Math.max(2, Math.round(e.deals/maxDeals*100));
     var ltCol = e.leadTimeAvg<=10 ? '#10b981' : e.leadTimeAvg<=20 ? '#f59e0b' : '#ef4444';
-    html+='<div title="'+e.n+': '+e.deals+' deals parados há '+e.leadTimeAvg+' dias em média · ACV potencial '+_fmtMoney(e.acv)+'" style="position:relative;padding:12px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;overflow:hidden">'
+    var safeName = e.n.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    html+='<div onclick="showCarteiraDealsModal(\''+(bdrId||'time')+'\',\''+safeName+'\')" title="Clique pra ver os '+e.deals+' deals · ACV '+_fmtMoney(e.acv)+' · '+e.leadTimeAvg+'d médios" style="position:relative;padding:12px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:background .15s,transform .15s" onmouseenter="this.style.background=\'rgba(255,255,255,0.04)\';this.style.transform=\'translateY(-1px)\'" onmouseleave="this.style.background=\'rgba(255,255,255,0.02)\';this.style.transform=\'translateY(0)\'">'
       +'<div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:'+col+'"></div>'
       +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px">'
       +'<div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">'
@@ -2491,6 +2610,7 @@ function _renderFunilEtapas(etapas, totalDeals, totalAcv){
       +'<span style="font-size:10px;color:var(--text3);font-weight:500">deals</span>'
       +'<span style="font-size:13px;font-weight:700;color:var(--text)">'+_fmtMoney(e.acv)+'</span>'
       +'<span style="font-size:11px;font-weight:700;color:'+ltCol+'">'+e.leadTimeAvg+'d</span>'
+      +'<span style="font-size:11px;color:var(--text3);opacity:.6">→</span>'
       +'</div></div>'
       +'<div style="height:3px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden">'
       +'<div style="height:100%;width:'+pctBar+'%;background:'+col+';border-radius:2px;opacity:.65"></div>'
@@ -2754,7 +2874,7 @@ function buildAnaliseCarteira(pane, opts){
     +'</div>'
     +seletor
     +hero
-    +_renderFunilEtapas(c.funilEtapas||[], c.dealsAbertos||0, c.acvAberto||0)
+    +_renderFunilEtapas(c.funilEtapas||[], c.dealsAbertos||0, c.acvAberto||0, sel||'time')
     +'<div class="carteira-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">'
     +funilHtml+segHtml
     +'</div>'
