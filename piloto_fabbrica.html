@@ -54,6 +54,13 @@
   .preset-btn { background: transparent; border: 1px solid var(--border-strong); color: var(--text-dim); padding: 4px 10px; border-radius: 6px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.18s; }
   .preset-btn:hover { color: var(--text); border-color: #4b5260; }
   .preset-btn.active { background: var(--teste-soft); border-color: var(--teste-border); color: var(--teste); }
+  .filter-grupo { display: flex; gap: 0; border: 1px solid var(--border-strong); border-radius: 6px; overflow: hidden; }
+  .grupo-btn { background: transparent; border: none; color: var(--text-dim); padding: 5px 12px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; transition: all 0.18s; border-right: 1px solid var(--border-strong); }
+  .grupo-btn:last-child { border-right: none; }
+  .grupo-btn:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+  .grupo-btn.active[data-grupo="all"] { background: rgba(255,255,255,0.06); color: var(--text); }
+  .grupo-btn.active[data-grupo="Controle"] { background: var(--controle-soft); color: var(--controle); }
+  .grupo-btn.active[data-grupo="Teste"] { background: var(--teste-soft); color: var(--teste); }
 
   /* Upload (compact) */
   .upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -238,6 +245,11 @@
       <div class="filter-item">
         <label for="dt-to">Até</label>
         <input type="date" id="dt-to">
+      </div>
+      <div class="filter-grupo">
+        <button class="grupo-btn active" data-grupo="all">Ambos</button>
+        <button class="grupo-btn" data-grupo="Controle">Só Controle</button>
+        <button class="grupo-btn" data-grupo="Teste">Só Teste</button>
       </div>
       <div class="filter-presets">
         <button class="preset-btn" data-preset="piloto">Piloto (28/04 – 09/05)</button>
@@ -655,10 +667,17 @@ const FILE_TYPES = {
 const state = {
   files: {},
   computed: null,
-  filter: { from: PILOTO_FROM, to: PILOTO_TO },
+  filter: { from: PILOTO_FROM, to: PILOTO_TO, grupo: 'all' },
   sortCol: 'reunioes', sortDir: 'desc',
   charts: { atividades: null, conectadas: null },
 };
+
+function activeGroups() {
+  if (state.filter.grupo === 'Controle') return ['Controle'];
+  if (state.filter.grupo === 'Teste') return ['Teste'];
+  return ['Controle', 'Teste'];
+}
+function isGroupActive(g) { return activeGroups().includes(g); }
 
 // ============================================================
 // XLSX PARSER (upload path)
@@ -1004,8 +1023,12 @@ function renderRoster() {
   const c = state.computed;
   const seen = new Set(c.activeBdrs.map(b => b.bdr));
   const r = (list) => list.map(e => `<span class="roster-pill ${e.grupo.toLowerCase()} ${seen.has(e.display) ? '' : 'absent'}" title="${seen.has(e.display) ? 'Reportável' : 'Sem dados no período/arquivos'}">${e.display}</span>`).join('');
-  document.getElementById('roster-controle').innerHTML = r(BDR_ALLOWLIST.filter(e => e.grupo === 'Controle'));
-  document.getElementById('roster-teste').innerHTML = r(BDR_ALLOWLIST.filter(e => e.grupo === 'Teste'));
+  const ctrlCol = document.getElementById('roster-controle').parentElement;
+  const testCol = document.getElementById('roster-teste').parentElement;
+  ctrlCol.style.display = isGroupActive('Controle') ? '' : 'none';
+  testCol.style.display = isGroupActive('Teste') ? '' : 'none';
+  if (isGroupActive('Controle')) document.getElementById('roster-controle').innerHTML = r(BDR_ALLOWLIST.filter(e => e.grupo === 'Controle'));
+  if (isGroupActive('Teste'))    document.getElementById('roster-teste').innerHTML    = r(BDR_ALLOWLIST.filter(e => e.grupo === 'Teste'));
 }
 
 function renderMetaBar() {
@@ -1043,17 +1066,23 @@ function renderCards() {
     { name: 'Oportunidades por BDR',      k: 'oportunidades',  dec: 2 },
     { name: 'Negócios do segmento/BDR',   k: 'negociosSeg',    dec: 2 },
   ];
+  const groups = activeGroups();
   document.getElementById('cards-grid').innerHTML = cards.map(card => {
     const cv = c.groups.Controle.pc[card.k];
     const tv = c.groups.Teste.pc[card.k];
     const d = deltaPct(cv, tv);
+    const cols = groups.map(g => {
+      const klass = g.toLowerCase();
+      const val = g === 'Controle' ? cv : tv;
+      return `<div class="metric-col"><span class="group-tag ${klass}">${g}</span><span class="metric-val ${klass}">${fmt(val, card.dec)}</span></div>`;
+    }).join('');
+    const deltaHtml = groups.length === 2
+      ? `<div class="delta-row"><span class="delta-label">Δ Teste vs Controle</span><span class="delta-val ${deltaClass(d)}">${deltaText(d)}</span></div>`
+      : '';
     return `<div class="metric-card">
       <div class="metric-name">${card.name}</div>
-      <div class="metric-rows">
-        <div class="metric-col"><span class="group-tag controle">Controle</span><span class="metric-val controle">${fmt(cv, card.dec)}</span></div>
-        <div class="metric-col"><span class="group-tag teste">Teste</span><span class="metric-val teste">${fmt(tv, card.dec)}</span></div>
-      </div>
-      <div class="delta-row"><span class="delta-label">Δ Teste vs Controle</span><span class="delta-val ${deltaClass(d)}">${deltaText(d)}</span></div>
+      <div class="metric-rows">${cols}</div>
+      ${deltaHtml}
     </div>`;
   }).join('');
 }
@@ -1067,7 +1096,8 @@ function renderFunnel() {
     { key: 'reunioes',        label: 'Reunião Agendada',   convFrom: 'leadsAbordagem' },
     { key: 'oportunidades',   label: 'Oportunidades',      convFrom: 'reunioes' },
   ];
-  const max = Math.max(...stages.flatMap(s => [c.groups.Controle.total[s.key], c.groups.Teste.total[s.key]]), 1);
+  const groups = activeGroups();
+  const max = Math.max(...stages.flatMap(s => groups.map(g => c.groups[g].total[s.key])), 1);
 
   function buildCard(grp, klass) {
     const g = c.groups[grp];
@@ -1087,7 +1117,9 @@ function renderFunnel() {
       ${stagesHtml}
     </div>`;
   }
-  document.getElementById('funnel-grid').innerHTML = buildCard('Controle','controle') + buildCard('Teste','teste');
+  const grid = document.getElementById('funnel-grid');
+  grid.innerHTML = groups.map(g => buildCard(g, g.toLowerCase())).join('');
+  grid.style.gridTemplateColumns = groups.length === 1 ? '1fr' : '1fr 1fr';
 }
 
 function renderEvolution() {
@@ -1126,18 +1158,12 @@ function renderEvolution() {
   };
   const lp = (color) => ({ borderColor: color, backgroundColor: color + '33', borderWidth: 2, pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: color, tension: 0.25, fill: false });
 
-  state.charts.atividades = new Chart(document.getElementById('chart-atividades'), {
-    type: 'line', data: { labels, datasets: [
-      { label: 'Controle', data: perDay('Controle','atividadesPorDia'), ...lp('#d4a574') },
-      { label: 'Teste',    data: perDay('Teste','atividadesPorDia'),    ...lp('#6db4a8') },
-    ]}, options: baseOpts,
-  });
-  state.charts.conectadas = new Chart(document.getElementById('chart-conectadas'), {
-    type: 'line', data: { labels, datasets: [
-      { label: 'Controle', data: perDay('Controle','ligacoesConectPorDia'), ...lp('#d4a574') },
-      { label: 'Teste',    data: perDay('Teste','ligacoesConectPorDia'),    ...lp('#6db4a8') },
-    ]}, options: baseOpts,
-  });
+  const groupsCharts = activeGroups();
+  const colorMap = { Controle: '#d4a574', Teste: '#6db4a8' };
+  const datasetsAtv = groupsCharts.map(g => ({ label: g, data: perDay(g, 'atividadesPorDia'), ...lp(colorMap[g]) }));
+  const datasetsCon = groupsCharts.map(g => ({ label: g, data: perDay(g, 'ligacoesConectPorDia'), ...lp(colorMap[g]) }));
+  state.charts.atividades = new Chart(document.getElementById('chart-atividades'), { type: 'line', data: { labels, datasets: datasetsAtv }, options: baseOpts });
+  state.charts.conectadas = new Chart(document.getElementById('chart-conectadas'), { type: 'line', data: { labels, datasets: datasetsCon }, options: baseOpts });
 }
 
 function destroyCharts() {
@@ -1148,7 +1174,10 @@ function destroyCharts() {
 
 function renderTable() {
   const c = state.computed;
-  const rows = c.activeBdrs.map(b => ({ ...b, taxaConexao: b.ligacoesFeitas ? b.ligacoesConect / b.ligacoesFeitas : null }));
+  const groups = activeGroups();
+  const rows = c.activeBdrs
+    .filter(b => groups.includes(b.grupo))
+    .map(b => ({ ...b, taxaConexao: b.ligacoesFeitas ? b.ligacoesConect / b.ligacoesFeitas : null }));
   const sf = {
     bdr: (a, b) => a.bdr.localeCompare(b.bdr, 'pt-BR'),
     grupo: (a, b) => a.grupo.localeCompare(b.grupo, 'pt-BR'),
@@ -1229,8 +1258,8 @@ function renderCoverage() {
   }
 
   const top = [];
-  if (hasCtrl) top.push(buildListCard('Lista Controle (Alocadas)', 'controle', c.controleAccountSet, tocadasControle, state.files.alocadasControle.fileName));
-  if (hasMvp)  top.push(buildListCard('Lista Teste (MVP Fabbrica)', 'teste', c.mvpAccountSet, tocadasTeste, state.files.mvpFabbrica.fileName));
+  if (hasCtrl && isGroupActive('Controle')) top.push(buildListCard('Lista Controle (Alocadas)', 'controle', c.controleAccountSet, tocadasControle, state.files.alocadasControle.fileName));
+  if (hasMvp && isGroupActive('Teste'))     top.push(buildListCard('Lista Teste (MVP Fabbrica)', 'teste', c.mvpAccountSet, tocadasTeste, state.files.mvpFabbrica.fileName));
   if (state.files.bdrAe) {
     // Cobertura geral da carteira sobre TODAS as listas
     const carteiraGlobal = new Set();
@@ -1250,7 +1279,8 @@ function renderCoverage() {
 
   // Tabela: contas atribuídas vs tocadas, por BDR (com base em carteira + negócios criados)
   const carteiraByBdr = c.carteiraByBdr;
-  const rows = c.activeBdrs.map(b => {
+  const groupsActive = activeGroups();
+  const rows = c.activeBdrs.filter(b => groupsActive.includes(b.grupo)).map(b => {
     const grpSet = c.segByGrupo[b.grupo] || new Set();
     const carteira = carteiraByBdr[b.bdr] || new Set();
     const inCart = [...grpSet].filter(a => carteira.has(a)).length;
@@ -1279,10 +1309,13 @@ function renderNegocios() {
   const sec = document.getElementById('negocios-section');
   if (!state.files.negocios || c.negociosList.length === 0) { sec.classList.add('hidden'); return; }
   sec.classList.remove('hidden');
-  const sorted = [...c.negociosList].sort((a, b) => {
-    if (a.isSegmento !== b.isSegmento) return a.isSegmento ? -1 : 1;
-    return (b.data || '').localeCompare(a.data || '');
-  }).slice(0, 200);
+  const groupsActive = activeGroups();
+  const sorted = [...c.negociosList]
+    .filter(n => groupsActive.includes(n.grupo))
+    .sort((a, b) => {
+      if (a.isSegmento !== b.isSegmento) return a.isSegmento ? -1 : 1;
+      return (b.data || '').localeCompare(a.data || '');
+    }).slice(0, 200);
   document.getElementById('negocios-tbody').innerHTML = sorted.map(n => `<tr class="${n.grupo === 'Controle' ? 'controle-row' : ''}">
     <td class="bdr-name">${n.bdr}</td>
     <td><span class="group-tag ${n.grupo === 'Controle' ? 'controle' : 'teste'}">${n.grupo}</span></td>
@@ -1303,6 +1336,13 @@ function setupFilter() {
   toInput.value = state.filter.to;
   fromInput.addEventListener('change', () => { state.filter.from = fromInput.value; recomputeAndRender(); markPresetActive(); });
   toInput.addEventListener('change', () => { state.filter.to = toInput.value; recomputeAndRender(); markPresetActive(); });
+  document.querySelectorAll('.grupo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.filter.grupo = btn.dataset.grupo;
+      document.querySelectorAll('.grupo-btn').forEach(b => b.classList.toggle('active', b.dataset.grupo === state.filter.grupo));
+      recomputeAndRender();
+    });
+  });
   document.querySelectorAll('.preset-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const p = btn.dataset.preset;
