@@ -2351,21 +2351,22 @@ const CARTEIRA_BDR={
     // Mydoha → Aline Coelho (top AE do funil: R$1,67M / 20 deals) — perfil ICP forte
     // leadTimeAvg = real do SF (avg ponderada de buckets · widget "LT na mesma etapa por AE")
     // leadTimeStages = derivado proporcional [0.4× · 1× · 1.6×] do avg real
-    MY:{ ae:'Aline Coelho',       acvFunil:1669096, acvAberto:1280410, dealsAbertos:20, carteiraTotal:580, leadTimeAvg:12, score:84, icpPct:78, recicladaPct:18, segCarteira:{Varejo:32,Tech:24,'Alimentação':14,Agro:8,'Serv. Profissionais':14,Outros:8}, segVendas:{Varejo:40,Tech:30,'Alimentação':15,Agro:8,'Serv. Profissionais':5,Outros:2}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[5,12,19]} },
-    // Juliana → Evelyn Diaz (R$1,04M / 17) — sem dado direto LT, usa média time 10d
-    JS:{ ae:'Evelyn Diaz',        acvFunil:1038194, acvAberto:982954,  dealsAbertos:17, carteiraTotal:540, leadTimeAvg:10, score:71, icpPct:68, recicladaPct:24, segCarteira:{Varejo:24,Tech:18,'Alimentação':12,Agro:6,'Serv. Profissionais':28,Outros:12}, segVendas:{Varejo:32,Tech:24,'Alimentação':18,Agro:8,'Serv. Profissionais':12,Outros:6}, qualidadeDados:{contatos:88,decisor:71,linkedin:58}, conv:{lcRa:18,raOp:32,leadTimeStages:[4,10,16]} },
+    // funilEtapas = real do SF (report "Acompanhamento opps no funil de vendas")
+    MY:{ ae:'Aline Coelho',       acvFunil:1669096, acvAberto:1280410, dealsAbertos:20, carteiraTotal:580, leadTimeAvg:12, score:84, icpPct:78, recicladaPct:18, segCarteira:{Varejo:32,Tech:24,'Alimentação':14,Agro:8,'Serv. Profissionais':14,Outros:8}, segVendas:{Varejo:40,Tech:30,'Alimentação':15,Agro:8,'Serv. Profissionais':5,Outros:2}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[5,12,19]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:12,acv:736264,leadTimeAvg:11},{n:'Aprovação do projeto',deals:6,acv:544147,leadTimeAvg:14},{n:'Negociação',deals:1,acv:14000,leadTimeAvg:8},{n:'Contrato',deals:1,acv:374685,leadTimeAvg:6}] },
+    // Juliana → Evelyn Diaz (R$1,04M / 17)
+    JS:{ ae:'Evelyn Diaz',        acvFunil:1038194, acvAberto:982954,  dealsAbertos:17, carteiraTotal:540, leadTimeAvg:10, score:71, icpPct:68, recicladaPct:24, segCarteira:{Varejo:24,Tech:18,'Alimentação':12,Agro:6,'Serv. Profissionais':28,Outros:12}, segVendas:{Varejo:32,Tech:24,'Alimentação':18,Agro:8,'Serv. Profissionais':12,Outros:6}, qualidadeDados:{contatos:88,decisor:71,linkedin:58}, conv:{lcRa:18,raOp:32,leadTimeStages:[4,10,16]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:12,acv:740675,leadTimeAvg:9},{n:'Aprovação do projeto',deals:3,acv:242279,leadTimeAvg:12},{n:'Negociação',deals:1,acv:23833,leadTimeAvg:7},{n:'Contrato',deals:1,acv:31407,leadTimeAvg:5}] },
     // Victoria → Carlos Grigorio (LT real: 20 deals · 9 até 7d / 6 8-15 / 5 16-30 = 11d)
-    VE:{ ae:'Carlos Grigorio',    acvFunil:740000,  acvAberto:556000,  dealsAbertos:20, carteiraTotal:610, leadTimeAvg:11, score:76, icpPct:74, recicladaPct:21, segCarteira:{Varejo:28,Tech:22,'Alimentação':14,Agro:8,'Serv. Profissionais':20,Outros:8}, segVendas:{Varejo:36,Tech:28,'Alimentação':14,Agro:10,'Serv. Profissionais':8,Outros:4}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[4,11,18]} },
+    VE:{ ae:'Carlos Grigorio',    acvFunil:740000,  acvAberto:556000,  dealsAbertos:20, carteiraTotal:610, leadTimeAvg:11, score:76, icpPct:74, recicladaPct:21, segCarteira:{Varejo:28,Tech:22,'Alimentação':14,Agro:8,'Serv. Profissionais':20,Outros:8}, segVendas:{Varejo:36,Tech:28,'Alimentação':14,Agro:10,'Serv. Profissionais':8,Outros:4}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[4,11,18]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:20,acv:556000,leadTimeAvg:11}] },
     // Giovana → Andrea Ferraz (LT real: 10 deals · 3 até 7 / 7 8-15 = 9d)
-    GF:{ ae:'Andrea Ferraz',      acvFunil:485000,  acvAberto:368000,  dealsAbertos:10, carteiraTotal:560, leadTimeAvg:9,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Varejo:34,Tech:28,'Alimentação':16,Agro:10,'Serv. Profissionais':8,Outros:4}, segVendas:{Varejo:42,Tech:32,'Alimentação':14,Agro:8,'Serv. Profissionais':3,Outros:1}, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[4,9,14]} },
-    // Jeanne → Dara Santos (R$129k / 2) — sem dado direto, usa média time 10d
-    JR:{ ae:'Dara Santos',        acvFunil:128742,  acvAberto:128742,  dealsAbertos:2,  carteiraTotal:495, leadTimeAvg:10, score:62, icpPct:62, recicladaPct:31, segCarteira:{Varejo:18,Tech:14,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:14}, segVendas:{Varejo:24,Tech:20,'Alimentação':14,Agro:6,'Serv. Profissionais':28,Outros:8}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[4,10,16]} },
+    GF:{ ae:'Andrea Ferraz',      acvFunil:485000,  acvAberto:368000,  dealsAbertos:10, carteiraTotal:560, leadTimeAvg:9,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Varejo:34,Tech:28,'Alimentação':16,Agro:10,'Serv. Profissionais':8,Outros:4}, segVendas:{Varejo:42,Tech:32,'Alimentação':14,Agro:8,'Serv. Profissionais':3,Outros:1}, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[4,9,14]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:10,acv:368000,leadTimeAvg:9}] },
+    // Jeanne → Dara Santos (R$129k / 2)
+    JR:{ ae:'Dara Santos',        acvFunil:128742,  acvAberto:128742,  dealsAbertos:2,  carteiraTotal:495, leadTimeAvg:10, score:62, icpPct:62, recicladaPct:31, segCarteira:{Varejo:18,Tech:14,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:14}, segVendas:{Varejo:24,Tech:20,'Alimentação':14,Agro:6,'Serv. Profissionais':28,Outros:8}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[4,10,16]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:2,acv:128742,leadTimeAvg:10}] },
     // Adhara → ela mesma (LT real: 3 deals todos em até 7d = 5d)
-    AG:{ ae:'Adhara Gonçalves',   acvFunil:0,       acvAberto:0,       dealsAbertos:2,  carteiraTotal:520, leadTimeAvg:5,  score:55, icpPct:58, recicladaPct:36, segCarteira:{Varejo:14,Tech:12,'Alimentação':8,Agro:4,'Serv. Profissionais':46,Outros:16}, segVendas:{Varejo:18,Tech:16,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:12}, qualidadeDados:{contatos:78,decisor:58,linkedin:46}, conv:{lcRa:24,raOp:18,leadTimeStages:[2,5,8]} },
-    // Ariane → ela mesma — sem dado direto, usa média time 10d
-    AM:{ ae:'Ariane Mesquita',    acvFunil:0,       acvAberto:0,       dealsAbertos:1,  carteiraTotal:470, leadTimeAvg:10, score:48, icpPct:54, recicladaPct:42, segCarteira:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':54,Outros:18}, segVendas:{Varejo:14,Tech:12,'Alimentação':8, Agro:4,'Serv. Profissionais':46,Outros:16}, qualidadeDados:{contatos:74,decisor:51,linkedin:40}, conv:{lcRa:11,raOp:20,leadTimeStages:[4,10,16]} },
+    AG:{ ae:'Adhara Gonçalves',   acvFunil:0,       acvAberto:0,       dealsAbertos:3,  carteiraTotal:520, leadTimeAvg:5,  score:55, icpPct:58, recicladaPct:36, segCarteira:{Varejo:14,Tech:12,'Alimentação':8,Agro:4,'Serv. Profissionais':46,Outros:16}, segVendas:{Varejo:18,Tech:16,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:12}, qualidadeDados:{contatos:78,decisor:58,linkedin:46}, conv:{lcRa:24,raOp:18,leadTimeStages:[2,5,8]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:3,acv:0,leadTimeAvg:5}] },
+    // Ariane → ela mesma
+    AM:{ ae:'Ariane Mesquita',    acvFunil:0,       acvAberto:0,       dealsAbertos:1,  carteiraTotal:470, leadTimeAvg:10, score:48, icpPct:54, recicladaPct:42, segCarteira:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':54,Outros:18}, segVendas:{Varejo:14,Tech:12,'Alimentação':8, Agro:4,'Serv. Profissionais':46,Outros:16}, qualidadeDados:{contatos:74,decisor:51,linkedin:40}, conv:{lcRa:11,raOp:20,leadTimeStages:[4,10,16]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:1,acv:0,leadTimeAvg:10}] },
     // Pedro → Andressa Lyra (LT real: 4 deals · 2 até 7 / 2 8-15 = 8d)
-    PS:{ ae:'Andressa Lyra',      acvFunil:8477,    acvAberto:8477,    dealsAbertos:4,  carteiraTotal:445, leadTimeAvg:8,  score:42, icpPct:50, recicladaPct:48, segCarteira:{Varejo:8, Tech:6, 'Alimentação':5, Agro:3,'Serv. Profissionais':58,Outros:20}, segVendas:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':52,Outros:20}, qualidadeDados:{contatos:70,decisor:48,linkedin:36}, conv:{lcRa:22,raOp:0, leadTimeStages:[3,8,13]} }
+    PS:{ ae:'Andressa Lyra',      acvFunil:8477,    acvAberto:8477,    dealsAbertos:4,  carteiraTotal:445, leadTimeAvg:8,  score:42, icpPct:50, recicladaPct:48, segCarteira:{Varejo:8, Tech:6, 'Alimentação':5, Agro:3,'Serv. Profissionais':58,Outros:20}, segVendas:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':52,Outros:20}, qualidadeDados:{contatos:70,decisor:48,linkedin:36}, conv:{lcRa:22,raOp:0, leadTimeStages:[3,8,13]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:4,acv:8477,leadTimeAvg:8}] }
   }
 };
 
@@ -2393,12 +2394,28 @@ function _carteiraAggregate(){
     keys.forEach(function(k){ out[k]=Math.round(all.reduce(function(s,x){return s+(x[seg][k]||0);},0)/all.length); });
     return out;
   };
+  // Agrega funilEtapas — soma deals e acv por nome, lead time média ponderada
+  function aggFunilEtapas(){
+    var byNome={};
+    all.forEach(function(b){
+      (b.funilEtapas||[]).forEach(function(et){
+        if(!byNome[et.n]) byNome[et.n]={n:et.n, deals:0, acv:0, _sumLT:0};
+        byNome[et.n].deals += et.deals;
+        byNome[et.n].acv   += et.acv;
+        byNome[et.n]._sumLT+= (et.leadTimeAvg||0)*(et.deals||0);
+      });
+    });
+    return Object.values(byNome).map(function(x){
+      return {n:x.n, deals:x.deals, acv:x.acv, leadTimeAvg: x.deals>0 ? Math.round(x._sumLT/x.deals) : 0};
+    }).sort(function(a,b){return b.deals-a.deals;});
+  }
   return {
     ae:'Time todo · '+all.length+' BDRs',
     acvFunil: sum(function(x){return x.acvFunil;}),
     acvAberto: sum(function(x){return x.acvAberto;}),
     dealsAbertos: sum(function(x){return x.dealsAbertos;}),
     carteiraTotal: sum(function(x){return x.carteiraTotal;}),
+    funilEtapas: aggFunilEtapas(),
     leadTimeAvg: avg(function(x){return x.leadTimeAvg;}),
     score: avg(function(x){return x.score;}),
     icpPct: avg(function(x){return x.icpPct;}),
@@ -2440,6 +2457,48 @@ function selectCarteiraBDR(bdrId){
   if(typeof track==='function') track('analise_carteira_bdr', bdrId||'time');
 }
 
+// Cores por etapa do funil de Vendas (semantic — early→late)
+var ETAPA_COLORS={
+  'Desenvolvimento de negócio':'#3b82f6',  // azul — entry
+  'Aprovação do projeto':      '#f59e0b',  // laranja — meio
+  'Negociação':                '#eab308',  // amarelo — late
+  'Contrato':                  '#a855f7',  // roxo — quase fechado
+  'Closed Won':                '#10b981',  // verde — ganho
+  'Closed Lost':               '#ef4444'   // vermelho — perdido
+};
+function _renderFunilEtapas(etapas, totalDeals, totalAcv){
+  if(!etapas || etapas.length===0) return '';
+  var maxDeals = Math.max.apply(null, etapas.map(function(e){return e.deals;}).concat([1]));
+  var html='<div class="card" style="margin-bottom:14px">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Pipeline · por etapa de Vendas</div>'
+    +'<div style="font-size:11px;color:var(--text3);font-feature-settings:\'tnum\'">'+totalDeals+' deals · '+_fmtMoney(totalAcv)+'</div>'
+    +'</div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px">';
+  etapas.forEach(function(e){
+    var col = ETAPA_COLORS[e.n] || '#64748b';
+    var pctBar = Math.max(2, Math.round(e.deals/maxDeals*100));
+    var ltCol = e.leadTimeAvg<=10 ? '#10b981' : e.leadTimeAvg<=20 ? '#f59e0b' : '#ef4444';
+    html+='<div title="'+e.n+': '+e.deals+' deals parados há '+e.leadTimeAvg+' dias em média · ACV potencial '+_fmtMoney(e.acv)+'" style="position:relative;padding:12px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;overflow:hidden">'
+      +'<div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:'+col+'"></div>'
+      +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px">'
+      +'<div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1">'
+      +'<span style="width:8px;height:8px;border-radius:50%;background:'+col+';flex-shrink:0"></span>'
+      +'<span style="font-size:12px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e.n+'</span>'
+      +'</div>'
+      +'<div style="display:flex;align-items:baseline;gap:14px;font-feature-settings:\'tnum\'">'
+      +'<span style="font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.02em">'+e.deals+'</span>'
+      +'<span style="font-size:10px;color:var(--text3);font-weight:500">deals</span>'
+      +'<span style="font-size:13px;font-weight:700;color:var(--text)">'+_fmtMoney(e.acv)+'</span>'
+      +'<span style="font-size:11px;font-weight:700;color:'+ltCol+'">'+e.leadTimeAvg+'d</span>'
+      +'</div></div>'
+      +'<div style="height:3px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden">'
+      +'<div style="height:100%;width:'+pctBar+'%;background:'+col+';border-radius:2px;opacity:.65"></div>'
+      +'</div></div>';
+  });
+  html+='</div></div>';
+  return html;
+}
 // Cores por vertical (alinhadas semanticamente)
 var SEG_COLORS={
   'Varejo':'#10b981',          // verde — ICP forte
@@ -2695,6 +2754,7 @@ function buildAnaliseCarteira(pane, opts){
     +'</div>'
     +seletor
     +hero
+    +_renderFunilEtapas(c.funilEtapas||[], c.dealsAbertos||0, c.acvAberto||0)
     +'<div class="carteira-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">'
     +funilHtml+segHtml
     +'</div>'
