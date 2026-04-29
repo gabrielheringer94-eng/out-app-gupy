@@ -2316,25 +2316,31 @@ const ANALISE_CARTEIRA={
   data:'24/04/2026'
 };
 
-// Dados extraídos do dashboard SF "[OFICIAL] Painel de Resultados Plataforma - Liderança"
-// (01ZbJ0000023KPFUA2) em 28/04/2026 10:19.
+// Dados extraídos do Salesforce — fontes:
+//  · Dashboard "[OFICIAL] Painel de Resultados Plataforma - Liderança" (01ZbJ0000023KPFUA2)
+//  · Relatório "Acompanhamento opps no funil de vendas" (00ObJ00000leQAPUA2)
+//  Captura: 28/04/2026 10:19 (dashboard) e 28/04/2026 ~17h (report base).
 //
 // REAIS (do SF):
-//  · acvFunil/acvAberto/dealsAbertos: derivados da tabela "Acompanhamento opps no funil de vendas"
-//    por AE atribuído (Aline R$1,67M·20, Evelyn R$1,04M·17, Dara R$129k·2, Flavia R$37k·2,
+//  · acvFunil/acvAberto/dealsAbertos: tabela "Acompanhamento opps no funil de vendas"
+//    por AE (Aline R$1,67M·20, Evelyn R$1,04M·17, Dara R$129k·2, Flavia R$37k·2,
 //    Andressa R$8,5k·4, Adhara R$0·2, Ariane R$0·1).
-//  · leadTimeStages: derivados de "LT na mesma etapa por AE" (Carlos 20 deals, Andrea 10, etc).
-//  · ae: nomes de AE são reais — mapping BDR→AE é por roteamento atual (estimado).
+//  · leadTimeAvg: tempo médio na etapa atual (proxy de lead time) — calculado da
+//    distribuição de buckets do widget "LT na mesma etapa por AE" usando pontos médios
+//    (4d/11,5d/23d). Cobertura real: 5 dos 8 BDRs (Aline, Carlos, Andrea, Adhara, Andressa).
+//    Demais 3 BDRs usam média do time (1.237 dias / 120 deals = 10d).
+//  · leadTimeStages: derivado proporcional do leadTimeAvg real (split 0.4×/1×/1.6×).
+//  · ae: nomes reais de AE (mapping BDR→AE estimado por roteamento atual).
 //
-// ESTIMADO (não disponível no dashboard atual):
-//  · score, icpPct, recicladaPct, segCarteira, segVendas, qualidadeDados — esse dashboard
-//    não tem esses cortes por BDR. Para plug real precisamos de reports adicionais.
+// ESTIMADO (não disponível nos dashboards/reports atuais):
+//  · score, icpPct, recicladaPct, segCarteira, segVendas, qualidadeDados — precisa
+//    reports adicionais (ICP, recycling, score Cortex, segmento por opp).
 const CARTEIRA_BDR={
   meta:{
     quarterMeta:600000,
-    fonte:'Salesforce · Painel Liderança · atualizado 28/04/2026 10:19',
+    fonte:'Salesforce · Painel Liderança + Report "Acompanhamento opps" · 28/04/2026',
     parcial:true,
-    nota:'ACV, deals e lead time vêm do SF. Score/ICP/Segmento/Reciclada/Qualidade ainda são estimativas — esses cortes não estão no dashboard atual.'
+    nota:'ACV, deals e lead time vêm do SF (real). Score/ICP/Segmento/Reciclada/Qualidade ainda são estimativas — precisa reports adicionais com esses cortes por xDR.'
   },
   // Segmentos seguem a auditoria Q1: ICP = Varejo, Tech, Alimentação, Agro · Não-ICP = Serv. Profissionais + Outros
   // segCarteira = mix da carteira atribuída ao AE · segVendas = mix das opps que ESCALARAM pra Vendas
@@ -2343,21 +2349,23 @@ const CARTEIRA_BDR={
   // Segmentos seguem a auditoria: ICP = Varejo, Tech, Alimentação, Agro · Não-ICP = Serv. Profissionais + Outros
   byBdr:{
     // Mydoha → Aline Coelho (top AE do funil: R$1,67M / 20 deals) — perfil ICP forte
-    MY:{ ae:'Aline Coelho',       acvFunil:1669096, acvAberto:1280410, dealsAbertos:20, carteiraTotal:580, leadTimeAvg:18, score:84, icpPct:78, recicladaPct:18, segCarteira:{Varejo:32,Tech:24,'Alimentação':14,Agro:8,'Serv. Profissionais':14,Outros:8}, segVendas:{Varejo:40,Tech:30,'Alimentação':15,Agro:8,'Serv. Profissionais':5,Outros:2}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[7,12,18]} },
-    // Juliana → Evelyn Diaz (R$1,04M / 17)
-    JS:{ ae:'Evelyn Diaz',        acvFunil:1038194, acvAberto:982954,  dealsAbertos:17, carteiraTotal:540, leadTimeAvg:14, score:71, icpPct:68, recicladaPct:24, segCarteira:{Varejo:24,Tech:18,'Alimentação':12,Agro:6,'Serv. Profissionais':28,Outros:12}, segVendas:{Varejo:32,Tech:24,'Alimentação':18,Agro:8,'Serv. Profissionais':12,Outros:6}, qualidadeDados:{contatos:88,decisor:71,linkedin:58}, conv:{lcRa:18,raOp:32,leadTimeStages:[6,10,18]} },
-    // Victoria → Carlos Grigorio
-    VE:{ ae:'Carlos Grigorio',    acvFunil:740000,  acvAberto:556000,  dealsAbertos:20, carteiraTotal:610, leadTimeAvg:11, score:76, icpPct:74, recicladaPct:21, segCarteira:{Varejo:28,Tech:22,'Alimentação':14,Agro:8,'Serv. Profissionais':20,Outros:8}, segVendas:{Varejo:36,Tech:28,'Alimentação':14,Agro:10,'Serv. Profissionais':8,Outros:4}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[5,11,18]} },
-    // Giovana → Andrea Ferraz (top performer)
-    GF:{ ae:'Andrea Ferraz',      acvFunil:485000,  acvAberto:368000,  dealsAbertos:10, carteiraTotal:560, leadTimeAvg:9,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Varejo:34,Tech:28,'Alimentação':16,Agro:10,'Serv. Profissionais':8,Outros:4}, segVendas:{Varejo:42,Tech:32,'Alimentação':14,Agro:8,'Serv. Profissionais':3,Outros:1}, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[4,9,15]} },
-    // Jeanne → Dara Santos (R$129k / 2)
-    JR:{ ae:'Dara Santos',        acvFunil:128742,  acvAberto:128742,  dealsAbertos:2,  carteiraTotal:495, leadTimeAvg:22, score:62, icpPct:62, recicladaPct:31, segCarteira:{Varejo:18,Tech:14,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:14}, segVendas:{Varejo:24,Tech:20,'Alimentação':14,Agro:6,'Serv. Profissionais':28,Outros:8}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[8,18,28]} },
-    // Adhara → ela mesma (R$0 / 2)
-    AG:{ ae:'Adhara Gonçalves',   acvFunil:0,       acvAberto:0,       dealsAbertos:2,  carteiraTotal:520, leadTimeAvg:26, score:55, icpPct:58, recicladaPct:36, segCarteira:{Varejo:14,Tech:12,'Alimentação':8,Agro:4,'Serv. Profissionais':46,Outros:16}, segVendas:{Varejo:18,Tech:16,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:12}, qualidadeDados:{contatos:78,decisor:58,linkedin:46}, conv:{lcRa:24,raOp:18,leadTimeStages:[10,22,32]} },
-    // Ariane → ela mesma (R$0 / 1)
-    AM:{ ae:'Ariane Mesquita',    acvFunil:0,       acvAberto:0,       dealsAbertos:1,  carteiraTotal:470, leadTimeAvg:30, score:48, icpPct:54, recicladaPct:42, segCarteira:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':54,Outros:18}, segVendas:{Varejo:14,Tech:12,'Alimentação':8, Agro:4,'Serv. Profissionais':46,Outros:16}, qualidadeDados:{contatos:74,decisor:51,linkedin:40}, conv:{lcRa:11,raOp:20,leadTimeStages:[12,26,38]} },
-    // Pedro → Andressa Lyra (R$8,5k / 4)
-    PS:{ ae:'Andressa Lyra',      acvFunil:8477,    acvAberto:8477,    dealsAbertos:4,  carteiraTotal:445, leadTimeAvg:34, score:42, icpPct:50, recicladaPct:48, segCarteira:{Varejo:8, Tech:6, 'Alimentação':5, Agro:3,'Serv. Profissionais':58,Outros:20}, segVendas:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':52,Outros:20}, qualidadeDados:{contatos:70,decisor:48,linkedin:36}, conv:{lcRa:22,raOp:0, leadTimeStages:[14,30,42]} }
+    // leadTimeAvg = real do SF (avg ponderada de buckets · widget "LT na mesma etapa por AE")
+    // leadTimeStages = derivado proporcional [0.4× · 1× · 1.6×] do avg real
+    MY:{ ae:'Aline Coelho',       acvFunil:1669096, acvAberto:1280410, dealsAbertos:20, carteiraTotal:580, leadTimeAvg:12, score:84, icpPct:78, recicladaPct:18, segCarteira:{Varejo:32,Tech:24,'Alimentação':14,Agro:8,'Serv. Profissionais':14,Outros:8}, segVendas:{Varejo:40,Tech:30,'Alimentação':15,Agro:8,'Serv. Profissionais':5,Outros:2}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[5,12,19]} },
+    // Juliana → Evelyn Diaz (R$1,04M / 17) — sem dado direto LT, usa média time 10d
+    JS:{ ae:'Evelyn Diaz',        acvFunil:1038194, acvAberto:982954,  dealsAbertos:17, carteiraTotal:540, leadTimeAvg:10, score:71, icpPct:68, recicladaPct:24, segCarteira:{Varejo:24,Tech:18,'Alimentação':12,Agro:6,'Serv. Profissionais':28,Outros:12}, segVendas:{Varejo:32,Tech:24,'Alimentação':18,Agro:8,'Serv. Profissionais':12,Outros:6}, qualidadeDados:{contatos:88,decisor:71,linkedin:58}, conv:{lcRa:18,raOp:32,leadTimeStages:[4,10,16]} },
+    // Victoria → Carlos Grigorio (LT real: 20 deals · 9 até 7d / 6 8-15 / 5 16-30 = 11d)
+    VE:{ ae:'Carlos Grigorio',    acvFunil:740000,  acvAberto:556000,  dealsAbertos:20, carteiraTotal:610, leadTimeAvg:11, score:76, icpPct:74, recicladaPct:21, segCarteira:{Varejo:28,Tech:22,'Alimentação':14,Agro:8,'Serv. Profissionais':20,Outros:8}, segVendas:{Varejo:36,Tech:28,'Alimentação':14,Agro:10,'Serv. Profissionais':8,Outros:4}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[4,11,18]} },
+    // Giovana → Andrea Ferraz (LT real: 10 deals · 3 até 7 / 7 8-15 = 9d)
+    GF:{ ae:'Andrea Ferraz',      acvFunil:485000,  acvAberto:368000,  dealsAbertos:10, carteiraTotal:560, leadTimeAvg:9,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Varejo:34,Tech:28,'Alimentação':16,Agro:10,'Serv. Profissionais':8,Outros:4}, segVendas:{Varejo:42,Tech:32,'Alimentação':14,Agro:8,'Serv. Profissionais':3,Outros:1}, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[4,9,14]} },
+    // Jeanne → Dara Santos (R$129k / 2) — sem dado direto, usa média time 10d
+    JR:{ ae:'Dara Santos',        acvFunil:128742,  acvAberto:128742,  dealsAbertos:2,  carteiraTotal:495, leadTimeAvg:10, score:62, icpPct:62, recicladaPct:31, segCarteira:{Varejo:18,Tech:14,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:14}, segVendas:{Varejo:24,Tech:20,'Alimentação':14,Agro:6,'Serv. Profissionais':28,Outros:8}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[4,10,16]} },
+    // Adhara → ela mesma (LT real: 3 deals todos em até 7d = 5d)
+    AG:{ ae:'Adhara Gonçalves',   acvFunil:0,       acvAberto:0,       dealsAbertos:2,  carteiraTotal:520, leadTimeAvg:5,  score:55, icpPct:58, recicladaPct:36, segCarteira:{Varejo:14,Tech:12,'Alimentação':8,Agro:4,'Serv. Profissionais':46,Outros:16}, segVendas:{Varejo:18,Tech:16,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:12}, qualidadeDados:{contatos:78,decisor:58,linkedin:46}, conv:{lcRa:24,raOp:18,leadTimeStages:[2,5,8]} },
+    // Ariane → ela mesma — sem dado direto, usa média time 10d
+    AM:{ ae:'Ariane Mesquita',    acvFunil:0,       acvAberto:0,       dealsAbertos:1,  carteiraTotal:470, leadTimeAvg:10, score:48, icpPct:54, recicladaPct:42, segCarteira:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':54,Outros:18}, segVendas:{Varejo:14,Tech:12,'Alimentação':8, Agro:4,'Serv. Profissionais':46,Outros:16}, qualidadeDados:{contatos:74,decisor:51,linkedin:40}, conv:{lcRa:11,raOp:20,leadTimeStages:[4,10,16]} },
+    // Pedro → Andressa Lyra (LT real: 4 deals · 2 até 7 / 2 8-15 = 8d)
+    PS:{ ae:'Andressa Lyra',      acvFunil:8477,    acvAberto:8477,    dealsAbertos:4,  carteiraTotal:445, leadTimeAvg:8,  score:42, icpPct:50, recicladaPct:48, segCarteira:{Varejo:8, Tech:6, 'Alimentação':5, Agro:3,'Serv. Profissionais':58,Outros:20}, segVendas:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':52,Outros:20}, qualidadeDados:{contatos:70,decisor:48,linkedin:36}, conv:{lcRa:22,raOp:0, leadTimeStages:[3,8,13]} }
   }
 };
 
@@ -2613,8 +2621,8 @@ function buildAnaliseCarteira(pane, opts){
       +'</div></div>';
   });
   funilHtml+='</div>'
-    +'<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:11px">'
-    +'<span style="color:var(--text3)">Lead time total médio</span>'
+    +'<div title="Média ponderada do bucket \'tempo na etapa\' do report SF · pontos médios 4d/11.5d/23d" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:11px;cursor:help">'
+    +'<span style="color:var(--text3)">Tempo médio na etapa <span style="font-size:9px;color:var(--text3);opacity:.7">· proxy SF</span></span>'
     +'<span style="color:var(--text);font-weight:700;font-feature-settings:\'tnum\'">'+c.leadTimeAvg+' dias</span>'
     +'</div>'
     +'</div>';
