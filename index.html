@@ -2050,11 +2050,12 @@ const NAV_ICONS={
   mrr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
   mrr_bdr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
   noticias:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
-  analise:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>'
+  analise:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>',
+  carteira:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2" ry="2"/><path d="M22 10H18a2 2 0 0 0 0 4h4"/><path d="M2 10V8a2 2 0 0 1 2-2h14"/></svg>'
 };
 const NAV_LABELS={
   resumo:'Hoje',time:'Time',base:'Base',reunioes:'Agenda',weekly:'Weekly',analise:'Análise de carteira',log:'Log',
-  hoje:'Início',resultado:'Meu Resultado',performance:'Performance',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI',jdc:'Pessoas'
+  hoje:'Início',resultado:'Meu Resultado',performance:'Performance',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI',jdc:'Pessoas',carteira:'Carteira'
 };
 
 
@@ -2327,23 +2328,26 @@ const CARTEIRA_BDR={
     parcial:true,
     nota:'ACV, deals e lead time vêm do SF. Score/ICP/Segmento/Reciclada/Qualidade ainda são estimativas — esses cortes não estão no dashboard atual.'
   },
+  // Segmentos seguem a auditoria Q1: ICP = Varejo, Tech, Alimentação, Agro · Não-ICP = Serv. Profissionais + Outros
+  // segCarteira = mix da carteira atribuída ao AE · segVendas = mix das opps que ESCALARAM pra Vendas
+  // (BDRs com mais ICP-fit tendem a converter mais Varejo/Tech, BDRs fracos ficam presos em Serv. Prof.)
   byBdr:{
-    // Mydoha → Aline Coelho (top AE do funil: R$1,67M / 20 deals)
-    MY:{ ae:'Aline Coelho',       acvFunil:1669096, acvAberto:1280410, dealsAbertos:20, leadTimeAvg:18, score:84, icpPct:78, recicladaPct:18, segCarteira:{Enterprise:42,'Mid-Market':38,SMB:20}, segVendas:{Enterprise:55,'Mid-Market':35,SMB:10}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[7,12,18]} },
-    // Juliana → Evelyn Diaz (segundo top: R$1,04M / 17)
-    JS:{ ae:'Evelyn Diaz',        acvFunil:1038194, acvAberto:982954,  dealsAbertos:17, leadTimeAvg:14, score:71, icpPct:68, recicladaPct:24, segCarteira:{Enterprise:30,'Mid-Market':45,SMB:25}, segVendas:{Enterprise:48,'Mid-Market':42,SMB:10}, qualidadeDados:{contatos:88,decisor:71,linkedin:58}, conv:{lcRa:18,raOp:32,leadTimeStages:[6,10,18]} },
-    // Victoria → Carlos Grigorio (40 opps — top em volume de oportunidades)
-    VE:{ ae:'Carlos Grigorio',    acvFunil:740000,  acvAberto:556000,  dealsAbertos:20, leadTimeAvg:11, score:76, icpPct:74, recicladaPct:21, segCarteira:{Enterprise:38,'Mid-Market':40,SMB:22}, segVendas:{Enterprise:50,'Mid-Market':38,SMB:12}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[5,11,18]} },
-    // Giovana → Andrea Ferraz (10 deals, lead time rápido)
-    GF:{ ae:'Andrea Ferraz',      acvFunil:485000,  acvAberto:368000,  dealsAbertos:10, leadTimeAvg:9,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Enterprise:48,'Mid-Market':35,SMB:17}, segVendas:{Enterprise:62,'Mid-Market':30,SMB:8 }, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[4,9,15]} },
+    // Mydoha → Aline Coelho (top AE do funil: R$1,67M / 20 deals) — perfil ICP forte
+    MY:{ ae:'Aline Coelho',       acvFunil:1669096, acvAberto:1280410, dealsAbertos:20, leadTimeAvg:18, score:84, icpPct:78, recicladaPct:18, segCarteira:{Varejo:32,Tech:24,'Alimentação':14,Agro:8,'Serv. Profissionais':14,Outros:8}, segVendas:{Varejo:40,Tech:30,'Alimentação':15,Agro:8,'Serv. Profissionais':5,Outros:2}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[7,12,18]} },
+    // Juliana → Evelyn Diaz (R$1,04M / 17)
+    JS:{ ae:'Evelyn Diaz',        acvFunil:1038194, acvAberto:982954,  dealsAbertos:17, leadTimeAvg:14, score:71, icpPct:68, recicladaPct:24, segCarteira:{Varejo:24,Tech:18,'Alimentação':12,Agro:6,'Serv. Profissionais':28,Outros:12}, segVendas:{Varejo:32,Tech:24,'Alimentação':18,Agro:8,'Serv. Profissionais':12,Outros:6}, qualidadeDados:{contatos:88,decisor:71,linkedin:58}, conv:{lcRa:18,raOp:32,leadTimeStages:[6,10,18]} },
+    // Victoria → Carlos Grigorio (mais opps em volume)
+    VE:{ ae:'Carlos Grigorio',    acvFunil:740000,  acvAberto:556000,  dealsAbertos:20, leadTimeAvg:11, score:76, icpPct:74, recicladaPct:21, segCarteira:{Varejo:28,Tech:22,'Alimentação':14,Agro:8,'Serv. Profissionais':20,Outros:8}, segVendas:{Varejo:36,Tech:28,'Alimentação':14,Agro:10,'Serv. Profissionais':8,Outros:4}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[5,11,18]} },
+    // Giovana → Andrea Ferraz (10 deals, top performer)
+    GF:{ ae:'Andrea Ferraz',      acvFunil:485000,  acvAberto:368000,  dealsAbertos:10, leadTimeAvg:9,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Varejo:34,Tech:28,'Alimentação':16,Agro:10,'Serv. Profissionais':8,Outros:4}, segVendas:{Varejo:42,Tech:32,'Alimentação':14,Agro:8,'Serv. Profissionais':3,Outros:1}, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[4,9,15]} },
     // Jeanne → Dara Santos (R$129k / 2)
-    JR:{ ae:'Dara Santos',        acvFunil:128742,  acvAberto:128742,  dealsAbertos:2,  leadTimeAvg:22, score:62, icpPct:62, recicladaPct:31, segCarteira:{Enterprise:24,'Mid-Market':46,SMB:30}, segVendas:{Enterprise:38,'Mid-Market':48,SMB:14}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[8,18,28]} },
-    // Adhara → ela mesma (aparece no SF: R$0 / 2 deals)
-    AG:{ ae:'Adhara Gonçalves',   acvFunil:0,       acvAberto:0,       dealsAbertos:2,  leadTimeAvg:26, score:55, icpPct:58, recicladaPct:36, segCarteira:{Enterprise:18,'Mid-Market':44,SMB:38}, segVendas:{Enterprise:30,'Mid-Market':50,SMB:20}, qualidadeDados:{contatos:78,decisor:58,linkedin:46}, conv:{lcRa:24,raOp:18,leadTimeStages:[10,22,32]} },
-    // Ariane → ela mesma (aparece no SF: R$0 / 1)
-    AM:{ ae:'Ariane Mesquita',    acvFunil:0,       acvAberto:0,       dealsAbertos:1,  leadTimeAvg:30, score:48, icpPct:54, recicladaPct:42, segCarteira:{Enterprise:14,'Mid-Market':40,SMB:46}, segVendas:{Enterprise:24,'Mid-Market':52,SMB:24}, qualidadeDados:{contatos:74,decisor:51,linkedin:40}, conv:{lcRa:11,raOp:20,leadTimeStages:[12,26,38]} },
-    // Pedro → Andressa Lyra (R$8,5k / 4)
-    PS:{ ae:'Andressa Lyra',      acvFunil:8477,    acvAberto:8477,    dealsAbertos:4,  leadTimeAvg:34, score:42, icpPct:50, recicladaPct:48, segCarteira:{Enterprise:10,'Mid-Market':38,SMB:52}, segVendas:{Enterprise:18,'Mid-Market':54,SMB:28}, qualidadeDados:{contatos:70,decisor:48,linkedin:36}, conv:{lcRa:22,raOp:0, leadTimeStages:[14,30,42]} }
+    JR:{ ae:'Dara Santos',        acvFunil:128742,  acvAberto:128742,  dealsAbertos:2,  leadTimeAvg:22, score:62, icpPct:62, recicladaPct:31, segCarteira:{Varejo:18,Tech:14,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:14}, segVendas:{Varejo:24,Tech:20,'Alimentação':14,Agro:6,'Serv. Profissionais':28,Outros:8}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[8,18,28]} },
+    // Adhara → ela mesma (R$0 / 2)
+    AG:{ ae:'Adhara Gonçalves',   acvFunil:0,       acvAberto:0,       dealsAbertos:2,  leadTimeAvg:26, score:55, icpPct:58, recicladaPct:36, segCarteira:{Varejo:14,Tech:12,'Alimentação':8,Agro:4,'Serv. Profissionais':46,Outros:16}, segVendas:{Varejo:18,Tech:16,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:12}, qualidadeDados:{contatos:78,decisor:58,linkedin:46}, conv:{lcRa:24,raOp:18,leadTimeStages:[10,22,32]} },
+    // Ariane → ela mesma (R$0 / 1)
+    AM:{ ae:'Ariane Mesquita',    acvFunil:0,       acvAberto:0,       dealsAbertos:1,  leadTimeAvg:30, score:48, icpPct:54, recicladaPct:42, segCarteira:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':54,Outros:18}, segVendas:{Varejo:14,Tech:12,'Alimentação':8, Agro:4,'Serv. Profissionais':46,Outros:16}, qualidadeDados:{contatos:74,decisor:51,linkedin:40}, conv:{lcRa:11,raOp:20,leadTimeStages:[12,26,38]} },
+    // Pedro → Andressa Lyra (R$8,5k / 4) — perfil mais não-ICP
+    PS:{ ae:'Andressa Lyra',      acvFunil:8477,    acvAberto:8477,    dealsAbertos:4,  leadTimeAvg:34, score:42, icpPct:50, recicladaPct:48, segCarteira:{Varejo:8, Tech:6, 'Alimentação':5, Agro:3,'Serv. Profissionais':58,Outros:20}, segVendas:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':52,Outros:20}, qualidadeDados:{contatos:70,decisor:48,linkedin:36}, conv:{lcRa:22,raOp:0, leadTimeStages:[14,30,42]} }
   }
 };
 
@@ -2406,20 +2410,30 @@ function selectCarteiraBDR(bdrId){
   if(typeof track==='function') track('analise_carteira_bdr', bdrId||'time');
 }
 
+// Cores por vertical (alinhadas semanticamente)
+var SEG_COLORS={
+  'Varejo':'#10b981',          // verde — ICP forte
+  'Tech':'#3b82f6',            // azul — tech
+  'Alimentação':'#f59e0b',     // laranja — food
+  'Agro':'#84cc16',            // verde-lima — agro
+  'Serv. Profissionais':'#a855f7', // roxo — não-ICP "vampiro"
+  'Outros':'#64748b'           // cinza — resto
+};
 function _renderDonut(seg, size){
   size = size || 110;
   var keys=Object.keys(seg);
-  var palette=['#6366f1','#10b981','#f59e0b','#a855f7','#ec4899'];
+  var fallback=['#6366f1','#10b981','#f59e0b','#a855f7','#ec4899','#64748b'];
   var total=keys.reduce(function(s,k){return s+seg[k];},0);
   var cx=size/2, cy=size/2, r=size/2-8, sw=14;
   var circ=2*Math.PI*r;
   var off=0;
   var svg='<svg viewBox="0 0 '+size+' '+size+'" style="width:'+size+'px;height:'+size+'px">';
   svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="'+sw+'"/>';
+  function colorFor(k,i){ return SEG_COLORS[k]||fallback[i%fallback.length]; }
   keys.forEach(function(k,i){
     var pct=seg[k]/total;
     var len=circ*pct;
-    svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+palette[i%palette.length]+'" stroke-width="'+sw+'" stroke-dasharray="'+len.toFixed(2)+' '+circ.toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" transform="rotate(-90 '+cx+' '+cy+')" stroke-linecap="butt"/>';
+    svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+colorFor(k,i)+'" stroke-width="'+sw+'" stroke-dasharray="'+len.toFixed(2)+' '+circ.toFixed(2)+'" stroke-dashoffset="'+(-off).toFixed(2)+'" transform="rotate(-90 '+cx+' '+cy+')" stroke-linecap="butt"/>';
     off+=len;
   });
   svg+='</svg>';
@@ -2427,7 +2441,7 @@ function _renderDonut(seg, size){
   var leg='<div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0">';
   keys.forEach(function(k,i){
     leg+='<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)">'
-      +'<span style="width:8px;height:8px;border-radius:2px;background:'+palette[i%palette.length]+';flex-shrink:0"></span>'
+      +'<span style="width:8px;height:8px;border-radius:2px;background:'+colorFor(k,i)+';flex-shrink:0"></span>'
       +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+k+'</span>'
       +'<span style="font-weight:700;color:var(--text);font-feature-settings:\'tnum\'">'+seg[k]+'%</span>'
       +'</div>';
@@ -2436,11 +2450,18 @@ function _renderDonut(seg, size){
   return '<div style="display:flex;align-items:center;gap:14px">'+svg+leg+'</div>';
 }
 
-function buildAnaliseCarteira(pane){
+function buildAnaliseCarteira(pane, opts){
+  opts = opts || {};
   var t=ANALISE_CARTEIRA;
   var bdrs=DATA.bdrs||[];
-  var sel=_carteiraSel;
+  // Se lockedBdr passado, força a view do BDR e oculta seletor (modo BDR individual)
+  var sel = opts.lockedBdr ? opts.lockedBdr : _carteiraSel;
+  if(opts.lockedBdr){ _carteiraSel = opts.lockedBdr; }
   var c = sel ? CARTEIRA_BDR.byBdr[sel] : _carteiraAggregate();
+  if(!c){
+    pane.innerHTML='<div style="padding:30px;text-align:center;color:var(--text3);font-size:12px">Sem dados de carteira para esse BDR.</div>';
+    return;
+  }
   var bdrObj = sel ? bdrs.find(function(b){return b.id===sel;}) : null;
   var nomeExibido = bdrObj ? bdrObj.name : 'Time todo';
   var meta = CARTEIRA_BDR.meta.quarterMeta * (sel ? 1 : bdrs.length);
@@ -2451,19 +2472,22 @@ function buildAnaliseCarteira(pane){
               :             'linear-gradient(145deg,#991b1b 0%,#450a0a 60%,#0a0a0f 100%)';
   var heroAccent=pctMeta>=80?'#bbf7d0':pctMeta>=50?'#fde68a':'#fecaca';
 
-  // ── Seletor de BDR (chips com avatares) ──
-  var seletor='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px">';
-  seletor+='<button onclick="selectCarteiraBDR(null)" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:'+(!sel?'rgba(99,102,241,0.14)':'rgba(255,255,255,0.03)')+';border:1px solid '+(!sel?'rgba(99,102,241,0.32)':'var(--border)')+';color:'+(!sel?'var(--text)':'var(--text2)')+';font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">'
-    +'<span style="width:18px;height:18px;border-radius:50%;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--accent)">∑</span>'
-    +'Time</button>';
-  bdrs.forEach(function(b){
-    var isAtivo=sel===b.id;
-    var av = b.photo
-      ? '<img src="'+b.photo+'" style="width:18px;height:18px;border-radius:50%;object-fit:cover">'
-      : '<span style="width:18px;height:18px;border-radius:50%;background:'+b.bg+';color:'+b.color+';display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700">'+b.id+'</span>';
-    seletor+='<button onclick="selectCarteiraBDR(\''+b.id+'\')" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:'+(isAtivo?'rgba(99,102,241,0.14)':'rgba(255,255,255,0.03)')+';border:1px solid '+(isAtivo?'rgba(99,102,241,0.32)':'var(--border)')+';color:'+(isAtivo?'var(--text)':'var(--text2)')+';font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">'+av+b.name.split(' ')[0]+'</button>';
-  });
-  seletor+='</div>';
+  // ── Seletor de BDR (chips com avatares) — ocultado em modo BDR individual ──
+  var seletor='';
+  if(!opts.lockedBdr){
+    seletor='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px">';
+    seletor+='<button onclick="selectCarteiraBDR(null)" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:'+(!sel?'rgba(99,102,241,0.14)':'rgba(255,255,255,0.03)')+';border:1px solid '+(!sel?'rgba(99,102,241,0.32)':'var(--border)')+';color:'+(!sel?'var(--text)':'var(--text2)')+';font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">'
+      +'<span style="width:18px;height:18px;border-radius:50%;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--accent)">∑</span>'
+      +'Time</button>';
+    bdrs.forEach(function(b){
+      var isAtivo=sel===b.id;
+      var av = b.photo
+        ? '<img src="'+b.photo+'" style="width:18px;height:18px;border-radius:50%;object-fit:cover">'
+        : '<span style="width:18px;height:18px;border-radius:50%;background:'+b.bg+';color:'+b.color+';display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700">'+b.id+'</span>';
+      seletor+='<button onclick="selectCarteiraBDR(\''+b.id+'\')" style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:'+(isAtivo?'rgba(99,102,241,0.14)':'rgba(255,255,255,0.03)')+';border:1px solid '+(isAtivo?'rgba(99,102,241,0.32)':'var(--border)')+';color:'+(isAtivo?'var(--text)':'var(--text2)')+';font-size:12px;font-weight:600;cursor:pointer;font-family:\'Inter\',sans-serif">'+av+b.name.split(' ')[0]+'</button>';
+    });
+    seletor+='</div>';
+  }
 
   // ── Hero ACV + Forecast ──
   var hero='<div style="background:'+heroBg+';border-radius:var(--radius);padding:22px 24px;margin-bottom:14px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden">'
@@ -2514,14 +2538,32 @@ function buildAnaliseCarteira(pane){
     +'</div>'
     +'</div>';
 
+  // Calcula % ICP (Varejo+Tech+Alimentação+Agro) carteira vs vendas
+  var icpKeys=['Varejo','Tech','Alimentação','Agro'];
+  var icpC=icpKeys.reduce(function(s,k){return s+(c.segCarteira[k]||0);},0);
+  var icpV=icpKeys.reduce(function(s,k){return s+(c.segVendas[k]||0);},0);
+  var icpDelta=icpV-icpC;
+  var icpDeltaCol = icpDelta>0?'#4ade80':icpDelta<0?'#f87171':'var(--text3)';
+  var icpDeltaArrow = icpDelta>0?'▲':icpDelta<0?'▼':'—';
   var segHtml='<div class="card" style="margin:0">'
-    +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">Distribuição por segmento</div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em">Por vertical · ICP vs não-ICP</div>'
+    +'<div style="display:flex;align-items:center;gap:6px">'
+    +'<span style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em">ICP escala</span>'
+    +'<span style="font-size:11px;font-weight:700;color:'+icpDeltaCol+';font-feature-settings:\'tnum\'">'+icpDeltaArrow+' '+(icpDelta>=0?'+':'')+icpDelta+'pp</span>'
+    +'</div></div>'
     +'<div style="margin-bottom:14px">'
-    +'<div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Carteira do AE</div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+    +'<span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Carteira do AE</span>'
+    +'<span style="font-size:10px;color:var(--text3);font-feature-settings:\'tnum\'">ICP <strong style="color:var(--text)">'+icpC+'%</strong></span>'
+    +'</div>'
     +_renderDonut(c.segCarteira,96)
     +'</div>'
     +'<div style="padding-top:14px;border-top:1px solid var(--border)">'
-    +'<div style="font-size:10px;color:var(--text3);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Convertidas em Vendas</div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+    +'<span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Convertidas em Vendas</span>'
+    +'<span style="font-size:10px;color:var(--text3);font-feature-settings:\'tnum\'">ICP <strong style="color:var(--text)">'+icpV+'%</strong></span>'
+    +'</div>'
     +_renderDonut(c.segVendas,96)
     +'</div>'
     +'</div>';
@@ -2551,11 +2593,13 @@ function buildAnaliseCarteira(pane){
   var badgeParcial = CARTEIRA_BDR.meta.parcial
     ? '<span title="'+(CARTEIRA_BDR.meta.nota||'').replace(/"/g,'&quot;')+'" style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.25);color:#fbbf24;font-size:10px;font-weight:700;letter-spacing:.04em;cursor:help">⚠ DADOS PARCIAIS</span>'
     : '';
+  var kicker = opts.lockedBdr ? 'Minha carteira' : 'Análise de carteira · por BDR';
+  var titulo = opts.lockedBdr ? 'Pipeline, conversão & lead time' : 'Pipeline, conversão & segmentos';
   pane.innerHTML=''
     +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px">'
     +  '<div style="min-width:0;flex:1">'
-    +    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><span style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em">Análise de carteira · por BDR</span>'+badgeParcial+'</div>'
-    +    '<div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em">Pipeline, conversão & segmentos</div>'
+    +    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><span style="font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em">'+kicker+'</span>'+badgeParcial+'</div>'
+    +    '<div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em">'+titulo+'</div>'
     +    '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+CARTEIRA_BDR.meta.fonte+'</div>'
     +    (CARTEIRA_BDR.meta.parcial?'<div style="font-size:10px;color:var(--text3);margin-top:6px;max-width:680px;line-height:1.45;font-style:italic">'+CARTEIRA_BDR.meta.nota+'</div>':'')
     +  '</div>'
@@ -2566,12 +2610,18 @@ function buildAnaliseCarteira(pane){
     +funilHtml+segHtml
     +'</div>'
     +secHtml
-    +'<div style="margin-top:18px;padding:14px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'
-    +'<div><div style="font-size:11px;color:var(--text2);font-weight:600">Auditoria completa · '+t.desc+'</div>'
-    +'<div style="font-size:10px;color:var(--text3);margin-top:2px">'+t.data+' · análise estática trimestral</div></div>'
-    +'<a href="'+t.src+'" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:8px;padding:7px 12px;text-decoration:none">Abrir auditoria ↗</a>'
-    +'</div>';
-  track('analise_carteira_open', sel||'time');
+    +(opts.lockedBdr ? '' :
+      '<div style="margin-top:18px;padding:14px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">'
+      +'<div><div style="font-size:11px;color:var(--text2);font-weight:600">Auditoria completa · '+t.desc+'</div>'
+      +'<div style="font-size:10px;color:var(--text3);margin-top:2px">'+t.data+' · análise estática trimestral</div></div>'
+      +'<a href="'+t.src+'" target="_blank" rel="noopener" style="font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-mid);border-radius:8px;padding:7px 12px;text-decoration:none">Abrir auditoria ↗</a>'
+      +'</div>');
+  track(opts.lockedBdr?'carteira_bdr_open':'analise_carteira_open', sel||'time');
+}
+
+// Wrapper usado pela aba "Carteira" do BDR — locked no próprio BDR
+function buildCarteiraBDR(pane, bdr){
+  buildAnaliseCarteira(pane, {lockedBdr: bdr.id});
 }
 
 
@@ -6078,6 +6128,7 @@ function buildBDRApp(user){
     {id:'resultado',      label:'Meu Resultado'},
     {id:'performance',    label:'Performance'},
     {id:'funil',          label:'Funil'},
+    {id:'carteira',       label:'Carteira'},
     {id:'time_bdr',       label:'Time'},
   ];
   const builders=[
@@ -6085,6 +6136,7 @@ function buildBDRApp(user){
     p=>buildMeuResultado(p,bdr),
     p=>buildPerformanceBDR(p,bdr),
     p=>buildBDRFunil(p,bdr),
+    p=>buildCarteiraBDR(p,bdr),
     p=>buildTimeView(p,bdr),
   ];
   if(hasPDI){
