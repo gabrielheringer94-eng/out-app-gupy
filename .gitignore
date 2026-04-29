@@ -1,0 +1,5 @@
+# Build artifacts
+_piloto_data.json
+
+# OS
+.DS_Store
