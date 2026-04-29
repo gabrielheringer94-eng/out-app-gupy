@@ -837,6 +837,14 @@ input[type="number"]:focus {
 @media (max-width:760px){
   .carteira-grid{grid-template-columns:1fr !important;}
 }
+/* Linhas da legenda do donut — clicáveis com tooltip de absoluto on hover */
+.seg-row{
+  display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);
+  padding:4px 6px;margin:0 -6px;border-radius:6px;
+  transition:background .12s;
+}
+.seg-row[onclick]:hover{background:rgba(255,255,255,0.04);color:var(--text);}
+.seg-row[onclick]:hover .seg-abs{opacity:1 !important;}
 
 /* ─── BOTTOM SHORTCUTS (rodapé do BDR) ─────────────────────── */
 #bottom-shortcuts{
@@ -2331,24 +2339,37 @@ const CARTEIRA_BDR={
   // Segmentos seguem a auditoria Q1: ICP = Varejo, Tech, Alimentação, Agro · Não-ICP = Serv. Profissionais + Outros
   // segCarteira = mix da carteira atribuída ao AE · segVendas = mix das opps que ESCALARAM pra Vendas
   // (BDRs com mais ICP-fit tendem a converter mais Varejo/Tech, BDRs fracos ficam presos em Serv. Prof.)
+  // carteiraTotal = nº de contas atribuídas ao AE (mock realista — auditoria Q1: ~4.7k contas / time)
+  // Segmentos seguem a auditoria: ICP = Varejo, Tech, Alimentação, Agro · Não-ICP = Serv. Profissionais + Outros
   byBdr:{
     // Mydoha → Aline Coelho (top AE do funil: R$1,67M / 20 deals) — perfil ICP forte
-    MY:{ ae:'Aline Coelho',       acvFunil:1669096, acvAberto:1280410, dealsAbertos:20, leadTimeAvg:18, score:84, icpPct:78, recicladaPct:18, segCarteira:{Varejo:32,Tech:24,'Alimentação':14,Agro:8,'Serv. Profissionais':14,Outros:8}, segVendas:{Varejo:40,Tech:30,'Alimentação':15,Agro:8,'Serv. Profissionais':5,Outros:2}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[7,12,18]} },
+    MY:{ ae:'Aline Coelho',       acvFunil:1669096, acvAberto:1280410, dealsAbertos:20, carteiraTotal:580, leadTimeAvg:18, score:84, icpPct:78, recicladaPct:18, segCarteira:{Varejo:32,Tech:24,'Alimentação':14,Agro:8,'Serv. Profissionais':14,Outros:8}, segVendas:{Varejo:40,Tech:30,'Alimentação':15,Agro:8,'Serv. Profissionais':5,Outros:2}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[7,12,18]} },
     // Juliana → Evelyn Diaz (R$1,04M / 17)
-    JS:{ ae:'Evelyn Diaz',        acvFunil:1038194, acvAberto:982954,  dealsAbertos:17, leadTimeAvg:14, score:71, icpPct:68, recicladaPct:24, segCarteira:{Varejo:24,Tech:18,'Alimentação':12,Agro:6,'Serv. Profissionais':28,Outros:12}, segVendas:{Varejo:32,Tech:24,'Alimentação':18,Agro:8,'Serv. Profissionais':12,Outros:6}, qualidadeDados:{contatos:88,decisor:71,linkedin:58}, conv:{lcRa:18,raOp:32,leadTimeStages:[6,10,18]} },
-    // Victoria → Carlos Grigorio (mais opps em volume)
-    VE:{ ae:'Carlos Grigorio',    acvFunil:740000,  acvAberto:556000,  dealsAbertos:20, leadTimeAvg:11, score:76, icpPct:74, recicladaPct:21, segCarteira:{Varejo:28,Tech:22,'Alimentação':14,Agro:8,'Serv. Profissionais':20,Outros:8}, segVendas:{Varejo:36,Tech:28,'Alimentação':14,Agro:10,'Serv. Profissionais':8,Outros:4}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[5,11,18]} },
-    // Giovana → Andrea Ferraz (10 deals, top performer)
-    GF:{ ae:'Andrea Ferraz',      acvFunil:485000,  acvAberto:368000,  dealsAbertos:10, leadTimeAvg:9,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Varejo:34,Tech:28,'Alimentação':16,Agro:10,'Serv. Profissionais':8,Outros:4}, segVendas:{Varejo:42,Tech:32,'Alimentação':14,Agro:8,'Serv. Profissionais':3,Outros:1}, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[4,9,15]} },
+    JS:{ ae:'Evelyn Diaz',        acvFunil:1038194, acvAberto:982954,  dealsAbertos:17, carteiraTotal:540, leadTimeAvg:14, score:71, icpPct:68, recicladaPct:24, segCarteira:{Varejo:24,Tech:18,'Alimentação':12,Agro:6,'Serv. Profissionais':28,Outros:12}, segVendas:{Varejo:32,Tech:24,'Alimentação':18,Agro:8,'Serv. Profissionais':12,Outros:6}, qualidadeDados:{contatos:88,decisor:71,linkedin:58}, conv:{lcRa:18,raOp:32,leadTimeStages:[6,10,18]} },
+    // Victoria → Carlos Grigorio
+    VE:{ ae:'Carlos Grigorio',    acvFunil:740000,  acvAberto:556000,  dealsAbertos:20, carteiraTotal:610, leadTimeAvg:11, score:76, icpPct:74, recicladaPct:21, segCarteira:{Varejo:28,Tech:22,'Alimentação':14,Agro:8,'Serv. Profissionais':20,Outros:8}, segVendas:{Varejo:36,Tech:28,'Alimentação':14,Agro:10,'Serv. Profissionais':8,Outros:4}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[5,11,18]} },
+    // Giovana → Andrea Ferraz (top performer)
+    GF:{ ae:'Andrea Ferraz',      acvFunil:485000,  acvAberto:368000,  dealsAbertos:10, carteiraTotal:560, leadTimeAvg:9,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Varejo:34,Tech:28,'Alimentação':16,Agro:10,'Serv. Profissionais':8,Outros:4}, segVendas:{Varejo:42,Tech:32,'Alimentação':14,Agro:8,'Serv. Profissionais':3,Outros:1}, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[4,9,15]} },
     // Jeanne → Dara Santos (R$129k / 2)
-    JR:{ ae:'Dara Santos',        acvFunil:128742,  acvAberto:128742,  dealsAbertos:2,  leadTimeAvg:22, score:62, icpPct:62, recicladaPct:31, segCarteira:{Varejo:18,Tech:14,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:14}, segVendas:{Varejo:24,Tech:20,'Alimentação':14,Agro:6,'Serv. Profissionais':28,Outros:8}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[8,18,28]} },
+    JR:{ ae:'Dara Santos',        acvFunil:128742,  acvAberto:128742,  dealsAbertos:2,  carteiraTotal:495, leadTimeAvg:22, score:62, icpPct:62, recicladaPct:31, segCarteira:{Varejo:18,Tech:14,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:14}, segVendas:{Varejo:24,Tech:20,'Alimentação':14,Agro:6,'Serv. Profissionais':28,Outros:8}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[8,18,28]} },
     // Adhara → ela mesma (R$0 / 2)
-    AG:{ ae:'Adhara Gonçalves',   acvFunil:0,       acvAberto:0,       dealsAbertos:2,  leadTimeAvg:26, score:55, icpPct:58, recicladaPct:36, segCarteira:{Varejo:14,Tech:12,'Alimentação':8,Agro:4,'Serv. Profissionais':46,Outros:16}, segVendas:{Varejo:18,Tech:16,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:12}, qualidadeDados:{contatos:78,decisor:58,linkedin:46}, conv:{lcRa:24,raOp:18,leadTimeStages:[10,22,32]} },
+    AG:{ ae:'Adhara Gonçalves',   acvFunil:0,       acvAberto:0,       dealsAbertos:2,  carteiraTotal:520, leadTimeAvg:26, score:55, icpPct:58, recicladaPct:36, segCarteira:{Varejo:14,Tech:12,'Alimentação':8,Agro:4,'Serv. Profissionais':46,Outros:16}, segVendas:{Varejo:18,Tech:16,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:12}, qualidadeDados:{contatos:78,decisor:58,linkedin:46}, conv:{lcRa:24,raOp:18,leadTimeStages:[10,22,32]} },
     // Ariane → ela mesma (R$0 / 1)
-    AM:{ ae:'Ariane Mesquita',    acvFunil:0,       acvAberto:0,       dealsAbertos:1,  leadTimeAvg:30, score:48, icpPct:54, recicladaPct:42, segCarteira:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':54,Outros:18}, segVendas:{Varejo:14,Tech:12,'Alimentação':8, Agro:4,'Serv. Profissionais':46,Outros:16}, qualidadeDados:{contatos:74,decisor:51,linkedin:40}, conv:{lcRa:11,raOp:20,leadTimeStages:[12,26,38]} },
-    // Pedro → Andressa Lyra (R$8,5k / 4) — perfil mais não-ICP
-    PS:{ ae:'Andressa Lyra',      acvFunil:8477,    acvAberto:8477,    dealsAbertos:4,  leadTimeAvg:34, score:42, icpPct:50, recicladaPct:48, segCarteira:{Varejo:8, Tech:6, 'Alimentação':5, Agro:3,'Serv. Profissionais':58,Outros:20}, segVendas:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':52,Outros:20}, qualidadeDados:{contatos:70,decisor:48,linkedin:36}, conv:{lcRa:22,raOp:0, leadTimeStages:[14,30,42]} }
+    AM:{ ae:'Ariane Mesquita',    acvFunil:0,       acvAberto:0,       dealsAbertos:1,  carteiraTotal:470, leadTimeAvg:30, score:48, icpPct:54, recicladaPct:42, segCarteira:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':54,Outros:18}, segVendas:{Varejo:14,Tech:12,'Alimentação':8, Agro:4,'Serv. Profissionais':46,Outros:16}, qualidadeDados:{contatos:74,decisor:51,linkedin:40}, conv:{lcRa:11,raOp:20,leadTimeStages:[12,26,38]} },
+    // Pedro → Andressa Lyra (R$8,5k / 4)
+    PS:{ ae:'Andressa Lyra',      acvFunil:8477,    acvAberto:8477,    dealsAbertos:4,  carteiraTotal:445, leadTimeAvg:34, score:42, icpPct:50, recicladaPct:48, segCarteira:{Varejo:8, Tech:6, 'Alimentação':5, Agro:3,'Serv. Profissionais':58,Outros:20}, segVendas:{Varejo:10,Tech:8, 'Alimentação':6, Agro:4,'Serv. Profissionais':52,Outros:20}, qualidadeDados:{contatos:70,decisor:48,linkedin:36}, conv:{lcRa:22,raOp:0, leadTimeStages:[14,30,42]} }
   }
+};
+
+// Pool de empresas mock por vertical (nomes plausíveis B2B BR) —
+// auditoria Q1 mencionou: POLATO, Energética Serranópolis, SESC MT, KION
+var EMPRESAS_POOL={
+  'Varejo':['Renner','C&A','Riachuelo','Marisa','Magazine Luiza','Casas Bahia','Pernambucanas','Centauro','Lojas Americanas','Drogaria São Paulo','Raia Drogasil','Petz','Track&Field','Reserva','Hering','SPICY RETAIL','Camisariafmw','Box Print'],
+  'Tech':['Stefanini','TOTVS','Locaweb','Linx','VTEX','Movile','Resultados Digitais','Hi Platform','Take Blip','PagSeguro','Stone','Cielo','Hotmart','Loft','QuintoAndar'],
+  'Alimentação':['Madero','Outback','Bob\'s','Spoleto','Giraffas','China in Box','Burger King','Subway','Coco Bambu','Camarada Camarão','Habib\'s','Casa De Saúde Santa Maria','Cooperativa Languiru','COOPERATIVA DE LATICINIOS SELITA'],
+  'Agro':['JBS','BRF','Marfrig','Minerva','SLC Agrícola','São Martinho','Bracell','Fibria','Klabin','Suzano','Cosan','Raízen','Energética Serranópolis'],
+  'Serv. Profissionais':['Accenture','KPMG','Deloitte','EY','PwC','Falconi','Integration','Bain','Roland Berger','TIVIT','Sonda','BRQ','Avine','Grupo Laredo','Afaplan'],
+  'Outros':['Localiza','Movida','Unidas','TV APARECIDA','MODERN Logistics','Grupo FT Segurança','VERDE FORTE PAPEIS','NEXTA DISTRIBUIDORA','Libertad Comercial','POLATO','SESC MT','KION','ILHASERVICE TECNOLOGIA','Marcegaglia','Empregare']
 };
 
 var _carteiraSel=null; // null = Time todo (agregado)
@@ -2369,6 +2390,7 @@ function _carteiraAggregate(){
     acvFunil: sum(function(x){return x.acvFunil;}),
     acvAberto: sum(function(x){return x.acvAberto;}),
     dealsAbertos: sum(function(x){return x.dealsAbertos;}),
+    carteiraTotal: sum(function(x){return x.carteiraTotal;}),
     leadTimeAvg: avg(function(x){return x.leadTimeAvg;}),
     score: avg(function(x){return x.score;}),
     icpPct: avg(function(x){return x.icpPct;}),
@@ -2419,17 +2441,20 @@ var SEG_COLORS={
   'Serv. Profissionais':'#a855f7', // roxo — não-ICP "vampiro"
   'Outros':'#64748b'           // cinza — resto
 };
-function _renderDonut(seg, size){
+function _renderDonut(seg, size, ctx){
   size = size || 110;
+  ctx = ctx || {};
   var keys=Object.keys(seg);
   var fallback=['#6366f1','#10b981','#f59e0b','#a855f7','#ec4899','#64748b'];
   var total=keys.reduce(function(s,k){return s+seg[k];},0);
+  var totalAbs = ctx.totalAbs || 0; // total de contas/opps absoluto pra calcular n por vertical
   var cx=size/2, cy=size/2, r=size/2-8, sw=14;
   var circ=2*Math.PI*r;
   var off=0;
   var svg='<svg viewBox="0 0 '+size+' '+size+'" style="width:'+size+'px;height:'+size+'px">';
   svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="'+sw+'"/>';
   function colorFor(k,i){ return SEG_COLORS[k]||fallback[i%fallback.length]; }
+  function nFor(k){ return Math.max(1, Math.round(totalAbs * seg[k] / 100)); }
   keys.forEach(function(k,i){
     var pct=seg[k]/total;
     var len=circ*pct;
@@ -2437,17 +2462,73 @@ function _renderDonut(seg, size){
     off+=len;
   });
   svg+='</svg>';
-  // Legenda
-  var leg='<div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0">';
+  // Legenda — clicável + tooltip com absoluto on hover
+  var leg='<div class="seg-legend" style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:0">';
   keys.forEach(function(k,i){
-    leg+='<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)">'
+    var n = totalAbs ? nFor(k) : null;
+    var hoverPart = (n!=null) ? '<span class="seg-abs" style="font-size:10px;color:var(--text3);font-feature-settings:\'tnum\';margin-left:6px;opacity:0;transition:opacity .15s">· '+n+(ctx.tipo==='vendas'?' opps':' contas')+'</span>' : '';
+    var clickAttr = (ctx.bdrId!=null && ctx.tipo)
+      ? 'onclick="showCarteiraVerticalModal(\''+ctx.bdrId+'\',\''+ctx.tipo+'\',\''+k.replace(/'/g,"\\'")+'\','+(n||0)+')" style="cursor:pointer"'
+      : 'style="cursor:default"';
+    var titleAttr = (n!=null) ? ('title="'+seg[k]+'% · '+n+(ctx.tipo==='vendas'?' opps':' contas')+' — clique pra ver lista"') : '';
+    leg+='<div class="seg-row" '+clickAttr+' '+titleAttr+'>'
       +'<span style="width:8px;height:8px;border-radius:2px;background:'+colorFor(k,i)+';flex-shrink:0"></span>'
       +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+k+'</span>'
+      +hoverPart
       +'<span style="font-weight:700;color:var(--text);font-feature-settings:\'tnum\'">'+seg[k]+'%</span>'
       +'</div>';
   });
   leg+='</div>';
   return '<div style="display:flex;align-items:center;gap:14px">'+svg+leg+'</div>';
+}
+
+// Modal: lista de empresas por vertical (carteira ou vendas)
+function _empresasFor(vertical, n){
+  var pool = EMPRESAS_POOL[vertical] || EMPRESAS_POOL['Outros'] || [];
+  return pool.slice(0, Math.min(n, pool.length));
+}
+function showCarteiraVerticalModal(bdrId, tipo, vertical, n){
+  if(typeof track==='function') track('carteira_vert_modal', bdrId+'|'+tipo+'|'+vertical);
+  var old=document.getElementById('carteira-vert-modal'); if(old) old.remove();
+  var b = bdrId==='time' ? null : (DATA.bdrs||[]).find(function(x){return x.id===bdrId;});
+  var bdrName = b ? b.name : 'Time todo';
+  var c = bdrId && bdrId!=='time' ? CARTEIRA_BDR.byBdr[bdrId] : null;
+  var tipoLbl = tipo==='vendas' ? 'Convertidas em Vendas' : 'Carteira do AE';
+  var col = SEG_COLORS[vertical] || '#64748b';
+  var empresas = _empresasFor(vertical, n||0);
+  var overlay=document.createElement('div');
+  overlay.id='carteira-vert-modal';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(4px)';
+  overlay.onclick=function(e){if(e.target===overlay) overlay.remove();};
+  var html='<div style="background:var(--bg2);border-radius:14px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;border:1px solid var(--border);margin:auto">';
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:2">';
+  html+='<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">';
+  html+='<div style="width:6px;height:36px;border-radius:3px;background:'+col+';flex-shrink:0"></div>';
+  html+='<div style="min-width:0">';
+  html+='<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-weight:700">'+tipoLbl+' · '+bdrName+(c?' · '+c.ae:'')+'</div>';
+  html+='<div style="font-size:16px;font-weight:700;color:var(--text);margin-top:2px">'+vertical+' <span style="font-size:11px;color:var(--text3);font-weight:500">· '+(n||0)+(tipo==='vendas'?' opps':' contas')+'</span></div>';
+  html+='</div></div>';
+  html+='<button onclick="document.getElementById(\'carteira-vert-modal\').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);padding:4px 8px">✕</button>';
+  html+='</div>';
+  html+='<div style="padding:14px 18px">';
+  if(empresas.length===0){
+    html+='<div style="text-align:center;color:var(--text3);font-size:12px;padding:30px">Sem empresas listadas para esse segmento.</div>';
+  } else {
+    html+='<div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Empresas '+(empresas.length<n?'(amostra de '+empresas.length+' de '+n+')':'('+empresas.length+')')+'</div>';
+    html+='<div style="display:flex;flex-direction:column;gap:4px">';
+    empresas.forEach(function(e,i){
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:var(--bg3);border:1px solid var(--border)">'
+        +'<span style="font-size:9px;color:var(--text3);font-feature-settings:\'tnum\';min-width:18px">'+(i+1)+'</span>'
+        +'<span style="font-size:12px;font-weight:600;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+e+'</span>'
+        +'<span style="font-size:10px;color:var(--text3);font-weight:600">'+vertical+'</span>'
+        +'</div>';
+    });
+    html+='</div>';
+    html+='<div style="margin-top:14px;padding:10px 12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.18);border-radius:8px;font-size:10px;color:var(--text3);line-height:1.5">⚠ Lista de empresas é mock — quando o report SF agrupado por xDR + vertical estiver disponível, vai aparecer a lista real puxada do CRM.</div>';
+  }
+  html+='</div></div>';
+  overlay.innerHTML=html;
+  document.body.appendChild(overlay);
 }
 
 function buildAnaliseCarteira(pane, opts){
@@ -2554,17 +2635,17 @@ function buildAnaliseCarteira(pane, opts){
     +'</div></div>'
     +'<div style="margin-bottom:14px">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-    +'<span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Carteira do AE</span>'
+    +'<span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Carteira do AE · '+(c.carteiraTotal||0)+' contas</span>'
     +'<span style="font-size:10px;color:var(--text3);font-feature-settings:\'tnum\'">ICP <strong style="color:var(--text)">'+icpC+'%</strong></span>'
     +'</div>'
-    +_renderDonut(c.segCarteira,96)
+    +_renderDonut(c.segCarteira,96,{bdrId:(sel||'time'),tipo:'carteira',totalAbs:c.carteiraTotal||0})
     +'</div>'
     +'<div style="padding-top:14px;border-top:1px solid var(--border)">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-    +'<span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Convertidas em Vendas</span>'
+    +'<span style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.04em">Convertidas em Vendas · '+(c.dealsAbertos||0)+' opps</span>'
     +'<span style="font-size:10px;color:var(--text3);font-feature-settings:\'tnum\'">ICP <strong style="color:var(--text)">'+icpV+'%</strong></span>'
     +'</div>'
-    +_renderDonut(c.segVendas,96)
+    +_renderDonut(c.segVendas,96,{bdrId:(sel||'time'),tipo:'vendas',totalAbs:c.dealsAbertos||0})
     +'</div>'
     +'</div>';
 
