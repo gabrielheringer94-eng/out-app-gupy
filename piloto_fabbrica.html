@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão Piloto Fabbrica · Pré-Vendas Gupy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0d0e0f;
+    --card: #1a1d21;
+    --card-hover: #1f2227;
+    --border: #25282d;
+    --border-strong: #34383f;
+    --text: #e8e8ea;
+    --text-dim: #9098a3;
+    --text-faint: #5b6270;
+    --controle: #d4a574;
+    --controle-soft: rgba(212, 165, 116, 0.12);
+    --controle-border: rgba(212, 165, 116, 0.35);
+    --teste: #6db4a8;
+    --teste-soft: rgba(109, 180, 168, 0.12);
+    --teste-border: rgba(109, 180, 168, 0.35);
+    --positive: #6db4a8;
+    --negative: #d97a6c;
+    --neutral: #9098a3;
+    --warn: #e8c270;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter Tight', -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 32px 80px;
+  }
+
+  /* ===== Header ===== */
+  header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 32px;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ===== Section base ===== */
+  section { margin-bottom: 28px; }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 18px;
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+  .section-sub {
+    color: var(--text-faint);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 14px;
+  }
+
+  /* ===== Upload zones ===== */
+  .upload-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .drop-zone {
+    background: var(--card);
+    border: 1px dashed var(--border-strong);
+    border-radius: 10px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 92px;
+  }
+  .drop-zone:hover { background: var(--card-hover); border-color: #4b5260; }
+  .drop-zone.drag { background: var(--card-hover); border-color: var(--teste); border-style: solid; }
+  .drop-zone.loaded { border-color: var(--teste-border); border-style: solid; background: var(--card); }
+  .drop-zone.error { border-color: var(--negative); border-style: solid; }
+  .drop-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+  }
+  .drop-name {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .drop-state {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: auto;
+  }
+  .drop-state.ok { color: var(--teste); }
+  .drop-state.err { color: var(--negative); }
+  .clear-btn {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-dim);
+    padding: 0 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 12px;
+    transition: all 0.18s;
+  }
+  .clear-btn:hover { color: var(--text); border-color: #4b5260; }
+
+  /* ===== Meta bar ===== */
+  .meta-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .meta-item { display: flex; gap: 6px; align-items: baseline; }
+  .meta-key { color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+  .meta-val { color: var(--text); font-weight: 500; }
+
+  /* ===== Warnings ===== */
+  .warn-box {
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .warn-pedagogic {
+    background: rgba(232, 194, 112, 0.06);
+    border: 1px solid rgba(232, 194, 112, 0.2);
+    color: #e8d8b0;
+  }
+  .warn-operational {
+    background: rgba(217, 122, 108, 0.08);
+    border: 1px solid rgba(217, 122, 108, 0.25);
+    color: #e8b5a8;
+  }
+  .warn-box strong { color: var(--warn); font-weight: 600; }
+
+  /* ===== Cards grid ===== */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .metric-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .metric-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+  }
+  .metric-rows { display: flex; gap: 18px; }
+  .metric-col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .group-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    align-self: flex-start;
+  }
+  .group-tag.controle { background: var(--controle-soft); color: var(--controle); border: 1px solid var(--controle-border); }
+  .group-tag.teste { background: var(--teste-soft); color: var(--teste); border: 1px solid var(--teste-border); }
+  .metric-val {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.1;
+  }
+  .metric-val.controle { color: var(--controle); }
+  .metric-val.teste { color: var(--teste); }
+  .delta-row {
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  .delta-label { color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+  .delta-val { font-weight: 500; }
+  .delta-val.positive { color: var(--positive); }
+  .delta-val.negative { color: var(--negative); }
+  .delta-val.neutral { color: var(--neutral); }
+
+  /* ===== Funnel ===== */
+  .funnel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .funnel-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .funnel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .funnel-title {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 500;
+  }
+  .funnel-stage { margin-bottom: 14px; }
+  .funnel-stage:last-child { margin-bottom: 0; }
+  .stage-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
+  .stage-name { color: var(--text); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+  .stage-vals { color: var(--text-dim); }
+  .stage-vals .pc { color: var(--text-faint); margin-left: 8px; }
+  .stage-bar-wrap {
+    height: 30px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stage-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+  }
+  .stage-bar.controle { background: linear-gradient(90deg, rgba(212,165,116,0.5), rgba(212,165,116,0.2)); }
+  .stage-bar.teste { background: linear-gradient(90deg, rgba(109,180,168,0.5), rgba(109,180,168,0.2)); }
+  .conv-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-top: 4px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ===== Evolution ===== */
+  .evo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    height: 320px;
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-card h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 14px;
+  }
+  .chart-wrap { flex: 1; position: relative; min-height: 0; }
+
+  /* ===== Table ===== */
+  .table-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead {
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    text-align: left;
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  th:hover { color: var(--text); }
+  th.sort-asc::after { content: ' ▲'; color: var(--teste); }
+  th.sort-desc::after { content: ' ▼'; color: var(--teste); }
+  td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr.controle-row { background: var(--controle-soft); }
+  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+  td.bdr-name { font-family: 'Inter Tight', sans-serif; font-size: 13px; font-weight: 500; }
+  td.numeric { text-align: right; }
+
+  /* ===== Coverage ===== */
+  .coverage-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+  }
+  .coverage-top {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .coverage-stat .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+  }
+  .coverage-stat .val {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 500;
+  }
+  .coverage-table-wrap { max-height: 420px; overflow-y: auto; }
+  .coverage-table-wrap table tbody tr.controle-row { background: var(--controle-soft); }
+
+  /* ===== Empty state ===== */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-faint);
+    background: var(--card);
+    border: 1px dashed var(--border-strong);
+    border-radius: 10px;
+  }
+  .empty-state h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: var(--text-dim);
+  }
+
+  /* ===== Buttons ===== */
+  .actions-row {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-bottom: 14px;
+  }
+  .btn-primary {
+    background: var(--teste-soft);
+    border: 1px solid var(--teste-border);
+    color: var(--teste);
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .btn-primary:hover { background: rgba(109,180,168,0.2); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ===== Hidden ===== */
+  .hidden { display: none !important; }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 1100px) {
+    .upload-row, .cards-grid, .funnel-grid, .evo-grid, .coverage-top {
+      grid-template-columns: 1fr;
+    }
+    .container { padding: 24px 16px; }
+    h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Gestão Piloto Fabbrica · Pré-Vendas Gupy</h1>
+    <div class="subtitle" id="header-sub">28/04/2026 a 02/05/2026 (extensão até 09/05) · aguardando upload dos CSVs</div>
+  </header>
+
+  <!-- Upload -->
+  <section>
+    <div class="section-title">Carga de dados</div>
+    <div class="upload-row">
+      <div class="drop-zone" id="dz-bdr-ae" data-key="bdrAe" data-label="Carteira BDR / AE">
+        <div class="drop-label">Arquivo 1</div>
+        <div class="drop-name">bdr_ae.csv</div>
+        <div class="drop-state">Arraste ou clique para enviar</div>
+      </div>
+      <div class="drop-zone" id="dz-mvp" data-key="mvpFabbrica" data-label="Lista oficial do piloto">
+        <div class="drop-label">Arquivo 2</div>
+        <div class="drop-name">mvp_fabbrica.csv</div>
+        <div class="drop-state">Arraste ou clique para enviar</div>
+      </div>
+      <div class="drop-zone" id="dz-atv" data-key="atividades" data-label="Atividades diárias (Salesforce)">
+        <div class="drop-label">Arquivo 3</div>
+        <div class="drop-name">atividades_diarias.csv</div>
+        <div class="drop-state">Arraste ou clique para enviar</div>
+      </div>
+      <button class="clear-btn" id="btn-clear">Limpar tudo</button>
+    </div>
+    <input type="file" id="file-input" accept=".csv" style="display:none">
+  </section>
+
+  <!-- Empty state -->
+  <section id="empty-state-section">
+    <div class="empty-state">
+      <h2>Aguardando dados</h2>
+      <div>Suba pelo menos <strong>atividades_diarias.csv</strong> para destravar a comparação Controle vs Teste. Os outros dois arquivos enriquecem cobertura e contexto.</div>
+    </div>
+  </section>
+
+  <!-- Dashboard (revealed when data is present) -->
+  <div id="dashboard" class="hidden">
+
+    <!-- Meta bar -->
+    <section>
+      <div class="meta-bar" id="meta-bar"></div>
+    </section>
+
+    <!-- Pedagogic warning -->
+    <section>
+      <div class="warn-box warn-pedagogic">
+        <strong>Como ler este painel:</strong> com 3 BDRs no controle e ~15 no teste, a comparação válida é <strong>per capita</strong> e por <strong>taxa de conversão</strong>. Volume absoluto entra como contexto, não como veredito.
+      </div>
+    </section>
+
+    <!-- Operational warning (if any) -->
+    <section id="op-warn-section" class="hidden">
+      <div class="warn-box warn-operational" id="op-warn-content"></div>
+    </section>
+
+    <!-- Action row -->
+    <section>
+      <div class="actions-row">
+        <button class="btn-primary" id="btn-export">Exportar resumo (JSON)</button>
+      </div>
+    </section>
+
+    <!-- Cards comparativos -->
+    <section>
+      <div class="section-title">Comparação Controle vs Teste</div>
+      <div class="section-sub">Métricas per capita e taxa global · delta % calculado como (Teste − Controle) ÷ Controle</div>
+      <div class="cards-grid" id="cards-grid"></div>
+    </section>
+
+    <!-- Funil -->
+    <section>
+      <div class="section-title">Funil de conversão</div>
+      <div class="section-sub">Barras proporcionais ao maior valor entre os dois grupos · taxa = passagem para o estágio seguinte</div>
+      <div class="funnel-grid" id="funnel-grid"></div>
+    </section>
+
+    <!-- Evolução temporal -->
+    <section>
+      <div class="section-title">Evolução temporal (per capita)</div>
+      <div class="evo-grid">
+        <div class="chart-card">
+          <h3>Leads conectados por BDR/dia</h3>
+          <div class="chart-wrap"><canvas id="chart-conectados"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Reuniões agendadas por BDR/dia</h3>
+          <div class="chart-wrap"><canvas id="chart-reunioes"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabela detalhada -->
+    <section>
+      <div class="section-title">Detalhe por BDR</div>
+      <div class="section-sub">Clique em qualquer coluna para ordenar · linhas em âmbar = grupo controle</div>
+      <div class="table-card">
+        <table id="bdr-table">
+          <thead>
+            <tr>
+              <th data-col="bdr">BDR</th>
+              <th data-col="grupo">Grupo</th>
+              <th data-col="atividades" class="num">Atividades</th>
+              <th data-col="leadsTrab" class="num">Leads Trab.</th>
+              <th data-col="leadsConect" class="num">Leads Conect.</th>
+              <th data-col="reunioes" class="num">Reuniões</th>
+              <th data-col="oportunidades" class="num">Oportun.</th>
+              <th data-col="taxaConexao" class="num">Tx Conexão</th>
+              <th data-col="taxaGlobal" class="num">Tx Global</th>
+              <th data-col="cadencia">Cadência principal</th>
+            </tr>
+          </thead>
+          <tbody id="bdr-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Cobertura piloto -->
+    <section id="coverage-section" class="hidden">
+      <div class="section-title">Cobertura do piloto</div>
+      <div class="section-sub">Cruzamento da lista oficial Fabbrica (arquivo 2) com a carteira atual dos BDRs (arquivo 1)</div>
+      <div class="coverage-card">
+        <div class="coverage-top" id="coverage-top"></div>
+        <div class="coverage-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>BDR</th>
+                <th>Grupo</th>
+                <th class="num">Contas MVP atribuídas</th>
+                <th class="num">Em carteira hoje</th>
+                <th class="num">% cobertura</th>
+              </tr>
+            </thead>
+            <tbody id="coverage-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+// ============================================================
+// CONSTANTES
+// ============================================================
+const BDRS_CONTROLE = ["Ariane Mesquita", "Juliana Sant'Anna", "Beatriz Souza"];
+
+const REQUIRED_COLS = {
+  bdrAe: ["BDR", "AE_Principal", "Nome_conta"],
+  mvpFabbrica: ["Nome_da_conta", "BDR_da_conta"],
+  atividades: ["Data", "BDR", "Atividades", "Leads_Trabalhados", "Leads_Conectados", "Reunioes_Agendadas", "Oportunidades_Geradas", "Cadencia"]
+};
+
+const PERIODO_INICIO = new Date(2026, 3, 28); // 28/04/2026
+const PERIODO_FIM_EXT = new Date(2026, 4, 9); // 09/05/2026
+
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  bdrAe: null,
+  mvpFabbrica: null,
+  atividades: null,
+  metrics: null,
+  sortCol: 'reunioes',
+  sortDir: 'desc',
+  charts: { conectados: null, reunioes: null },
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+function parseNumber(v) {
+  if (v === null || v === undefined || v === '') return 0;
+  if (typeof v === 'number') return v;
+  let s = String(v).trim();
+  if (!s) return 0;
+  // Brazilian format: "1.234,56" → strip dots, swap comma
+  if (s.includes(',') && s.match(/\d\.\d{3}/)) s = s.replace(/\./g, '');
+  s = s.replace(',', '.');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+function parseDate(v) {
+  if (!v) return null;
+  if (v instanceof Date) return v;
+  const s = String(v).trim();
+  if (!s) return null;
+  // Try ISO yyyy-mm-dd or yyyy-mm-ddTHH...
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+  // dd/mm/yyyy or dd/mm/yy
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if (m) {
+    let y = parseInt(m[3]);
+    if (y < 100) y += 2000;
+    return new Date(y, parseInt(m[2])-1, parseInt(m[1]));
+  }
+  // dd-mm-yyyy
+  m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})/);
+  if (m) return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+}
+
+function formatDateShort(d) {
+  if (!d) return '—';
+  return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
+}
+
+function fmt(n, dec = 0) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return n.toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+
+function fmtPct(num, den) {
+  if (!den || den === 0) return '—';
+  return (100 * num / den).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+}
+
+function classifyBdr(name) {
+  if (!name) return 'Teste';
+  const trimmed = String(name).trim();
+  return BDRS_CONTROLE.some(b => b.toLowerCase() === trimmed.toLowerCase()) ? 'Controle' : 'Teste';
+}
+
+function deltaPct(controle, teste) {
+  if (!controle || controle === 0) return null;
+  return (teste - controle) / controle * 100;
+}
+
+function deltaClass(d) {
+  if (d === null || isNaN(d)) return 'neutral';
+  if (Math.abs(d) < 5) return 'neutral';
+  return d > 0 ? 'positive' : 'negative';
+}
+
+function deltaText(d) {
+  if (d === null || isNaN(d)) return '—';
+  const sign = d > 0 ? '+' : '';
+  return sign + d.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+}
+
+// ============================================================
+// CSV PARSING
+// ============================================================
+function parseFile(file, key, dropZoneEl) {
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    transformHeader: h => h.trim(),
+    complete: (result) => {
+      const data = result.data.filter(r => Object.values(r).some(v => v !== null && String(v).trim() !== ''));
+      const required = REQUIRED_COLS[key];
+      const headers = result.meta.fields || [];
+      const missing = required.filter(c => !headers.includes(c));
+      if (missing.length > 0) {
+        markZoneError(dropZoneEl, file.name, `colunas faltando: ${missing.join(', ')}`);
+        return;
+      }
+      state[key] = data;
+      markZoneOk(dropZoneEl, file.name, data.length);
+      recomputeAndRender();
+    },
+    error: (err) => {
+      markZoneError(dropZoneEl, file.name, err.message);
+    }
+  });
+}
+
+function markZoneOk(dz, fileName, rows) {
+  dz.classList.remove('error');
+  dz.classList.add('loaded');
+  const stateEl = dz.querySelector('.drop-state');
+  stateEl.className = 'drop-state ok';
+  stateEl.textContent = `✓ ${fileName} · ${rows.toLocaleString('pt-BR')} linhas`;
+}
+
+function markZoneError(dz, fileName, msg) {
+  dz.classList.remove('loaded');
+  dz.classList.add('error');
+  const stateEl = dz.querySelector('.drop-state');
+  stateEl.className = 'drop-state err';
+  stateEl.textContent = `✗ ${fileName} — ${msg}`;
+}
+
+function resetZone(dz) {
+  dz.classList.remove('loaded', 'error', 'drag');
+  const stateEl = dz.querySelector('.drop-state');
+  stateEl.className = 'drop-state';
+  stateEl.textContent = 'Arraste ou clique para enviar';
+}
+
+// ============================================================
+// UPLOAD WIRING
+// ============================================================
+function setupUpload() {
+  const zones = document.querySelectorAll('.drop-zone');
+  const fileInput = document.getElementById('file-input');
+  let activeZone = null;
+
+  zones.forEach(dz => {
+    dz.addEventListener('click', () => {
+      activeZone = dz;
+      fileInput.value = '';
+      fileInput.click();
+    });
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+    dz.addEventListener('drop', e => {
+      e.preventDefault();
+      dz.classList.remove('drag');
+      const file = e.dataTransfer.files[0];
+      if (file) parseFile(file, dz.dataset.key, dz);
+    });
+  });
+
+  fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file && activeZone) parseFile(file, activeZone.dataset.key, activeZone);
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', () => {
+    state.bdrAe = null;
+    state.mvpFabbrica = null;
+    state.atividades = null;
+    state.metrics = null;
+    zones.forEach(resetZone);
+    destroyCharts();
+    document.getElementById('dashboard').classList.add('hidden');
+    document.getElementById('empty-state-section').classList.remove('hidden');
+    document.getElementById('header-sub').textContent = '28/04/2026 a 02/05/2026 (extensão até 09/05) · aguardando upload dos CSVs';
+  });
+}
+
+// ============================================================
+// METRICS COMPUTATION
+// ============================================================
+function computeMetrics() {
+  if (!state.atividades || state.atividades.length === 0) return null;
+
+  // Per BDR aggregation
+  const byBdr = {};
+  // Per (date, group) aggregation for time series
+  const byDateGroup = {};
+  // Cadências per group
+  const cadenciasByGroup = { Controle: {}, Teste: {} };
+
+  let minDate = null, maxDate = null;
+
+  for (const row of state.atividades) {
+    const bdr = String(row.BDR || '').trim();
+    if (!bdr) continue;
+    const grupo = classifyBdr(bdr);
+    const d = parseDate(row.Data);
+    const atv = parseNumber(row.Atividades);
+    const lt = parseNumber(row.Leads_Trabalhados);
+    const lc = parseNumber(row.Leads_Conectados);
+    const ra = parseNumber(row.Reunioes_Agendadas);
+    const og = parseNumber(row.Oportunidades_Geradas);
+    const cad = String(row.Cadencia || '').trim();
+
+    if (d) {
+      if (!minDate || d < minDate) minDate = d;
+      if (!maxDate || d > maxDate) maxDate = d;
+    }
+
+    if (!byBdr[bdr]) {
+      byBdr[bdr] = {
+        bdr, grupo,
+        atividades: 0, leadsTrab: 0, leadsConect: 0,
+        reunioes: 0, oportunidades: 0,
+        cadencias: {}
+      };
+    }
+    const b = byBdr[bdr];
+    b.atividades += atv;
+    b.leadsTrab += lt;
+    b.leadsConect += lc;
+    b.reunioes += ra;
+    b.oportunidades += og;
+    if (cad) b.cadencias[cad] = (b.cadencias[cad] || 0) + 1;
+
+    if (cad) cadenciasByGroup[grupo][cad] = (cadenciasByGroup[grupo][cad] || 0) + 1;
+
+    if (d) {
+      const dKey = d.toISOString().slice(0,10);
+      if (!byDateGroup[dKey]) byDateGroup[dKey] = { date: d, Controle: { lc:0, ra:0, bdrs:new Set() }, Teste: { lc:0, ra:0, bdrs:new Set() } };
+      byDateGroup[dKey][grupo].lc += lc;
+      byDateGroup[dKey][grupo].ra += ra;
+      byDateGroup[dKey][grupo].bdrs.add(bdr);
+    }
+  }
+
+  // Resolve principal cadência per BDR
+  for (const bdr in byBdr) {
+    const cads = byBdr[bdr].cadencias;
+    const top = Object.entries(cads).sort((a,b) => b[1]-a[1])[0];
+    byBdr[bdr].cadenciaPrincipal = top ? top[0] : '—';
+  }
+
+  // Group totals
+  const groups = { Controle: {bdrs: new Set()}, Teste: {bdrs: new Set()} };
+  for (const k of ['atividades','leadsTrab','leadsConect','reunioes','oportunidades']) {
+    groups.Controle[k] = 0; groups.Teste[k] = 0;
+  }
+  for (const bdr in byBdr) {
+    const b = byBdr[bdr];
+    groups[b.grupo].bdrs.add(bdr);
+    groups[b.grupo].atividades += b.atividades;
+    groups[b.grupo].leadsTrab += b.leadsTrab;
+    groups[b.grupo].leadsConect += b.leadsConect;
+    groups[b.grupo].reunioes += b.reunioes;
+    groups[b.grupo].oportunidades += b.oportunidades;
+  }
+
+  // Counts of reportable BDRs
+  const nControle = groups.Controle.bdrs.size;
+  const nTeste = groups.Teste.bdrs.size;
+
+  // Per-capita
+  function perCapita(g, n) {
+    if (!n) return { atividades: 0, leadsTrab: 0, leadsConect: 0, reunioes: 0, oportunidades: 0 };
+    return {
+      atividades: g.atividades / n,
+      leadsTrab: g.leadsTrab / n,
+      leadsConect: g.leadsConect / n,
+      reunioes: g.reunioes / n,
+      oportunidades: g.oportunidades / n,
+    };
+  }
+  const pcControle = perCapita(groups.Controle, nControle);
+  const pcTeste = perCapita(groups.Teste, nTeste);
+
+  // Rates
+  function rates(g) {
+    return {
+      conexao: g.leadsTrab ? g.leadsConect / g.leadsTrab : null,
+      agendamento: g.leadsConect ? g.reunioes / g.leadsConect : null,
+      oportunidade: g.reunioes ? g.oportunidades / g.reunioes : null,
+      global: g.leadsTrab ? g.oportunidades / g.leadsTrab : null,
+    };
+  }
+  const rControle = rates(groups.Controle);
+  const rTeste = rates(groups.Teste);
+
+  // BDRs in control missing from atividades
+  const bdrsInAtv = Object.keys(byBdr).map(b => b.toLowerCase());
+  const missingControle = BDRS_CONTROLE.filter(b => !bdrsInAtv.includes(b.toLowerCase()));
+
+  // Days with data
+  const uniqueDates = new Set(Object.keys(byDateGroup));
+
+  return {
+    byBdr,
+    byDateGroup,
+    cadenciasByGroup,
+    groups,
+    nControle,
+    nTeste,
+    pcControle,
+    pcTeste,
+    rControle,
+    rTeste,
+    missingControle,
+    minDate, maxDate,
+    daysWithData: uniqueDates.size,
+  };
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function recomputeAndRender() {
+  if (!state.atividades) {
+    document.getElementById('dashboard').classList.add('hidden');
+    document.getElementById('empty-state-section').classList.remove('hidden');
+    return;
+  }
+  state.metrics = computeMetrics();
+  document.getElementById('empty-state-section').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+
+  renderMetaBar();
+  renderOpWarning();
+  renderCards();
+  renderFunnel();
+  renderEvolution();
+  renderTable();
+  renderCoverage();
+  updateHeader();
+}
+
+function updateHeader() {
+  const m = state.metrics;
+  let txt = '28/04/2026 a 02/05/2026 (extensão até 09/05)';
+  if (m.maxDate) txt += ` · última atualização ${formatDate(m.maxDate)}`;
+  document.getElementById('header-sub').textContent = txt;
+}
+
+function renderMetaBar() {
+  const m = state.metrics;
+  const bar = document.getElementById('meta-bar');
+  const periodTxt = (m.minDate && m.maxDate) ? `${formatDate(m.minDate)} → ${formatDate(m.maxDate)}` : '—';
+  bar.innerHTML = `
+    <div class="meta-item"><span class="meta-key">Controle</span><span class="meta-val">${m.nControle} BDRs</span></div>
+    <div class="meta-item"><span class="meta-key">Teste</span><span class="meta-val">${m.nTeste} BDRs</span></div>
+    <div class="meta-item"><span class="meta-key">Período</span><span class="meta-val">${periodTxt}</span></div>
+    <div class="meta-item"><span class="meta-key">Dias c/ dados</span><span class="meta-val">${m.daysWithData}</span></div>
+    <div class="meta-item"><span class="meta-key">Última atualização</span><span class="meta-val">${m.maxDate ? formatDate(m.maxDate) : '—'}</span></div>
+  `;
+}
+
+function renderOpWarning() {
+  const m = state.metrics;
+  const sec = document.getElementById('op-warn-section');
+  const content = document.getElementById('op-warn-content');
+  if (m.missingControle.length === 0) { sec.classList.add('hidden'); return; }
+  sec.classList.remove('hidden');
+  const names = m.missingControle.map(n => `<strong>${n}</strong>`).join(', ');
+  const verb = m.missingControle.length > 1 ? 'estão no grupo controle mas não constam' : 'está no grupo controle mas não consta';
+  content.innerHTML = `${names} ${verb} no CSV de atividades — controle está sendo medido com <strong>${m.nControle} BDR${m.nControle === 1 ? '' : 's'} reportáve${m.nControle === 1 ? 'l' : 'is'}</strong>.`;
+}
+
+function renderCards() {
+  const m = state.metrics;
+  const cards = [
+    { name: 'Atividades por BDR',         c: m.pcControle.atividades,    t: m.pcTeste.atividades,    dec: 1 },
+    { name: 'Leads trabalhados por BDR',  c: m.pcControle.leadsTrab,     t: m.pcTeste.leadsTrab,     dec: 1 },
+    { name: 'Leads conectados por BDR',   c: m.pcControle.leadsConect,   t: m.pcTeste.leadsConect,   dec: 1 },
+    { name: 'Reuniões por BDR',            c: m.pcControle.reunioes,      t: m.pcTeste.reunioes,      dec: 2 },
+    { name: 'Oportunidades por BDR',       c: m.pcControle.oportunidades, t: m.pcTeste.oportunidades, dec: 2 },
+    { name: 'Taxa global de conversão',    c: m.rControle.global,         t: m.rTeste.global,         dec: 2, pct: true },
+  ];
+
+  const grid = document.getElementById('cards-grid');
+  grid.innerHTML = cards.map(card => {
+    const cVal = card.pct ? (card.c === null ? '—' : (100*card.c).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) + '%') : fmt(card.c, card.dec);
+    const tVal = card.pct ? (card.t === null ? '—' : (100*card.t).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) + '%') : fmt(card.t, card.dec);
+    const d = (card.c === null || card.c === 0) ? null : deltaPct(card.c, card.t);
+    return `
+      <div class="metric-card">
+        <div class="metric-name">${card.name}</div>
+        <div class="metric-rows">
+          <div class="metric-col">
+            <span class="group-tag controle">Controle</span>
+            <span class="metric-val controle">${cVal}</span>
+          </div>
+          <div class="metric-col">
+            <span class="group-tag teste">Teste</span>
+            <span class="metric-val teste">${tVal}</span>
+          </div>
+        </div>
+        <div class="delta-row">
+          <span class="delta-label">Delta Teste vs Controle</span>
+          <span class="delta-val ${deltaClass(d)}">${deltaText(d)}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderFunnel() {
+  const m = state.metrics;
+  const grid = document.getElementById('funnel-grid');
+
+  const stages = [
+    { key: 'leadsTrab',     label: 'Leads Trabalhados' },
+    { key: 'leadsConect',   label: 'Leads Conectados', convFrom: 'leadsTrab' },
+    { key: 'reunioes',       label: 'Reuniões Agendadas', convFrom: 'leadsConect' },
+    { key: 'oportunidades',  label: 'Oportunidades Geradas', convFrom: 'reunioes' },
+  ];
+
+  const maxValue = Math.max(
+    m.groups.Controle.leadsTrab, m.groups.Teste.leadsTrab,
+    m.groups.Controle.leadsConect, m.groups.Teste.leadsConect,
+    m.groups.Controle.reunioes, m.groups.Teste.reunioes,
+    m.groups.Controle.oportunidades, m.groups.Teste.oportunidades,
+    1
+  );
+
+  function buildCard(groupName, klass, n) {
+    const g = m.groups[groupName];
+    const stagesHtml = stages.map(s => {
+      const abs = g[s.key];
+      const pc = n ? abs / n : 0;
+      const widthPct = (abs / maxValue) * 100;
+      let convHtml = '';
+      if (s.convFrom) {
+        const denom = g[s.convFrom];
+        convHtml = `<div class="conv-pill">↳ taxa: ${fmtPct(abs, denom)}</div>`;
+      }
+      return `
+        <div class="funnel-stage">
+          <div class="stage-meta">
+            <span class="stage-name">${s.label}</span>
+            <span class="stage-vals">${fmt(abs)}<span class="pc">${fmt(pc, 2)}/BDR</span></span>
+          </div>
+          <div class="stage-bar-wrap"><div class="stage-bar ${klass}" style="width: ${widthPct}%"></div></div>
+          ${convHtml}
+        </div>
+      `;
+    }).join('');
+    return `
+      <div class="funnel-card">
+        <div class="funnel-header">
+          <span class="funnel-title">${groupName}</span>
+          <span class="group-tag ${klass}">${n} BDR${n===1?'':'s'}</span>
+        </div>
+        ${stagesHtml}
+      </div>
+    `;
+  }
+
+  grid.innerHTML = buildCard('Controle', 'controle', m.nControle) + buildCard('Teste', 'teste', m.nTeste);
+}
+
+function renderEvolution() {
+  const m = state.metrics;
+  const dates = Object.keys(m.byDateGroup).sort();
+  const labels = dates.map(d => formatDateShort(m.byDateGroup[d].date));
+
+  const datasetConectados = {
+    Controle: dates.map(d => {
+      const cell = m.byDateGroup[d].Controle;
+      return cell.bdrs.size ? cell.lc / cell.bdrs.size : 0;
+    }),
+    Teste: dates.map(d => {
+      const cell = m.byDateGroup[d].Teste;
+      return cell.bdrs.size ? cell.lc / cell.bdrs.size : 0;
+    }),
+  };
+
+  const datasetReunioes = {
+    Controle: dates.map(d => {
+      const cell = m.byDateGroup[d].Controle;
+      return cell.bdrs.size ? cell.ra / cell.bdrs.size : 0;
+    }),
+    Teste: dates.map(d => {
+      const cell = m.byDateGroup[d].Teste;
+      return cell.bdrs.size ? cell.ra / cell.bdrs.size : 0;
+    }),
+  };
+
+  destroyCharts();
+  const baseOpts = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: {
+        labels: {
+          color: '#9098a3',
+          font: { family: 'Inter Tight', size: 12 },
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 16,
+        }
+      },
+      tooltip: {
+        backgroundColor: '#1a1d21',
+        borderColor: '#34383f',
+        borderWidth: 1,
+        titleColor: '#e8e8ea',
+        bodyColor: '#e8e8ea',
+        titleFont: { family: 'Inter Tight', weight: '500' },
+        bodyFont: { family: 'JetBrains Mono', size: 11 },
+        padding: 10,
+        callbacks: {
+          label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}/BDR`,
+        }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#9098a3', font: { family: 'JetBrains Mono', size: 10 } } },
+      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#9098a3', font: { family: 'JetBrains Mono', size: 10 } }, beginAtZero: true },
+    }
+  };
+
+  const lineProps = (color) => ({
+    borderColor: color,
+    backgroundColor: color + '33',
+    borderWidth: 2,
+    pointRadius: 4,
+    pointHoverRadius: 6,
+    pointBackgroundColor: color,
+    pointBorderColor: color,
+    tension: 0.25,
+    fill: false,
+  });
+
+  state.charts.conectados = new Chart(document.getElementById('chart-conectados'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Controle', data: datasetConectados.Controle, ...lineProps('#d4a574') },
+        { label: 'Teste',    data: datasetConectados.Teste,    ...lineProps('#6db4a8') },
+      ]
+    },
+    options: baseOpts,
+  });
+
+  state.charts.reunioes = new Chart(document.getElementById('chart-reunioes'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Controle', data: datasetReunioes.Controle, ...lineProps('#d4a574') },
+        { label: 'Teste',    data: datasetReunioes.Teste,    ...lineProps('#6db4a8') },
+      ]
+    },
+    options: baseOpts,
+  });
+}
+
+function destroyCharts() {
+  for (const k of ['conectados', 'reunioes']) {
+    if (state.charts[k]) { state.charts[k].destroy(); state.charts[k] = null; }
+  }
+}
+
+function renderTable() {
+  const m = state.metrics;
+  const rows = Object.values(m.byBdr).map(b => ({
+    ...b,
+    taxaConexao: b.leadsTrab ? b.leadsConect / b.leadsTrab : null,
+    taxaGlobal: b.leadsTrab ? b.oportunidades / b.leadsTrab : null,
+    cadencia: b.cadenciaPrincipal,
+  }));
+
+  const sortFns = {
+    bdr: (a,b) => a.bdr.localeCompare(b.bdr, 'pt-BR'),
+    grupo: (a,b) => a.grupo.localeCompare(b.grupo, 'pt-BR'),
+    atividades: (a,b) => a.atividades - b.atividades,
+    leadsTrab: (a,b) => a.leadsTrab - b.leadsTrab,
+    leadsConect: (a,b) => a.leadsConect - b.leadsConect,
+    reunioes: (a,b) => a.reunioes - b.reunioes,
+    oportunidades: (a,b) => a.oportunidades - b.oportunidades,
+    taxaConexao: (a,b) => (a.taxaConexao || 0) - (b.taxaConexao || 0),
+    taxaGlobal: (a,b) => (a.taxaGlobal || 0) - (b.taxaGlobal || 0),
+    cadencia: (a,b) => (a.cadencia || '').localeCompare(b.cadencia || '', 'pt-BR'),
+  };
+
+  rows.sort(sortFns[state.sortCol] || sortFns.reunioes);
+  if (state.sortDir === 'desc') rows.reverse();
+
+  const tbody = document.getElementById('bdr-tbody');
+  tbody.innerHTML = rows.map(r => `
+    <tr class="${r.grupo === 'Controle' ? 'controle-row' : ''}">
+      <td class="bdr-name">${r.bdr}</td>
+      <td><span class="group-tag ${r.grupo === 'Controle' ? 'controle' : 'teste'}">${r.grupo}</span></td>
+      <td class="numeric">${fmt(r.atividades)}</td>
+      <td class="numeric">${fmt(r.leadsTrab)}</td>
+      <td class="numeric">${fmt(r.leadsConect)}</td>
+      <td class="numeric">${fmt(r.reunioes)}</td>
+      <td class="numeric">${fmt(r.oportunidades)}</td>
+      <td class="numeric">${fmtPct(r.leadsConect, r.leadsTrab)}</td>
+      <td class="numeric">${fmtPct(r.oportunidades, r.leadsTrab)}</td>
+      <td>${r.cadencia}</td>
+    </tr>
+  `).join('');
+
+  // Header sort indicators
+  document.querySelectorAll('#bdr-table th').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (th.dataset.col === state.sortCol) {
+      th.classList.add(state.sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+    }
+  });
+}
+
+function setupTableSort() {
+  document.querySelectorAll('#bdr-table th').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = th.dataset.col;
+      if (state.sortCol === col) {
+        state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.sortCol = col;
+        state.sortDir = ['bdr','grupo','cadencia'].includes(col) ? 'asc' : 'desc';
+      }
+      if (state.metrics) renderTable();
+    });
+  });
+}
+
+function renderCoverage() {
+  const sec = document.getElementById('coverage-section');
+  if (!state.mvpFabbrica || !state.bdrAe) { sec.classList.add('hidden'); return; }
+  sec.classList.remove('hidden');
+
+  const mvpAccounts = state.mvpFabbrica.map(r => ({
+    nome: String(r.Nome_da_conta || '').trim(),
+    bdr: String(r.BDR_da_conta || '').trim(),
+  })).filter(r => r.nome);
+
+  // Contas em carteira hoje (set de Nome_conta dos BDRs no arquivo 1)
+  const carteiraSet = new Set(
+    state.bdrAe
+      .map(r => String(r.Nome_conta || '').trim().toLowerCase())
+      .filter(s => s.length > 0)
+  );
+
+  const totalMvp = mvpAccounts.length;
+  const inCarteira = mvpAccounts.filter(a => carteiraSet.has(a.nome.toLowerCase())).length;
+  const pctCobertura = totalMvp ? (100 * inCarteira / totalMvp) : 0;
+
+  document.getElementById('coverage-top').innerHTML = `
+    <div class="coverage-stat"><div class="lbl">Total contas no MVP</div><div class="val">${fmt(totalMvp)}</div></div>
+    <div class="coverage-stat"><div class="lbl">Em carteira hoje</div><div class="val">${fmt(inCarteira)}</div></div>
+    <div class="coverage-stat"><div class="lbl">% cobertura</div><div class="val">${pctCobertura.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}%</div></div>
+  `;
+
+  // Breakdown por BDR
+  const byBdr = {};
+  mvpAccounts.forEach(a => {
+    const b = a.bdr || '— sem BDR atribuído —';
+    if (!byBdr[b]) byBdr[b] = { total: 0, emCart: 0, grupo: classifyBdr(b) };
+    byBdr[b].total++;
+    if (carteiraSet.has(a.nome.toLowerCase())) byBdr[b].emCart++;
+  });
+
+  const tbody = document.getElementById('coverage-tbody');
+  const sortedBdrs = Object.keys(byBdr).sort((a,b) => byBdr[b].total - byBdr[a].total);
+  tbody.innerHTML = sortedBdrs.map(bdr => {
+    const x = byBdr[bdr];
+    const pct = x.total ? (100 * x.emCart / x.total) : 0;
+    return `
+      <tr class="${x.grupo === 'Controle' ? 'controle-row' : ''}">
+        <td class="bdr-name">${bdr}</td>
+        <td><span class="group-tag ${x.grupo === 'Controle' ? 'controle' : 'teste'}">${x.grupo}</span></td>
+        <td class="numeric">${fmt(x.total)}</td>
+        <td class="numeric">${fmt(x.emCart)}</td>
+        <td class="numeric">${pct.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}%</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// ============================================================
+// EXPORT JSON
+// ============================================================
+function exportSummary() {
+  if (!state.metrics) return;
+  const m = state.metrics;
+  const summary = {
+    geradoEm: new Date().toISOString(),
+    periodo: {
+      inicio: m.minDate ? m.minDate.toISOString().slice(0,10) : null,
+      fim: m.maxDate ? m.maxDate.toISOString().slice(0,10) : null,
+      diasComDados: m.daysWithData,
+    },
+    grupos: {
+      Controle: {
+        bdrsReportaveis: m.nControle,
+        bdrsListaOriginal: BDRS_CONTROLE,
+        bdrsAusentesNoCSV: m.missingControle,
+        volume: m.groups.Controle,
+        perCapita: m.pcControle,
+        taxas: m.rControle,
+        cadencias: m.cadenciasByGroup.Controle,
+      },
+      Teste: {
+        bdrsReportaveis: m.nTeste,
+        volume: m.groups.Teste,
+        perCapita: m.pcTeste,
+        taxas: m.rTeste,
+        cadencias: m.cadenciasByGroup.Teste,
+      }
+    },
+    deltasTesteVsControle: {
+      atividadesPorBdr: deltaPct(m.pcControle.atividades, m.pcTeste.atividades),
+      leadsTrabPorBdr: deltaPct(m.pcControle.leadsTrab, m.pcTeste.leadsTrab),
+      leadsConectPorBdr: deltaPct(m.pcControle.leadsConect, m.pcTeste.leadsConect),
+      reunioesPorBdr: deltaPct(m.pcControle.reunioes, m.pcTeste.reunioes),
+      oportunidadesPorBdr: deltaPct(m.pcControle.oportunidades, m.pcTeste.oportunidades),
+      taxaGlobal: deltaPct(m.rControle.global, m.rTeste.global),
+    },
+    bdrs: Object.values(m.byBdr).map(b => ({
+      nome: b.bdr,
+      grupo: b.grupo,
+      atividades: b.atividades,
+      leadsTrabalhados: b.leadsTrab,
+      leadsConectados: b.leadsConect,
+      reunioesAgendadas: b.reunioes,
+      oportunidadesGeradas: b.oportunidades,
+      taxaConexao: b.leadsTrab ? b.leadsConect / b.leadsTrab : null,
+      taxaGlobal: b.leadsTrab ? b.oportunidades / b.leadsTrab : null,
+      cadenciaPrincipal: b.cadenciaPrincipal,
+    })),
+  };
+
+  const blob = new Blob([JSON.stringify(summary, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
+  a.href = url;
+  a.download = `piloto_fabbrica_resumo_${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  setupUpload();
+  setupTableSort();
+  document.getElementById('btn-export').addEventListener('click', exportSummary);
+});
+</script>
+</body>
+</html>
