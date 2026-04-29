@@ -1,5 +1,7 @@
 # Build artifacts
 _piloto_data.json
+_icp_data.json
+__pycache__/
 
 # OS
 .DS_Store
