@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -30,9 +31,7 @@
     --neutral: #9098a3;
     --warn: #e8c270;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   html, body {
     background: var(--bg);
     color: var(--text);
@@ -41,396 +40,159 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
+  .container { max-width: 1400px; margin: 0 auto; padding: 40px 32px 80px; }
 
-  .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 40px 32px 80px;
-  }
+  /* Header */
+  header { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  h1 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 32px; letter-spacing: -0.01em; margin-bottom: 6px; }
+  .subtitle { color: var(--text-dim); font-size: 13px; font-family: 'JetBrains Mono', monospace; }
 
-  /* ===== Header ===== */
-  header {
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--border);
-  }
-  h1 {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 32px;
-    letter-spacing: -0.01em;
-    margin-bottom: 6px;
-  }
-  .subtitle {
-    color: var(--text-dim);
-    font-size: 13px;
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  /* ===== Section base ===== */
   section { margin-bottom: 28px; }
-  .section-title {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 18px;
-    margin-bottom: 14px;
-    color: var(--text);
-  }
-  .section-sub {
-    color: var(--text-faint);
-    font-size: 12px;
-    font-family: 'JetBrains Mono', monospace;
-    margin-bottom: 14px;
-  }
+  .section-title { font-family: 'Fraunces', serif; font-weight: 500; font-size: 18px; margin-bottom: 14px; color: var(--text); }
+  .section-sub { color: var(--text-faint); font-size: 12px; font-family: 'JetBrains Mono', monospace; margin-bottom: 14px; }
 
-  /* ===== Upload zones ===== */
-  .upload-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
-    gap: 12px;
-    align-items: stretch;
-  }
+  /* Tese / clusters */
+  .tese-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 12px; }
+  .tese-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .tese-card h3 { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 500; margin-bottom: 10px; }
+  .tese-card p { color: var(--text-dim); font-size: 13px; line-height: 1.55; }
+  .cluster-pill { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 4px; background: rgba(232, 194, 112, 0.1); color: var(--warn); border: 1px solid rgba(232,194,112,0.25); margin-bottom: 10px; letter-spacing: 0.04em; }
+  .cluster-stats { display: flex; flex-direction: column; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); margin-top: 8px; }
+  .cluster-stats .row { display: flex; justify-content: space-between; }
+  .cluster-stats .row .lbl { color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+  .cluster-stats .row .val { color: var(--text); }
+
+  /* Upload */
+  .upload-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .drop-zone {
     background: var(--card);
     border: 1px dashed var(--border-strong);
     border-radius: 10px;
-    padding: 18px;
+    padding: 14px;
     cursor: pointer;
     transition: all 0.18s ease;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    min-height: 92px;
+    gap: 4px;
+    min-height: 86px;
   }
   .drop-zone:hover { background: var(--card-hover); border-color: #4b5260; }
   .drop-zone.drag { background: var(--card-hover); border-color: var(--teste); border-style: solid; }
-  .drop-zone.loaded { border-color: var(--teste-border); border-style: solid; background: var(--card); }
+  .drop-zone.loaded { border-color: var(--teste-border); border-style: solid; }
   .drop-zone.error { border-color: var(--negative); border-style: solid; }
-  .drop-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-faint);
-  }
-  .drop-name {
-    font-family: 'Fraunces', serif;
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text);
-  }
-  .drop-state {
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-top: auto;
-  }
+  .drop-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); }
+  .drop-name { font-family: 'Fraunces', serif; font-size: 14px; font-weight: 500; color: var(--text); }
+  .drop-state { font-size: 11px; color: var(--text-dim); margin-top: auto; font-family: 'JetBrains Mono', monospace; }
   .drop-state.ok { color: var(--teste); }
   .drop-state.err { color: var(--negative); }
-  .clear-btn {
-    background: transparent;
-    border: 1px solid var(--border-strong);
-    color: var(--text-dim);
-    padding: 0 16px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-family: 'Inter Tight', sans-serif;
-    font-size: 12px;
-    transition: all 0.18s;
-  }
-  .clear-btn:hover { color: var(--text); border-color: #4b5260; }
+  .drop-state.loading { color: var(--warn); }
 
-  /* ===== Meta bar ===== */
-  .meta-bar {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 18px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 22px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-  }
+  .actions-row { display: flex; gap: 10px; justify-content: flex-end; margin: 14px 0; }
+  .btn { background: transparent; border: 1px solid var(--border-strong); color: var(--text-dim); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: 'Inter Tight', sans-serif; font-size: 13px; transition: all 0.18s; }
+  .btn:hover { color: var(--text); border-color: #4b5260; }
+  .btn-primary { background: var(--teste-soft); border: 1px solid var(--teste-border); color: var(--teste); }
+  .btn-primary:hover { background: rgba(109,180,168,0.2); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Meta bar */
+  .meta-bar { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 22px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
   .meta-item { display: flex; gap: 6px; align-items: baseline; }
   .meta-key { color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
   .meta-val { color: var(--text); font-weight: 500; }
 
-  /* ===== Warnings ===== */
-  .warn-box {
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 13px;
-    line-height: 1.6;
-  }
-  .warn-pedagogic {
-    background: rgba(232, 194, 112, 0.06);
-    border: 1px solid rgba(232, 194, 112, 0.2);
-    color: #e8d8b0;
-  }
-  .warn-operational {
-    background: rgba(217, 122, 108, 0.08);
-    border: 1px solid rgba(217, 122, 108, 0.25);
-    color: #e8b5a8;
-  }
+  /* Warnings */
+  .warn-box { border-radius: 10px; padding: 14px 18px; font-size: 13px; line-height: 1.6; }
+  .warn-pedagogic { background: rgba(232, 194, 112, 0.06); border: 1px solid rgba(232, 194, 112, 0.2); color: #e8d8b0; }
+  .warn-operational { background: rgba(217, 122, 108, 0.08); border: 1px solid rgba(217, 122, 108, 0.25); color: #e8b5a8; }
   .warn-box strong { color: var(--warn); font-weight: 600; }
 
-  /* ===== Cards grid ===== */
-  .cards-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-  }
-  .metric-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .metric-name {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-faint);
-  }
+  /* Allowlist roster */
+  .roster-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .roster-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .roster-col h4 { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); margin-bottom: 10px; }
+  .roster-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .roster-pill { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 10px; border-radius: 4px; }
+  .roster-pill.controle { background: var(--controle-soft); color: var(--controle); border: 1px solid var(--controle-border); }
+  .roster-pill.teste { background: var(--teste-soft); color: var(--teste); border: 1px solid var(--teste-border); }
+  .roster-pill.absent { opacity: 0.4; text-decoration: line-through; }
+
+  /* Cards grid */
+  .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .cards-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .metric-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .metric-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); }
   .metric-rows { display: flex; gap: 18px; }
   .metric-col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-  .group-tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 2px 8px;
-    border-radius: 4px;
-    align-self: flex-start;
-  }
+  .group-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; padding: 2px 8px; border-radius: 4px; align-self: flex-start; }
   .group-tag.controle { background: var(--controle-soft); color: var(--controle); border: 1px solid var(--controle-border); }
   .group-tag.teste { background: var(--teste-soft); color: var(--teste); border: 1px solid var(--teste-border); }
-  .metric-val {
-    font-family: 'Fraunces', serif;
-    font-size: 26px;
-    font-weight: 500;
-    line-height: 1.1;
-  }
+  .metric-val { font-family: 'Fraunces', serif; font-size: 26px; font-weight: 500; line-height: 1.1; }
   .metric-val.controle { color: var(--controle); }
   .metric-val.teste { color: var(--teste); }
-  .delta-row {
-    border-top: 1px solid var(--border);
-    padding-top: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-  }
+  .metric-val.faded { color: var(--text-faint); }
+  .delta-row { border-top: 1px solid var(--border); padding-top: 10px; display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
   .delta-label { color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.06em; }
   .delta-val { font-weight: 500; }
   .delta-val.positive { color: var(--positive); }
   .delta-val.negative { color: var(--negative); }
   .delta-val.neutral { color: var(--neutral); }
 
-  /* ===== Funnel ===== */
-  .funnel-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  .funnel-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-  }
-  .funnel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-  }
-  .funnel-title {
-    font-family: 'Fraunces', serif;
-    font-size: 17px;
-    font-weight: 500;
-  }
+  /* Funnel */
+  .funnel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .funnel-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .funnel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .funnel-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500; }
   .funnel-stage { margin-bottom: 14px; }
   .funnel-stage:last-child { margin-bottom: 0; }
-  .stage-meta {
-    display: flex;
-    justify-content: space-between;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    margin-bottom: 5px;
-  }
+  .stage-meta { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-bottom: 5px; }
   .stage-name { color: var(--text); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
   .stage-vals { color: var(--text-dim); }
   .stage-vals .pc { color: var(--text-faint); margin-left: 8px; }
-  .stage-bar-wrap {
-    height: 30px;
-    background: rgba(255,255,255,0.02);
-    border-radius: 4px;
-    position: relative;
-    overflow: hidden;
-  }
-  .stage-bar {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-    display: flex;
-    align-items: center;
-    padding: 0 10px;
-  }
-  .stage-bar.controle { background: linear-gradient(90deg, rgba(212,165,116,0.5), rgba(212,165,116,0.2)); }
-  .stage-bar.teste { background: linear-gradient(90deg, rgba(109,180,168,0.5), rgba(109,180,168,0.2)); }
-  .conv-pill {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--text-faint);
-    margin-top: 4px;
-    margin-left: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
+  .stage-bar-wrap { height: 30px; background: rgba(255,255,255,0.02); border-radius: 4px; position: relative; overflow: hidden; }
+  .stage-bar { height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); display: flex; align-items: center; padding: 0 10px; }
+  .stage-bar.controle { background: linear-gradient(90deg, rgba(212,165,116,0.55), rgba(212,165,116,0.2)); }
+  .stage-bar.teste { background: linear-gradient(90deg, rgba(109,180,168,0.55), rgba(109,180,168,0.2)); }
+  .conv-pill { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint); margin-top: 4px; margin-left: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
 
-  /* ===== Evolution ===== */
-  .evo-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  .chart-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-    height: 320px;
-    display: flex;
-    flex-direction: column;
-  }
-  .chart-card h3 {
-    font-family: 'Fraunces', serif;
-    font-size: 15px;
-    font-weight: 500;
-    margin-bottom: 14px;
-  }
+  /* Charts */
+  .evo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; height: 320px; display: flex; flex-direction: column; }
+  .chart-card h3 { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 500; margin-bottom: 14px; }
   .chart-wrap { flex: 1; position: relative; min-height: 0; }
 
-  /* ===== Table ===== */
-  .table-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-  }
+  /* Table */
+  .table-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
   table { width: 100%; border-collapse: collapse; }
-  thead {
-    background: rgba(255,255,255,0.02);
-    border-bottom: 1px solid var(--border);
-  }
-  th {
-    text-align: left;
-    padding: 12px 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-faint);
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-  }
+  thead { background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); }
+  th { text-align: left; padding: 12px 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); cursor: pointer; user-select: none; white-space: nowrap; }
   th:hover { color: var(--text); }
   th.sort-asc::after { content: ' ▲'; color: var(--teste); }
   th.sort-desc::after { content: ' ▼'; color: var(--teste); }
-  td {
-    padding: 11px 14px;
-    border-bottom: 1px solid var(--border);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-  }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; }
   tbody tr:last-child td { border-bottom: none; }
   tbody tr.controle-row { background: var(--controle-soft); }
   tbody tr:hover td { background: rgba(255,255,255,0.02); }
   td.bdr-name { font-family: 'Inter Tight', sans-serif; font-size: 13px; font-weight: 500; }
   td.numeric { text-align: right; }
+  th.num { text-align: right; }
+  .deal-name { color: var(--text-dim); font-size: 11px; }
+  .seg-pill { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 9px; padding: 1px 6px; border-radius: 3px; background: rgba(232,194,112,0.15); color: var(--warn); border: 1px solid rgba(232,194,112,0.3); margin-left: 6px; letter-spacing: 0.04em; }
 
-  /* ===== Coverage ===== */
-  .coverage-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 22px;
-  }
-  .coverage-top {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    padding-bottom: 18px;
-    margin-bottom: 18px;
-    border-bottom: 1px solid var(--border);
-  }
-  .coverage-stat .lbl {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-faint);
-    margin-bottom: 6px;
-  }
-  .coverage-stat .val {
-    font-family: 'Fraunces', serif;
-    font-size: 28px;
-    font-weight: 500;
-  }
-  .coverage-table-wrap { max-height: 420px; overflow-y: auto; }
-  .coverage-table-wrap table tbody tr.controle-row { background: var(--controle-soft); }
+  /* Coverage */
+  .coverage-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 22px; }
+  .coverage-top { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .coverage-stat .lbl { font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-faint); margin-bottom: 6px; }
+  .coverage-stat .val { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 500; }
+  .scrolling-table-wrap { max-height: 460px; overflow-y: auto; }
 
-  /* ===== Empty state ===== */
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-faint);
-    background: var(--card);
-    border: 1px dashed var(--border-strong);
-    border-radius: 10px;
-  }
-  .empty-state h2 {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 20px;
-    margin-bottom: 8px;
-    color: var(--text-dim);
-  }
+  /* Empty */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-faint); background: var(--card); border: 1px dashed var(--border-strong); border-radius: 10px; }
+  .empty-state h2 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 20px; margin-bottom: 8px; color: var(--text-dim); }
 
-  /* ===== Buttons ===== */
-  .actions-row {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    margin-bottom: 14px;
-  }
-  .btn-primary {
-    background: var(--teste-soft);
-    border: 1px solid var(--teste-border);
-    color: var(--teste);
-    padding: 8px 18px;
-    border-radius: 8px;
-    font-family: 'Inter Tight', sans-serif;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.18s;
-  }
-  .btn-primary:hover { background: rgba(109,180,168,0.2); }
-  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  /* ===== Hidden ===== */
   .hidden { display: none !important; }
 
-  /* ===== Responsive ===== */
   @media (max-width: 1100px) {
-    .upload-row, .cards-grid, .funnel-grid, .evo-grid, .coverage-top {
+    .upload-grid, .cards-grid, .cards-grid-4, .funnel-grid, .evo-grid, .coverage-top, .roster-grid, .tese-grid {
       grid-template-columns: 1fr;
     }
     .container { padding: 24px 16px; }
@@ -443,93 +205,125 @@
 
   <header>
     <h1>Gestão Piloto Fabbrica · Pré-Vendas Gupy</h1>
-    <div class="subtitle" id="header-sub">28/04/2026 a 02/05/2026 (extensão até 09/05) · aguardando upload dos CSVs</div>
+    <div class="subtitle" id="header-sub">Piloto 28/04 → 02/05/2026 (extensão até 09/05) · aguardando upload dos arquivos</div>
   </header>
+
+  <!-- Tese -->
+  <section>
+    <div class="section-title">Tese do experimento</div>
+    <div class="tese-grid">
+      <div class="tese-card">
+        <h3>Hipótese</h3>
+        <p>Segmentar leads por <strong>nicho de mercado</strong> com pitch, cadência e roteiro direcionados gera mais resultado que abordagem genérica. Controle (3 BDRs) trabalha Middle Market sem corte; Teste (~15 BDRs) trabalha lista segmentada Fabbrica. Leitura válida: <strong>per capita</strong> e <strong>taxa de conversão</strong>, não volume absoluto.</p>
+      </div>
+      <div class="tese-card">
+        <span class="cluster-pill">Cluster 1 · [M] Indústrias</span>
+        <p>Maior em volume de leads (3,9k); conversão histórica <strong>1,1%</strong>.</p>
+        <div class="cluster-stats">
+          <div class="row"><span class="lbl">LTV</span><span class="val">R$ 82k</span></div>
+          <div class="row"><span class="lbl">Valor Potencial</span><span class="val">R$ 3,5M</span></div>
+        </div>
+      </div>
+      <div class="tese-card">
+        <span class="cluster-pill">Cluster 2 · [G] Indústrias</span>
+        <p>Volume 1,6k leads; conversão histórica <strong>0,5%</strong> mas ticket alto.</p>
+        <div class="cluster-stats">
+          <div class="row"><span class="lbl">LTV</span><span class="val">R$ 292k</span></div>
+          <div class="row"><span class="lbl">Valor Potencial</span><span class="val">R$ 2,1M</span></div>
+        </div>
+      </div>
+      <div class="tese-card">
+        <span class="cluster-pill">Cluster 3 · [G] Cons. Discric.</span>
+        <p>Maior LTV do estudo; conversão <strong>0,6%</strong>; volume menor (0,8k).</p>
+        <div class="cluster-stats">
+          <div class="row"><span class="lbl">LTV</span><span class="val">R$ 390k</span></div>
+          <div class="row"><span class="lbl">Valor Potencial</span><span class="val">R$ 1,8M</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- Upload -->
   <section>
     <div class="section-title">Carga de dados</div>
-    <div class="upload-row">
-      <div class="drop-zone" id="dz-bdr-ae" data-key="bdrAe" data-label="Carteira BDR / AE">
-        <div class="drop-label">Arquivo 1</div>
-        <div class="drop-name">bdr_ae.csv</div>
-        <div class="drop-state">Arraste ou clique para enviar</div>
-      </div>
-      <div class="drop-zone" id="dz-mvp" data-key="mvpFabbrica" data-label="Lista oficial do piloto">
-        <div class="drop-label">Arquivo 2</div>
-        <div class="drop-name">mvp_fabbrica.csv</div>
-        <div class="drop-state">Arraste ou clique para enviar</div>
-      </div>
-      <div class="drop-zone" id="dz-atv" data-key="atividades" data-label="Atividades diárias (Salesforce)">
-        <div class="drop-label">Arquivo 3</div>
-        <div class="drop-name">atividades_diarias.csv</div>
-        <div class="drop-state">Arraste ou clique para enviar</div>
-      </div>
-      <button class="clear-btn" id="btn-clear">Limpar tudo</button>
+    <div class="section-sub">Arraste ou clique para enviar · arquivos podem ser .xlsx (exports SF) ou .csv · BDRs fora do allowlist abaixo são descartados</div>
+    <div class="upload-grid" id="upload-grid"></div>
+    <input type="file" id="file-input" accept=".csv,.xlsx" style="display:none">
+    <div class="actions-row">
+      <button class="btn" id="btn-clear">Limpar tudo</button>
+      <button class="btn-primary btn" id="btn-export" disabled>Exportar resumo (JSON)</button>
     </div>
-    <input type="file" id="file-input" accept=".csv" style="display:none">
   </section>
 
-  <!-- Empty state -->
+  <!-- Empty -->
   <section id="empty-state-section">
     <div class="empty-state">
       <h2>Aguardando dados</h2>
-      <div>Suba pelo menos <strong>atividades_diarias.csv</strong> para destravar a comparação Controle vs Teste. Os outros dois arquivos enriquecem cobertura e contexto.</div>
+      <div>Comece pelo <strong>Atividades concluídas</strong>, <strong>Ligações Conectadas</strong> e <strong>MVP Fabbrica</strong> — esses três já destravam a comparação Controle vs Teste. Os outros enriquecem funil e cobertura.</div>
     </div>
   </section>
 
-  <!-- Dashboard (revealed when data is present) -->
+  <!-- Dashboard -->
   <div id="dashboard" class="hidden">
 
-    <!-- Meta bar -->
+    <!-- Allowlist roster -->
     <section>
-      <div class="meta-bar" id="meta-bar"></div>
+      <div class="section-title">Roster do piloto</div>
+      <div class="section-sub">Toda métrica é calculada apenas sobre estes BDRs · linhas com nomes fora desta lista nos exports SF são descartadas</div>
+      <div class="roster-card">
+        <div class="roster-grid">
+          <div class="roster-col">
+            <h4>Grupo Controle</h4>
+            <div class="roster-list" id="roster-controle"></div>
+          </div>
+          <div class="roster-col">
+            <h4>Grupo Teste</h4>
+            <div class="roster-list" id="roster-teste"></div>
+          </div>
+        </div>
+      </div>
     </section>
+
+    <!-- Meta bar -->
+    <section><div class="meta-bar" id="meta-bar"></div></section>
 
     <!-- Pedagogic warning -->
     <section>
       <div class="warn-box warn-pedagogic">
-        <strong>Como ler este painel:</strong> com 3 BDRs no controle e ~15 no teste, a comparação válida é <strong>per capita</strong> e por <strong>taxa de conversão</strong>. Volume absoluto entra como contexto, não como veredito.
+        <strong>Como ler:</strong> com 3 BDRs no controle e ~6 no teste reportáveis, a comparação válida é <strong>per capita</strong> e por <strong>taxa de conversão</strong>. Volume absoluto entra como contexto. Conversão de referência dos clusters do estudo: <strong>0,5% — 1,1%</strong> de Novo Lead a Ganho.
       </div>
     </section>
 
-    <!-- Operational warning (if any) -->
+    <!-- Operational warning -->
     <section id="op-warn-section" class="hidden">
       <div class="warn-box warn-operational" id="op-warn-content"></div>
     </section>
 
-    <!-- Action row -->
-    <section>
-      <div class="actions-row">
-        <button class="btn-primary" id="btn-export">Exportar resumo (JSON)</button>
-      </div>
-    </section>
-
     <!-- Cards comparativos -->
     <section>
-      <div class="section-title">Comparação Controle vs Teste</div>
-      <div class="section-sub">Métricas per capita e taxa global · delta % calculado como (Teste − Controle) ÷ Controle</div>
-      <div class="cards-grid" id="cards-grid"></div>
+      <div class="section-title">Comparação Controle vs Teste · per capita</div>
+      <div class="section-sub">Delta % = (Teste − Controle) ÷ Controle · neutro quando |delta| < 5%</div>
+      <div class="cards-grid-4" id="cards-grid"></div>
     </section>
 
     <!-- Funil -->
     <section>
       <div class="section-title">Funil de conversão</div>
-      <div class="section-sub">Barras proporcionais ao maior valor entre os dois grupos · taxa = passagem para o estágio seguinte</div>
+      <div class="section-sub">Estágios derivados dos reports SF · barras proporcionais ao maior valor entre os dois grupos</div>
       <div class="funnel-grid" id="funnel-grid"></div>
     </section>
 
-    <!-- Evolução temporal -->
+    <!-- Evolução -->
     <section>
-      <div class="section-title">Evolução temporal (per capita)</div>
+      <div class="section-title">Evolução temporal · per capita</div>
       <div class="evo-grid">
         <div class="chart-card">
-          <h3>Leads conectados por BDR/dia</h3>
-          <div class="chart-wrap"><canvas id="chart-conectados"></canvas></div>
+          <h3>Atividades por BDR/dia</h3>
+          <div class="chart-wrap"><canvas id="chart-atividades"></canvas></div>
         </div>
         <div class="chart-card">
-          <h3>Reuniões agendadas por BDR/dia</h3>
-          <div class="chart-wrap"><canvas id="chart-reunioes"></canvas></div>
+          <h3>Ligações conectadas por BDR/dia</h3>
+          <div class="chart-wrap"><canvas id="chart-conectadas"></canvas></div>
         </div>
       </div>
     </section>
@@ -545,13 +339,16 @@
               <th data-col="bdr">BDR</th>
               <th data-col="grupo">Grupo</th>
               <th data-col="atividades" class="num">Atividades</th>
-              <th data-col="leadsTrab" class="num">Leads Trab.</th>
-              <th data-col="leadsConect" class="num">Leads Conect.</th>
+              <th data-col="ligacoesFeitas" class="num">Lig. feitas</th>
+              <th data-col="ligacoesConect" class="num">Lig. conect.</th>
+              <th data-col="leadsNovo" class="num">Leads novos</th>
+              <th data-col="leadsConect" class="num">Lead Conect.</th>
+              <th data-col="leadsAbordagem" class="num">Abordagem</th>
               <th data-col="reunioes" class="num">Reuniões</th>
               <th data-col="oportunidades" class="num">Oportun.</th>
+              <th data-col="negocios" class="num">Negócios</th>
+              <th data-col="negociosSeg" class="num">Negócios Seg</th>
               <th data-col="taxaConexao" class="num">Tx Conexão</th>
-              <th data-col="taxaGlobal" class="num">Tx Global</th>
-              <th data-col="cadencia">Cadência principal</th>
             </tr>
           </thead>
           <tbody id="bdr-tbody"></tbody>
@@ -559,13 +356,13 @@
       </div>
     </section>
 
-    <!-- Cobertura piloto -->
+    <!-- Cobertura MVP -->
     <section id="coverage-section" class="hidden">
-      <div class="section-title">Cobertura do piloto</div>
-      <div class="section-sub">Cruzamento da lista oficial Fabbrica (arquivo 2) com a carteira atual dos BDRs (arquivo 1)</div>
+      <div class="section-title">Cobertura do MVP Fabbrica</div>
+      <div class="section-sub">Cruzamento da lista oficial Fabbrica com a carteira atual dos BDRs (BDR AE export)</div>
       <div class="coverage-card">
         <div class="coverage-top" id="coverage-top"></div>
-        <div class="coverage-table-wrap">
+        <div class="scrolling-table-wrap">
           <table>
             <thead>
               <tr>
@@ -582,6 +379,29 @@
       </div>
     </section>
 
+    <!-- Novos negócios do segmento -->
+    <section id="negocios-section" class="hidden">
+      <div class="section-title">Novos negócios — do segmento Fabbrica</div>
+      <div class="section-sub">Negócios criados pelos BDRs do piloto cuja conta está na lista oficial · pill 🟡 = match com MVP</div>
+      <div class="table-card">
+        <div class="scrolling-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>BDR</th>
+                <th>Grupo</th>
+                <th>Conta</th>
+                <th>Negócio</th>
+                <th>Etapa</th>
+                <th>Data criação</th>
+              </tr>
+            </thead>
+            <tbody id="negocios-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
   </div>
 
 </div>
@@ -590,30 +410,246 @@
 "use strict";
 
 // ============================================================
-// CONSTANTES
+// CONFIG: ALLOWLIST DE BDRs (foco do piloto)
 // ============================================================
-const BDRS_CONTROLE = ["Ariane Mesquita", "Juliana Sant'Anna", "Beatriz Souza"];
+// Cada entrada: match (substring case-insensitive) → display (canônico) + grupo
+const BDR_ALLOWLIST = [
+  // Controle
+  { match: 'ariane',         display: 'Ariane Mesquita',   grupo: 'Controle' },
+  { match: "juliana sant",   display: "Juliana Sant'Anna", grupo: 'Controle' },
+  { match: 'beatriz souza',  display: 'Beatriz Souza',     grupo: 'Controle' },
+  // Teste
+  { match: 'pedro',          display: 'Pedro',             grupo: 'Teste' },
+  { match: 'jeanne',         display: 'Jeanne',            grupo: 'Teste' },
+  { match: 'victoria',       display: 'Victoria',          grupo: 'Teste' },
+  { match: 'mydoha',         display: 'Mydoha Seydo',      grupo: 'Teste' },
+  { match: 'giovana',        display: 'Giovana',           grupo: 'Teste' },
+  { match: 'adhara',         display: 'Adhara Gonçalves',  grupo: 'Teste' },
+];
 
-const REQUIRED_COLS = {
-  bdrAe: ["BDR", "AE_Principal", "Nome_conta"],
-  mvpFabbrica: ["Nome_da_conta", "BDR_da_conta"],
-  atividades: ["Data", "BDR", "Atividades", "Leads_Trabalhados", "Leads_Conectados", "Reunioes_Agendadas", "Oportunidades_Geradas", "Cadencia"]
+function classifyBdr(rawName) {
+  if (!rawName) return null;
+  const s = String(rawName).trim().toLowerCase();
+  if (!s || s === 'subtotal' || s === 'total geral') return null;
+  for (const e of BDR_ALLOWLIST) {
+    if (s.includes(e.match)) return { display: e.display, grupo: e.grupo };
+  }
+  return null;
+}
+
+// ============================================================
+// FILE TYPES & SCHEMAS
+// ============================================================
+// Cada tipo de arquivo tem:
+// - label, accept
+// - findHeaderBy: array de tokens que precisam estar na linha-header
+// - forwardFill: array de col indexes onde aplicar forward-fill (em ordem hierárquica)
+// - bdrCol: idx onde fica o nome do BDR
+// - keepRow: predicate que diz se a linha é uma linha de DADOS (não subtotal, header, etc)
+// - extract: função que pega a linha "fillada" e devolve o registro normalizado
+const FILE_TYPES = {
+  bdrAe: {
+    label: 'Carteira BDR / AE',
+    accept: '.xlsx,.csv',
+    findHeaderBy: ['Nome do membro da equipe', 'Nome da conta'],
+    forwardFill: [0, 1, 2],
+    bdrCol: 0,
+    keepRow: (row, hdr) => {
+      const c0 = String(row[0] || '').trim().toLowerCase();
+      const c1 = String(row[1] || '').trim().toLowerCase();
+      const c2 = String(row[2] || '').trim().toLowerCase();
+      if ([c0, c1, c2].some(v => v === 'subtotal' || v === 'total geral')) return false;
+      const conta = row[hdr.contaIdx];
+      return conta && String(conta).trim().length > 0;
+    },
+    deriveHeaderIdx: (headers) => ({
+      contaIdx: headers.findIndex(h => /Nome da conta/i.test(h || '')),
+      negociosIdx: headers.findIndex(h => /Negócios em aberto|Negocios em aberto/i.test(h || '')),
+      statusIdx: headers.findIndex(h => /^Status[_ ]?Geral/i.test(h || '')),
+      papelIdx: headers.findIndex(h => /Papel na equipe/i.test(h || '')),
+      carteiraMacroIdx: headers.findIndex(h => /Carteira Macro/i.test(h || '')),
+      carteiraNovaIdx: headers.findIndex(h => /Carteira Nova/i.test(h || '')),
+    }),
+  },
+  mvpFabbrica: {
+    label: 'MVP Fabbrica · lista oficial',
+    accept: '.csv',
+    csv: true,
+    fields: ['Nome da conta', 'ID da conta', 'ID Conta', 'BDR da conta'],
+    extract: (row) => ({
+      nomeConta: String(row['Nome da conta'] || '').trim(),
+      idConta: String(row['ID da conta'] || '').trim(),
+      bdr: String(row['BDR da conta'] || '').trim(),
+    }),
+  },
+  ligacoesConectadas: {
+    label: 'Ligações Conectadas',
+    accept: '.xlsx',
+    findHeaderBy: ['Responsável: Nome completo', 'Status da Conexão'],
+    forwardFill: [0],
+    bdrCol: 0,
+    keepRow: (row, hdr) => {
+      const c0 = String(row[0] || '').trim().toLowerCase();
+      if (c0 === 'subtotal' || c0 === 'total geral') return false;
+      const data = row[hdr.dataIdx];
+      const conta = row[hdr.contaIdx];
+      return data && conta && String(data).trim() && String(conta).trim();
+    },
+    deriveHeaderIdx: (headers) => ({
+      contaIdx: headers.findIndex(h => /Conta: Nome da conta/i.test(h || '')),
+      dataIdx: headers.findIndex(h => /Data de criação/i.test(h || '')),
+      statusConexaoIdx: headers.findIndex(h => /Status da Conexão/i.test(h || '')),
+    }),
+  },
+  atividadesConcluidas: {
+    label: 'Atividades concluídas',
+    accept: '.xlsx',
+    findHeaderBy: ['Subtipo de Tarefa', 'Criado por: Nome completo'],
+    forwardFill: [0, 1, 2],
+    bdrCol: 2,
+    keepRow: (row, hdr) => {
+      const c0 = String(row[0] || '').trim().toLowerCase();
+      const c1 = String(row[1] || '').trim().toLowerCase();
+      const c2 = String(row[2] || '').trim().toLowerCase();
+      if ([c0, c1, c2].some(v => v === 'subtotal' || v === 'total geral')) return false;
+      const data = row[hdr.dataIdx];
+      const tipo = row[hdr.tipoIdx];
+      return data && String(data).trim() && tipo && String(tipo).trim();
+    },
+    deriveHeaderIdx: (headers) => ({
+      dataIdx: headers.findIndex(h => /Data e hora de conclusão/i.test(h || '')),
+      contaIdx: headers.findIndex(h => /Conta: Nome da conta/i.test(h || '')),
+      tipoIdx: headers.findIndex(h => /^Tipo$/i.test(h || '')),
+    }),
+  },
+  leadsNovo: {
+    label: 'Leads · Novo Lead',
+    accept: '.xlsx',
+    findHeaderBy: ['Nome do membro da equipe', 'Etapa do Lead'],
+    forwardFill: [0, 1],
+    bdrCol: 0,
+    keepRow: (row, hdr) => {
+      const c0 = String(row[0] || '').trim().toLowerCase();
+      if (c0 === 'subtotal' || c0 === 'total geral') return false;
+      const negocio = row[hdr.negocioIdx];
+      return negocio && String(negocio).trim();
+    },
+    deriveHeaderIdx: (headers) => ({
+      negocioIdx: headers.findIndex(h => /Nome do negócio/i.test(h || '')),
+      etapaLeadIdx: headers.findIndex(h => /Etapa do Lead/i.test(h || '')),
+      etapaNegocioIdx: headers.findIndex(h => /Etapa do negócio/i.test(h || '')),
+      papelIdx: headers.findIndex(h => /Papel na equipe/i.test(h || '')),
+      idContaIdx: headers.findIndex(h => /ID da conta/i.test(h || '')),
+      dataIdx: headers.findIndex(h => /Data de entrada/i.test(h || '')),
+    }),
+  },
+  leadsConectado: {
+    label: 'Leads · Lead Conectado',
+    accept: '.xlsx',
+    findHeaderBy: ['Nome do membro da equipe', 'Etapa do Lead'],
+    forwardFill: [0],
+    bdrCol: 0,
+    keepRow: (row, hdr) => {
+      const c0 = String(row[0] || '').trim().toLowerCase();
+      if (c0 === 'subtotal' || c0 === 'total geral') return false;
+      const negocio = row[hdr.negocioIdx];
+      return negocio && String(negocio).trim();
+    },
+    deriveHeaderIdx: (headers) => ({
+      negocioIdx: headers.findIndex(h => /Nome do negócio/i.test(h || '')),
+      etapaLeadIdx: headers.findIndex(h => /Etapa do Lead/i.test(h || '')),
+      etapaNegocioIdx: headers.findIndex(h => /Etapa do negócio/i.test(h || '')),
+      papelIdx: headers.findIndex(h => /Papel na equipe/i.test(h || '')),
+    }),
+  },
+  leadsAbordagem: {
+    label: 'Leads · Abordagem Iniciada',
+    accept: '.xlsx',
+    findHeaderBy: ['Nome do membro da equipe', 'Etapa do Lead'],
+    forwardFill: [0],
+    bdrCol: 0,
+    keepRow: (row, hdr) => {
+      const c0 = String(row[0] || '').trim().toLowerCase();
+      if (c0 === 'subtotal' || c0 === 'total geral') return false;
+      const negocio = row[hdr.negocioIdx];
+      return negocio && String(negocio).trim();
+    },
+    deriveHeaderIdx: (headers) => ({
+      negocioIdx: headers.findIndex(h => /Nome do negócio/i.test(h || '')),
+      etapaLeadIdx: headers.findIndex(h => /Etapa do Lead/i.test(h || '')),
+      etapaNegocioIdx: headers.findIndex(h => /Etapa do negócio/i.test(h || '')),
+      papelIdx: headers.findIndex(h => /Papel na equipe/i.test(h || '')),
+    }),
+  },
+  oportunidades: {
+    label: 'Oportunidades TATM',
+    accept: '.xlsx',
+    findHeaderBy: ['Nome do membro da equipe', 'Apres. Solução'],
+    forwardFill: [0, 1, 2],
+    bdrCol: 0,
+    keepRow: (row, hdr) => {
+      const c0 = String(row[0] || '').trim().toLowerCase();
+      if (c0 === 'subtotal' || c0 === 'total geral') return false;
+      const negocio = row[hdr.negocioIdx];
+      return negocio && String(negocio).trim();
+    },
+    deriveHeaderIdx: (headers) => ({
+      negocioIdx: headers.findIndex(h => /Nome do negócio/i.test(h || '')),
+      contaIdx: headers.findIndex(h => /Negócio: Conta/i.test(h || '')),
+      etapaIdx: headers.findIndex(h => /Etapa do negócio/i.test(h || '')),
+      dataApresIdx: headers.findIndex(h => /Data de entrada - Apres\. Solução/i.test(h || '')),
+      dataCriacaoIdx: headers.findIndex(h => /Data de criação/i.test(h || '')),
+      reuniaoTaIdx: headers.findIndex(h => /\[TA\] Data da reunião/i.test(h || '')),
+      reuniaoTmIdx: headers.findIndex(h => /\[TM\] Data da reunião/i.test(h || '')),
+      papelIdx: headers.findIndex(h => /Papel na equipe/i.test(h || '')),
+    }),
+  },
+  negocios: {
+    label: 'Negócios xDR Plataforma',
+    accept: '.xlsx',
+    findHeaderBy: ['Nome do membro da equipe', 'Tamanho da Empresa'],
+    forwardFill: [0, 1],
+    bdrCol: 0,
+    keepRow: (row, hdr) => {
+      const c0 = String(row[0] || '').trim().toLowerCase();
+      if (c0 === 'subtotal' || c0 === 'total geral') return false;
+      const negocio = row[hdr.negocioIdx];
+      return negocio && String(negocio).trim();
+    },
+    deriveHeaderIdx: (headers) => ({
+      negocioIdx: headers.findIndex(h => /Nome do negócio/i.test(h || '')),
+      contaIdx: headers.findIndex(h => /Negócio: Conta/i.test(h || '')),
+      etapaIdx: headers.findIndex(h => /Etapa do negócio/i.test(h || '')),
+      dataCriacaoIdx: headers.findIndex(h => /Data de criação/i.test(h || '')),
+      tamanhoIdx: headers.findIndex(h => /Tamanho da Empresa/i.test(h || '')),
+      tipoIdx: headers.findIndex(h => /Tipo de negócio/i.test(h || '')),
+      papelIdx: headers.findIndex(h => /Papel na equipe/i.test(h || '')),
+    }),
+  },
 };
 
-const PERIODO_INICIO = new Date(2026, 3, 28); // 28/04/2026
-const PERIODO_FIM_EXT = new Date(2026, 4, 9); // 09/05/2026
+const UPLOAD_ZONES_ORDER = [
+  'atividadesConcluidas',
+  'ligacoesConectadas',
+  'leadsNovo',
+  'leadsConectado',
+  'leadsAbordagem',
+  'oportunidades',
+  'negocios',
+  'bdrAe',
+  'mvpFabbrica',
+];
 
 // ============================================================
 // STATE
 // ============================================================
 const state = {
-  bdrAe: null,
-  mvpFabbrica: null,
-  atividades: null,
-  metrics: null,
+  // Para cada tipo: { records: [...], rawCount, fileName }
+  files: {},
+  computed: null,
   sortCol: 'reunioes',
   sortDir: 'desc',
-  charts: { conectados: null, reunioes: null },
+  charts: { atividades: null, conectadas: null },
 };
 
 // ============================================================
@@ -624,7 +660,6 @@ function parseNumber(v) {
   if (typeof v === 'number') return v;
   let s = String(v).trim();
   if (!s) return 0;
-  // Brazilian format: "1.234,56" → strip dots, swap comma
   if (s.includes(',') && s.match(/\d\.\d{3}/)) s = s.replace(/\./g, '');
   s = s.replace(',', '.');
   const n = parseFloat(s);
@@ -633,20 +668,23 @@ function parseNumber(v) {
 
 function parseDate(v) {
   if (!v) return null;
-  if (v instanceof Date) return v;
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+  if (typeof v === 'number') {
+    // Excel serial date
+    const utcDays = v - 25569;
+    const utcMs = utcDays * 86400 * 1000;
+    return new Date(utcMs);
+  }
   const s = String(v).trim();
   if (!s) return null;
-  // Try ISO yyyy-mm-dd or yyyy-mm-ddTHH...
   let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (m) return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
-  // dd/mm/yyyy or dd/mm/yy
   m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
   if (m) {
     let y = parseInt(m[3]);
     if (y < 100) y += 2000;
     return new Date(y, parseInt(m[2])-1, parseInt(m[1]));
   }
-  // dd-mm-yyyy
   m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})/);
   if (m) return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
   const d = new Date(s);
@@ -657,106 +695,155 @@ function formatDate(d) {
   if (!d) return '—';
   return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
 }
-
 function formatDateShort(d) {
   if (!d) return '—';
   return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
 }
-
+function dKey(d) {
+  if (!d) return null;
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
 function fmt(n, dec = 0) {
   if (n === null || n === undefined || isNaN(n)) return '—';
   return n.toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
 }
-
 function fmtPct(num, den) {
   if (!den || den === 0) return '—';
   return (100 * num / den).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
 }
-
-function classifyBdr(name) {
-  if (!name) return 'Teste';
-  const trimmed = String(name).trim();
-  return BDRS_CONTROLE.some(b => b.toLowerCase() === trimmed.toLowerCase()) ? 'Controle' : 'Teste';
+function deltaPct(c, t) {
+  if (!c || c === 0) return null;
+  return (t - c) / c * 100;
 }
-
-function deltaPct(controle, teste) {
-  if (!controle || controle === 0) return null;
-  return (teste - controle) / controle * 100;
-}
-
 function deltaClass(d) {
   if (d === null || isNaN(d)) return 'neutral';
   if (Math.abs(d) < 5) return 'neutral';
   return d > 0 ? 'positive' : 'negative';
 }
-
 function deltaText(d) {
   if (d === null || isNaN(d)) return '—';
-  const sign = d > 0 ? '+' : '';
-  return sign + d.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+  return (d > 0 ? '+' : '') + d.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+}
+function normalizeAccount(s) {
+  return String(s || '').trim().toLowerCase();
 }
 
 // ============================================================
-// CSV PARSING
+// PARSER GENÉRICO PARA XLSX SF (com forward-fill)
 // ============================================================
-function parseFile(file, key, dropZoneEl) {
+function parseXlsxSF(workbook, schema) {
+  const sheetName = workbook.SheetNames[0];
+  const sheet = workbook.Sheets[sheetName];
+  const grid = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: '' });
+
+  // Find header row by matching tokens
+  let headerRowIdx = -1;
+  for (let i = 0; i < Math.min(grid.length, 30); i++) {
+    const row = grid[i] || [];
+    const text = row.map(c => String(c || '')).join(' | ');
+    if (schema.findHeaderBy.every(tok => text.includes(tok))) {
+      headerRowIdx = i;
+      break;
+    }
+  }
+  if (headerRowIdx < 0) throw new Error(`Header não encontrado · esperado: ${schema.findHeaderBy.join(' / ')}`);
+
+  const headers = grid[headerRowIdx].map(h => String(h || '').replace(/\s+↑$|\s+↓$/, '').trim());
+  const hdrIdx = schema.deriveHeaderIdx(headers);
+
+  // Forward-fill + filter
+  const ff = {};
+  for (const c of schema.forwardFill) ff[c] = '';
+  const records = [];
+
+  for (let i = headerRowIdx + 1; i < grid.length; i++) {
+    const row = grid[i] || [];
+    if (row.every(c => !c || String(c).trim() === '')) continue;
+
+    // Reset deeper fills when an outer fill col changes
+    const fillCols = schema.forwardFill;
+    for (let k = 0; k < fillCols.length; k++) {
+      const col = fillCols[k];
+      const v = row[col];
+      if (v !== null && v !== undefined && String(v).trim() !== '') {
+        // New value at this level — reset deeper levels
+        ff[col] = String(v).trim();
+        for (let kk = k+1; kk < fillCols.length; kk++) ff[fillCols[kk]] = '';
+      }
+    }
+
+    // Apply ff to working row
+    const filled = [...row];
+    for (const c of fillCols) {
+      if (filled[c] === null || filled[c] === undefined || String(filled[c]).trim() === '') {
+        filled[c] = ff[c];
+      }
+    }
+
+    if (!schema.keepRow(filled, hdrIdx)) continue;
+    records.push({ row: filled, hdr: hdrIdx });
+  }
+  return { records, hdrIdx };
+}
+
+function parseCSVPapa(file, schema, callback, errback) {
   Papa.parse(file, {
     header: true,
     skipEmptyLines: true,
     transformHeader: h => h.trim(),
     complete: (result) => {
       const data = result.data.filter(r => Object.values(r).some(v => v !== null && String(v).trim() !== ''));
-      const required = REQUIRED_COLS[key];
-      const headers = result.meta.fields || [];
-      const missing = required.filter(c => !headers.includes(c));
-      if (missing.length > 0) {
-        markZoneError(dropZoneEl, file.name, `colunas faltando: ${missing.join(', ')}`);
-        return;
+      if (schema.fields) {
+        const headers = result.meta.fields || [];
+        const missing = schema.fields.filter(c => !headers.includes(c));
+        if (missing.length > 0) { errback(`colunas faltando: ${missing.join(', ')}`); return; }
       }
-      state[key] = data;
-      markZoneOk(dropZoneEl, file.name, data.length);
-      recomputeAndRender();
+      const records = data.map(row => schema.extract ? schema.extract(row) : row);
+      callback({ records, raw: data });
     },
-    error: (err) => {
-      markZoneError(dropZoneEl, file.name, err.message);
-    }
+    error: (err) => errback(err.message),
   });
 }
 
-function markZoneOk(dz, fileName, rows) {
-  dz.classList.remove('error');
-  dz.classList.add('loaded');
-  const stateEl = dz.querySelector('.drop-state');
-  stateEl.className = 'drop-state ok';
-  stateEl.textContent = `✓ ${fileName} · ${rows.toLocaleString('pt-BR')} linhas`;
-}
-
-function markZoneError(dz, fileName, msg) {
-  dz.classList.remove('loaded');
-  dz.classList.add('error');
-  const stateEl = dz.querySelector('.drop-state');
-  stateEl.className = 'drop-state err';
-  stateEl.textContent = `✗ ${fileName} — ${msg}`;
-}
-
-function resetZone(dz) {
-  dz.classList.remove('loaded', 'error', 'drag');
-  const stateEl = dz.querySelector('.drop-state');
-  stateEl.className = 'drop-state';
-  stateEl.textContent = 'Arraste ou clique para enviar';
+function readXlsx(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: 'array', cellDates: false });
+        resolve(wb);
+      } catch (err) { reject(err); }
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsArrayBuffer(file);
+  });
 }
 
 // ============================================================
-// UPLOAD WIRING
+// UPLOAD
 // ============================================================
+function buildUploadZones() {
+  const grid = document.getElementById('upload-grid');
+  grid.innerHTML = UPLOAD_ZONES_ORDER.map((key, idx) => {
+    const t = FILE_TYPES[key];
+    return `
+      <div class="drop-zone" data-key="${key}" id="dz-${key}">
+        <div class="drop-label">Arq. ${idx+1}</div>
+        <div class="drop-name">${t.label}</div>
+        <div class="drop-state">Arraste ou clique · ${t.accept}</div>
+      </div>
+    `;
+  }).join('');
+}
+
 function setupUpload() {
-  const zones = document.querySelectorAll('.drop-zone');
   const fileInput = document.getElementById('file-input');
-  let activeZone = null;
+  let activeKey = null;
 
-  zones.forEach(dz => {
+  document.querySelectorAll('.drop-zone').forEach(dz => {
     dz.addEventListener('click', () => {
-      activeZone = dz;
+      activeKey = dz.dataset.key;
       fileInput.value = '';
       fileInput.click();
     });
@@ -765,161 +852,292 @@ function setupUpload() {
     dz.addEventListener('drop', e => {
       e.preventDefault();
       dz.classList.remove('drag');
-      const file = e.dataTransfer.files[0];
-      if (file) parseFile(file, dz.dataset.key, dz);
+      const f = e.dataTransfer.files[0];
+      if (f) handleFile(dz.dataset.key, f);
     });
   });
 
   fileInput.addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (file && activeZone) parseFile(file, activeZone.dataset.key, activeZone);
+    const f = e.target.files[0];
+    if (f && activeKey) handleFile(activeKey, f);
   });
 
-  document.getElementById('btn-clear').addEventListener('click', () => {
-    state.bdrAe = null;
-    state.mvpFabbrica = null;
-    state.atividades = null;
-    state.metrics = null;
-    zones.forEach(resetZone);
-    destroyCharts();
-    document.getElementById('dashboard').classList.add('hidden');
-    document.getElementById('empty-state-section').classList.remove('hidden');
-    document.getElementById('header-sub').textContent = '28/04/2026 a 02/05/2026 (extensão até 09/05) · aguardando upload dos CSVs';
+  document.getElementById('btn-clear').addEventListener('click', clearAll);
+  document.getElementById('btn-export').addEventListener('click', exportSummary);
+}
+
+async function handleFile(key, file) {
+  const dz = document.getElementById('dz-' + key);
+  const stateEl = dz.querySelector('.drop-state');
+  stateEl.className = 'drop-state loading';
+  stateEl.textContent = `… processando ${file.name}`;
+  dz.classList.remove('error', 'loaded');
+
+  const schema = FILE_TYPES[key];
+  try {
+    if (schema.csv || file.name.toLowerCase().endsWith('.csv')) {
+      await new Promise((resolve, reject) => {
+        parseCSVPapa(file, schema, ({ records, raw }) => {
+          state.files[key] = { records, rawCount: raw.length, fileName: file.name };
+          markZoneOk(dz, file.name, records.length);
+          resolve();
+        }, msg => { markZoneError(dz, file.name, msg); reject(new Error(msg)); });
+      });
+    } else {
+      const wb = await readXlsx(file);
+      const parsed = parseXlsxSF(wb, schema);
+      state.files[key] = { records: parsed.records, rawCount: parsed.records.length, fileName: file.name, hdrIdx: parsed.hdrIdx };
+      markZoneOk(dz, file.name, parsed.records.length);
+    }
+    recomputeAndRender();
+  } catch (err) {
+    markZoneError(dz, file.name, err.message);
+  }
+}
+
+function markZoneOk(dz, fileName, count) {
+  dz.classList.remove('error');
+  dz.classList.add('loaded');
+  const stateEl = dz.querySelector('.drop-state');
+  stateEl.className = 'drop-state ok';
+  stateEl.textContent = `✓ ${fileName.length > 28 ? fileName.slice(0,26)+'…' : fileName} · ${count.toLocaleString('pt-BR')} linhas`;
+}
+
+function markZoneError(dz, fileName, msg) {
+  dz.classList.remove('loaded');
+  dz.classList.add('error');
+  const stateEl = dz.querySelector('.drop-state');
+  stateEl.className = 'drop-state err';
+  stateEl.textContent = `✗ ${msg}`;
+}
+
+function clearAll() {
+  state.files = {};
+  state.computed = null;
+  document.querySelectorAll('.drop-zone').forEach(dz => {
+    dz.classList.remove('loaded', 'error', 'drag');
+    const stateEl = dz.querySelector('.drop-state');
+    stateEl.className = 'drop-state';
+    const t = FILE_TYPES[dz.dataset.key];
+    stateEl.textContent = `Arraste ou clique · ${t.accept}`;
   });
+  destroyCharts();
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('empty-state-section').classList.remove('hidden');
+  document.getElementById('btn-export').disabled = true;
+  document.getElementById('header-sub').textContent = 'Piloto 28/04 → 02/05/2026 (extensão até 09/05) · aguardando upload dos arquivos';
 }
 
 // ============================================================
-// METRICS COMPUTATION
+// COMPUTE METRICS (consolidação multi-fonte)
 // ============================================================
-function computeMetrics() {
-  if (!state.atividades || state.atividades.length === 0) return null;
+function computeAll() {
+  // Sai cedo se não houver atividades nem ligações nem nada útil
+  const hasAny = Object.keys(state.files).length > 0;
+  if (!hasAny) return null;
 
-  // Per BDR aggregation
+  // 1) Inicializa BDRs do allowlist
   const byBdr = {};
-  // Per (date, group) aggregation for time series
-  const byDateGroup = {};
-  // Cadências per group
-  const cadenciasByGroup = { Controle: {}, Teste: {} };
+  for (const e of BDR_ALLOWLIST) {
+    byBdr[e.display] = {
+      bdr: e.display,
+      grupo: e.grupo,
+      atividades: 0,
+      ligacoesFeitas: 0,
+      ligacoesConect: 0,
+      leadsNovo: 0,
+      leadsConect: 0,
+      leadsAbordagem: 0,
+      reunioes: 0,
+      oportunidades: 0,
+      negocios: 0,
+      negociosSeg: 0,
+      atividadesPorDia: {},
+      ligacoesConectPorDia: {},
+      negociosList: [],
+      seenInData: false,
+    };
+  }
+
+  const mvpAccountSet = new Set();
+  if (state.files.mvpFabbrica) {
+    for (const r of state.files.mvpFabbrica.records) {
+      if (r.nomeConta) mvpAccountSet.add(normalizeAccount(r.nomeConta));
+    }
+  }
 
   let minDate = null, maxDate = null;
+  function trackDate(d) {
+    if (!d) return;
+    if (!minDate || d < minDate) minDate = d;
+    if (!maxDate || d > maxDate) maxDate = d;
+  }
 
-  for (const row of state.atividades) {
-    const bdr = String(row.BDR || '').trim();
-    if (!bdr) continue;
-    const grupo = classifyBdr(bdr);
-    const d = parseDate(row.Data);
-    const atv = parseNumber(row.Atividades);
-    const lt = parseNumber(row.Leads_Trabalhados);
-    const lc = parseNumber(row.Leads_Conectados);
-    const ra = parseNumber(row.Reunioes_Agendadas);
-    const og = parseNumber(row.Oportunidades_Geradas);
-    const cad = String(row.Cadencia || '').trim();
-
-    if (d) {
-      if (!minDate || d < minDate) minDate = d;
-      if (!maxDate || d > maxDate) maxDate = d;
-    }
-
-    if (!byBdr[bdr]) {
-      byBdr[bdr] = {
-        bdr, grupo,
-        atividades: 0, leadsTrab: 0, leadsConect: 0,
-        reunioes: 0, oportunidades: 0,
-        cadencias: {}
-      };
-    }
-    const b = byBdr[bdr];
-    b.atividades += atv;
-    b.leadsTrab += lt;
-    b.leadsConect += lc;
-    b.reunioes += ra;
-    b.oportunidades += og;
-    if (cad) b.cadencias[cad] = (b.cadencias[cad] || 0) + 1;
-
-    if (cad) cadenciasByGroup[grupo][cad] = (cadenciasByGroup[grupo][cad] || 0) + 1;
-
-    if (d) {
-      const dKey = d.toISOString().slice(0,10);
-      if (!byDateGroup[dKey]) byDateGroup[dKey] = { date: d, Controle: { lc:0, ra:0, bdrs:new Set() }, Teste: { lc:0, ra:0, bdrs:new Set() } };
-      byDateGroup[dKey][grupo].lc += lc;
-      byDateGroup[dKey][grupo].ra += ra;
-      byDateGroup[dKey][grupo].bdrs.add(bdr);
+  // 2) Atividades concluídas → atividades + ligações feitas + atividades/dia
+  if (state.files.atividadesConcluidas) {
+    for (const rec of state.files.atividadesConcluidas.records) {
+      const sch = FILE_TYPES.atividadesConcluidas;
+      const bdrRaw = rec.row[sch.bdrCol];
+      const cls = classifyBdr(bdrRaw);
+      if (!cls) continue;
+      const b = byBdr[cls.display];
+      const data = parseDate(rec.row[rec.hdr.dataIdx]);
+      const tipo = String(rec.row[rec.hdr.tipoIdx] || '').trim().toLowerCase();
+      b.seenInData = true;
+      b.atividades++;
+      if (tipo === 'ligação' || tipo === 'ligacao' || tipo === 'task') {
+        // "Ligação" é atividade do tipo SF Task subtype Ligação. Algumas exports usam "Task".
+        if (tipo === 'ligação' || tipo === 'ligacao') b.ligacoesFeitas++;
+      }
+      if (data) {
+        const k = dKey(data);
+        b.atividadesPorDia[k] = (b.atividadesPorDia[k] || 0) + 1;
+        trackDate(data);
+      }
     }
   }
 
-  // Resolve principal cadência per BDR
-  for (const bdr in byBdr) {
-    const cads = byBdr[bdr].cadencias;
-    const top = Object.entries(cads).sort((a,b) => b[1]-a[1])[0];
-    byBdr[bdr].cadenciaPrincipal = top ? top[0] : '—';
+  // 3) Ligações Conectadas → ligacoesConect + ligacoesConect/dia
+  if (state.files.ligacoesConectadas) {
+    for (const rec of state.files.ligacoesConectadas.records) {
+      const sch = FILE_TYPES.ligacoesConectadas;
+      const bdrRaw = rec.row[sch.bdrCol];
+      const cls = classifyBdr(bdrRaw);
+      if (!cls) continue;
+      const b = byBdr[cls.display];
+      b.seenInData = true;
+      b.ligacoesConect++;
+      const data = parseDate(rec.row[rec.hdr.dataIdx]);
+      if (data) {
+        const k = dKey(data);
+        b.ligacoesConectPorDia[k] = (b.ligacoesConectPorDia[k] || 0) + 1;
+        trackDate(data);
+      }
+    }
   }
 
-  // Group totals
-  const groups = { Controle: {bdrs: new Set()}, Teste: {bdrs: new Set()} };
-  for (const k of ['atividades','leadsTrab','leadsConect','reunioes','oportunidades']) {
-    groups.Controle[k] = 0; groups.Teste[k] = 0;
-  }
-  for (const bdr in byBdr) {
-    const b = byBdr[bdr];
-    groups[b.grupo].bdrs.add(bdr);
-    groups[b.grupo].atividades += b.atividades;
-    groups[b.grupo].leadsTrab += b.leadsTrab;
-    groups[b.grupo].leadsConect += b.leadsConect;
-    groups[b.grupo].reunioes += b.reunioes;
-    groups[b.grupo].oportunidades += b.oportunidades;
+  // 4) Leads · Novo Lead
+  if (state.files.leadsNovo) {
+    for (const rec of state.files.leadsNovo.records) {
+      const cls = classifyBdr(rec.row[FILE_TYPES.leadsNovo.bdrCol]);
+      if (!cls) continue;
+      const b = byBdr[cls.display];
+      b.seenInData = true;
+      b.leadsNovo++;
+      const etapaLead = String(rec.row[rec.hdr.etapaLeadIdx] || '').trim();
+      if (/Reunião Agendada/i.test(etapaLead)) b.reunioes++;
+      const data = parseDate(rec.row[rec.hdr.dataIdx]);
+      if (data) trackDate(data);
+    }
   }
 
-  // Counts of reportable BDRs
-  const nControle = groups.Controle.bdrs.size;
-  const nTeste = groups.Teste.bdrs.size;
+  // 5) Leads · Lead Conectado
+  if (state.files.leadsConectado) {
+    for (const rec of state.files.leadsConectado.records) {
+      const cls = classifyBdr(rec.row[FILE_TYPES.leadsConectado.bdrCol]);
+      if (!cls) continue;
+      const b = byBdr[cls.display];
+      b.seenInData = true;
+      b.leadsConect++;
+    }
+  }
 
-  // Per-capita
-  function perCapita(g, n) {
-    if (!n) return { atividades: 0, leadsTrab: 0, leadsConect: 0, reunioes: 0, oportunidades: 0 };
+  // 6) Leads · Abordagem Iniciada
+  if (state.files.leadsAbordagem) {
+    for (const rec of state.files.leadsAbordagem.records) {
+      const cls = classifyBdr(rec.row[FILE_TYPES.leadsAbordagem.bdrCol]);
+      if (!cls) continue;
+      const b = byBdr[cls.display];
+      b.seenInData = true;
+      b.leadsAbordagem++;
+    }
+  }
+
+  // 7) Oportunidades
+  if (state.files.oportunidades) {
+    for (const rec of state.files.oportunidades.records) {
+      const cls = classifyBdr(rec.row[FILE_TYPES.oportunidades.bdrCol]);
+      if (!cls) continue;
+      const b = byBdr[cls.display];
+      b.seenInData = true;
+      b.oportunidades++;
+    }
+  }
+
+  // 8) Negócios xDR
+  const negociosList = [];
+  if (state.files.negocios) {
+    for (const rec of state.files.negocios.records) {
+      const cls = classifyBdr(rec.row[FILE_TYPES.negocios.bdrCol]);
+      if (!cls) continue;
+      const b = byBdr[cls.display];
+      b.seenInData = true;
+      b.negocios++;
+      const conta = String(rec.row[rec.hdr.contaIdx] || '').trim();
+      const negocio = String(rec.row[rec.hdr.negocioIdx] || '').trim();
+      const etapa = String(rec.row[rec.hdr.etapaIdx] || '').trim();
+      const data = parseDate(rec.row[rec.hdr.dataCriacaoIdx]);
+      const isSegmento = mvpAccountSet.size > 0 && mvpAccountSet.has(normalizeAccount(conta));
+      if (isSegmento) b.negociosSeg++;
+      negociosList.push({ bdr: cls.display, grupo: cls.grupo, conta, negocio, etapa, data, isSegmento });
+    }
+  }
+  negociosList.sort((a, b) => (b.data ? b.data.getTime() : 0) - (a.data ? a.data.getTime() : 0));
+
+  // 9) Carteira (BDR AE) → mapeamento contas em carteira por BDR
+  const carteiraByBdr = {};
+  if (state.files.bdrAe) {
+    for (const rec of state.files.bdrAe.records) {
+      const cls = classifyBdr(rec.row[FILE_TYPES.bdrAe.bdrCol]);
+      if (!cls) continue;
+      if (!carteiraByBdr[cls.display]) carteiraByBdr[cls.display] = new Set();
+      const conta = String(rec.row[rec.hdr.contaIdx] || '').trim();
+      if (conta) carteiraByBdr[cls.display].add(normalizeAccount(conta));
+    }
+  }
+
+  // Identifica BDRs ativos e missing-do-controle
+  const activeBdrs = Object.values(byBdr).filter(b => b.seenInData);
+  const groups = { Controle: { bdrs: [], total: {} }, Teste: { bdrs: [], total: {} } };
+  for (const b of activeBdrs) groups[b.grupo].bdrs.push(b);
+
+  const SUM_KEYS = ['atividades','ligacoesFeitas','ligacoesConect','leadsNovo','leadsConect','leadsAbordagem','reunioes','oportunidades','negocios','negociosSeg'];
+  for (const g of ['Controle','Teste']) {
+    for (const k of SUM_KEYS) {
+      groups[g].total[k] = groups[g].bdrs.reduce((acc, b) => acc + b[k], 0);
+    }
+    const n = groups[g].bdrs.length;
+    groups[g].n = n;
+    groups[g].pc = {};
+    for (const k of SUM_KEYS) groups[g].pc[k] = n ? groups[g].total[k] / n : 0;
+  }
+
+  // Taxas
+  function rates(t) {
     return {
-      atividades: g.atividades / n,
-      leadsTrab: g.leadsTrab / n,
-      leadsConect: g.leadsConect / n,
-      reunioes: g.reunioes / n,
-      oportunidades: g.oportunidades / n,
+      conexao: t.ligacoesFeitas ? t.ligacoesConect / t.ligacoesFeitas : null,
+      qualificacao: t.leadsNovo ? t.leadsConect / t.leadsNovo : null,
+      abordagem: t.leadsConect ? t.leadsAbordagem / t.leadsConect : null,
+      reuniao: t.leadsAbordagem ? t.reunioes / t.leadsAbordagem : null,
+      oportunidade: t.reunioes ? t.oportunidades / t.reunioes : null,
+      global: t.leadsNovo ? t.oportunidades / t.leadsNovo : null,
     };
   }
-  const pcControle = perCapita(groups.Controle, nControle);
-  const pcTeste = perCapita(groups.Teste, nTeste);
+  groups.Controle.rates = rates(groups.Controle.total);
+  groups.Teste.rates = rates(groups.Teste.total);
 
-  // Rates
-  function rates(g) {
-    return {
-      conexao: g.leadsTrab ? g.leadsConect / g.leadsTrab : null,
-      agendamento: g.leadsConect ? g.reunioes / g.leadsConect : null,
-      oportunidade: g.reunioes ? g.oportunidades / g.reunioes : null,
-      global: g.leadsTrab ? g.oportunidades / g.leadsTrab : null,
-    };
-  }
-  const rControle = rates(groups.Controle);
-  const rTeste = rates(groups.Teste);
-
-  // BDRs in control missing from atividades
-  const bdrsInAtv = Object.keys(byBdr).map(b => b.toLowerCase());
-  const missingControle = BDRS_CONTROLE.filter(b => !bdrsInAtv.includes(b.toLowerCase()));
-
-  // Days with data
-  const uniqueDates = new Set(Object.keys(byDateGroup));
+  // BDRs do allowlist sem dados (para aviso)
+  const missingBdrs = Object.values(byBdr).filter(b => !b.seenInData);
 
   return {
     byBdr,
-    byDateGroup,
-    cadenciasByGroup,
+    activeBdrs,
     groups,
-    nControle,
-    nTeste,
-    pcControle,
-    pcTeste,
-    rControle,
-    rTeste,
-    missingControle,
     minDate, maxDate,
-    daysWithData: uniqueDates.size,
+    mvpAccountSet,
+    carteiraByBdr,
+    negociosList,
+    missingBdrs,
   };
 }
 
@@ -927,15 +1145,18 @@ function computeMetrics() {
 // RENDER
 // ============================================================
 function recomputeAndRender() {
-  if (!state.atividades) {
+  state.computed = computeAll();
+  if (!state.computed) {
     document.getElementById('dashboard').classList.add('hidden');
     document.getElementById('empty-state-section').classList.remove('hidden');
+    document.getElementById('btn-export').disabled = true;
     return;
   }
-  state.metrics = computeMetrics();
   document.getElementById('empty-state-section').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('hidden');
+  document.getElementById('btn-export').disabled = false;
 
+  renderRoster();
   renderMetaBar();
   renderOpWarning();
   renderCards();
@@ -943,71 +1164,84 @@ function recomputeAndRender() {
   renderEvolution();
   renderTable();
   renderCoverage();
+  renderNegocios();
   updateHeader();
 }
 
 function updateHeader() {
-  const m = state.metrics;
-  let txt = '28/04/2026 a 02/05/2026 (extensão até 09/05)';
-  if (m.maxDate) txt += ` · última atualização ${formatDate(m.maxDate)}`;
+  const c = state.computed;
+  let txt = 'Piloto 28/04 → 02/05/2026 (extensão até 09/05)';
+  if (c.maxDate) txt += ` · última atualização ${formatDate(c.maxDate)}`;
   document.getElementById('header-sub').textContent = txt;
 }
 
+function renderRoster() {
+  const c = state.computed;
+  const seenSet = new Set(c.activeBdrs.map(b => b.bdr));
+  const ctrl = BDR_ALLOWLIST.filter(e => e.grupo === 'Controle');
+  const test = BDR_ALLOWLIST.filter(e => e.grupo === 'Teste');
+  const render = (list) => list.map(e => {
+    const absent = !seenSet.has(e.display);
+    return `<span class="roster-pill ${e.grupo.toLowerCase()} ${absent ? 'absent' : ''}" title="${absent ? 'Sem dados nos arquivos carregados' : 'Reportável'}">${e.display}</span>`;
+  }).join('');
+  document.getElementById('roster-controle').innerHTML = render(ctrl);
+  document.getElementById('roster-teste').innerHTML = render(test);
+}
+
 function renderMetaBar() {
-  const m = state.metrics;
-  const bar = document.getElementById('meta-bar');
-  const periodTxt = (m.minDate && m.maxDate) ? `${formatDate(m.minDate)} → ${formatDate(m.maxDate)}` : '—';
-  bar.innerHTML = `
-    <div class="meta-item"><span class="meta-key">Controle</span><span class="meta-val">${m.nControle} BDRs</span></div>
-    <div class="meta-item"><span class="meta-key">Teste</span><span class="meta-val">${m.nTeste} BDRs</span></div>
+  const c = state.computed;
+  const periodTxt = (c.minDate && c.maxDate) ? `${formatDate(c.minDate)} → ${formatDate(c.maxDate)}` : '—';
+  const sources = Object.entries(state.files).map(([k, v]) => `${FILE_TYPES[k].label.split(' · ')[0]}: ${v.records.length.toLocaleString('pt-BR')}`);
+  document.getElementById('meta-bar').innerHTML = `
+    <div class="meta-item"><span class="meta-key">Controle</span><span class="meta-val">${c.groups.Controle.n} BDRs</span></div>
+    <div class="meta-item"><span class="meta-key">Teste</span><span class="meta-val">${c.groups.Teste.n} BDRs</span></div>
     <div class="meta-item"><span class="meta-key">Período</span><span class="meta-val">${periodTxt}</span></div>
-    <div class="meta-item"><span class="meta-key">Dias c/ dados</span><span class="meta-val">${m.daysWithData}</span></div>
-    <div class="meta-item"><span class="meta-key">Última atualização</span><span class="meta-val">${m.maxDate ? formatDate(m.maxDate) : '—'}</span></div>
+    <div class="meta-item"><span class="meta-key">Fontes</span><span class="meta-val">${Object.keys(state.files).length}/${UPLOAD_ZONES_ORDER.length}</span></div>
   `;
 }
 
 function renderOpWarning() {
-  const m = state.metrics;
+  const c = state.computed;
   const sec = document.getElementById('op-warn-section');
   const content = document.getElementById('op-warn-content');
-  if (m.missingControle.length === 0) { sec.classList.add('hidden'); return; }
+  const missingNames = c.missingBdrs.map(b => b.bdr);
+  if (missingNames.length === 0) { sec.classList.add('hidden'); return; }
   sec.classList.remove('hidden');
-  const names = m.missingControle.map(n => `<strong>${n}</strong>`).join(', ');
-  const verb = m.missingControle.length > 1 ? 'estão no grupo controle mas não constam' : 'está no grupo controle mas não consta';
-  content.innerHTML = `${names} ${verb} no CSV de atividades — controle está sendo medido com <strong>${m.nControle} BDR${m.nControle === 1 ? '' : 's'} reportáve${m.nControle === 1 ? 'l' : 'is'}</strong>.`;
+  const list = missingNames.map(n => `<strong>${n}</strong>`).join(', ');
+  content.innerHTML = `${list} ${missingNames.length > 1 ? 'estão' : 'está'} no roster mas não aparece${missingNames.length > 1 ? 'm' : ''} em nenhum dos arquivos carregados — métricas não incluem ess${missingNames.length > 1 ? 'es BDRs' : 'e BDR'}.`;
 }
 
 function renderCards() {
-  const m = state.metrics;
+  const c = state.computed;
   const cards = [
-    { name: 'Atividades por BDR',         c: m.pcControle.atividades,    t: m.pcTeste.atividades,    dec: 1 },
-    { name: 'Leads trabalhados por BDR',  c: m.pcControle.leadsTrab,     t: m.pcTeste.leadsTrab,     dec: 1 },
-    { name: 'Leads conectados por BDR',   c: m.pcControle.leadsConect,   t: m.pcTeste.leadsConect,   dec: 1 },
-    { name: 'Reuniões por BDR',            c: m.pcControle.reunioes,      t: m.pcTeste.reunioes,      dec: 2 },
-    { name: 'Oportunidades por BDR',       c: m.pcControle.oportunidades, t: m.pcTeste.oportunidades, dec: 2 },
-    { name: 'Taxa global de conversão',    c: m.rControle.global,         t: m.rTeste.global,         dec: 2, pct: true },
+    { name: 'Atividades por BDR',          k: 'atividades',     dec: 1 },
+    { name: 'Lig. conectadas por BDR',     k: 'ligacoesConect', dec: 1 },
+    { name: 'Leads novos por BDR',         k: 'leadsNovo',      dec: 1 },
+    { name: 'Lead Conectado por BDR',      k: 'leadsConect',    dec: 1 },
+    { name: 'Abordagem Inic. por BDR',     k: 'leadsAbordagem', dec: 1 },
+    { name: 'Reuniões por BDR',            k: 'reunioes',       dec: 2 },
+    { name: 'Oportunidades por BDR',       k: 'oportunidades',  dec: 2 },
+    { name: 'Negócios do segmento/BDR',    k: 'negociosSeg',    dec: 2 },
   ];
-
-  const grid = document.getElementById('cards-grid');
-  grid.innerHTML = cards.map(card => {
-    const cVal = card.pct ? (card.c === null ? '—' : (100*card.c).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) + '%') : fmt(card.c, card.dec);
-    const tVal = card.pct ? (card.t === null ? '—' : (100*card.t).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) + '%') : fmt(card.t, card.dec);
-    const d = (card.c === null || card.c === 0) ? null : deltaPct(card.c, card.t);
+  document.getElementById('cards-grid').innerHTML = cards.map(card => {
+    const cv = c.groups.Controle.pc[card.k];
+    const tv = c.groups.Teste.pc[card.k];
+    const d = deltaPct(cv, tv);
     return `
       <div class="metric-card">
         <div class="metric-name">${card.name}</div>
         <div class="metric-rows">
           <div class="metric-col">
             <span class="group-tag controle">Controle</span>
-            <span class="metric-val controle">${cVal}</span>
+            <span class="metric-val controle">${fmt(cv, card.dec)}</span>
           </div>
           <div class="metric-col">
             <span class="group-tag teste">Teste</span>
-            <span class="metric-val teste">${tVal}</span>
+            <span class="metric-val teste">${fmt(tv, card.dec)}</span>
           </div>
         </div>
         <div class="delta-row">
-          <span class="delta-label">Delta Teste vs Controle</span>
+          <span class="delta-label">Δ Teste vs Controle</span>
           <span class="delta-val ${deltaClass(d)}">${deltaText(d)}</span>
         </div>
       </div>
@@ -1016,33 +1250,28 @@ function renderCards() {
 }
 
 function renderFunnel() {
-  const m = state.metrics;
-  const grid = document.getElementById('funnel-grid');
-
+  const c = state.computed;
   const stages = [
-    { key: 'leadsTrab',     label: 'Leads Trabalhados' },
-    { key: 'leadsConect',   label: 'Leads Conectados', convFrom: 'leadsTrab' },
-    { key: 'reunioes',       label: 'Reuniões Agendadas', convFrom: 'leadsConect' },
-    { key: 'oportunidades',  label: 'Oportunidades Geradas', convFrom: 'reunioes' },
+    { key: 'leadsNovo',       label: 'Leads Novos' },
+    { key: 'leadsConect',     label: 'Lead Conectado',     convFrom: 'leadsNovo' },
+    { key: 'leadsAbordagem',  label: 'Abordagem Iniciada', convFrom: 'leadsConect' },
+    { key: 'reunioes',        label: 'Reunião Agendada',   convFrom: 'leadsAbordagem' },
+    { key: 'oportunidades',   label: 'Oportunidades',      convFrom: 'reunioes' },
   ];
-
-  const maxValue = Math.max(
-    m.groups.Controle.leadsTrab, m.groups.Teste.leadsTrab,
-    m.groups.Controle.leadsConect, m.groups.Teste.leadsConect,
-    m.groups.Controle.reunioes, m.groups.Teste.reunioes,
-    m.groups.Controle.oportunidades, m.groups.Teste.oportunidades,
+  const max = Math.max(
+    ...stages.flatMap(s => [c.groups.Controle.total[s.key], c.groups.Teste.total[s.key]]),
     1
   );
 
-  function buildCard(groupName, klass, n) {
-    const g = m.groups[groupName];
+  function buildCard(grp, klass) {
+    const g = c.groups[grp];
     const stagesHtml = stages.map(s => {
-      const abs = g[s.key];
-      const pc = n ? abs / n : 0;
-      const widthPct = (abs / maxValue) * 100;
+      const abs = g.total[s.key];
+      const pc = g.n ? abs / g.n : 0;
+      const widthPct = (abs / max) * 100;
       let convHtml = '';
       if (s.convFrom) {
-        const denom = g[s.convFrom];
+        const denom = g.total[s.convFrom];
         convHtml = `<div class="conv-pill">↳ taxa: ${fmtPct(abs, denom)}</div>`;
       }
       return `
@@ -1059,43 +1288,38 @@ function renderFunnel() {
     return `
       <div class="funnel-card">
         <div class="funnel-header">
-          <span class="funnel-title">${groupName}</span>
-          <span class="group-tag ${klass}">${n} BDR${n===1?'':'s'}</span>
+          <span class="funnel-title">${grp}</span>
+          <span class="group-tag ${klass}">${g.n} BDR${g.n===1?'':'s'}</span>
         </div>
         ${stagesHtml}
       </div>
     `;
   }
-
-  grid.innerHTML = buildCard('Controle', 'controle', m.nControle) + buildCard('Teste', 'teste', m.nTeste);
+  document.getElementById('funnel-grid').innerHTML = buildCard('Controle','controle') + buildCard('Teste','teste');
 }
 
 function renderEvolution() {
-  const m = state.metrics;
-  const dates = Object.keys(m.byDateGroup).sort();
-  const labels = dates.map(d => formatDateShort(m.byDateGroup[d].date));
+  const c = state.computed;
+  // Set de todas as datas que aparecem em algum BDR
+  const allDates = new Set();
+  for (const b of c.activeBdrs) {
+    for (const k of Object.keys(b.atividadesPorDia)) allDates.add(k);
+    for (const k of Object.keys(b.ligacoesConectPorDia)) allDates.add(k);
+  }
+  const dates = Array.from(allDates).sort();
+  const labels = dates.map(d => {
+    const [y, m, dd] = d.split('-');
+    return dd + '/' + m;
+  });
 
-  const datasetConectados = {
-    Controle: dates.map(d => {
-      const cell = m.byDateGroup[d].Controle;
-      return cell.bdrs.size ? cell.lc / cell.bdrs.size : 0;
-    }),
-    Teste: dates.map(d => {
-      const cell = m.byDateGroup[d].Teste;
-      return cell.bdrs.size ? cell.lc / cell.bdrs.size : 0;
-    }),
-  };
-
-  const datasetReunioes = {
-    Controle: dates.map(d => {
-      const cell = m.byDateGroup[d].Controle;
-      return cell.bdrs.size ? cell.ra / cell.bdrs.size : 0;
-    }),
-    Teste: dates.map(d => {
-      const cell = m.byDateGroup[d].Teste;
-      return cell.bdrs.size ? cell.ra / cell.bdrs.size : 0;
-    }),
-  };
+  function perDay(grp, source) {
+    const g = c.groups[grp];
+    if (!g.n) return dates.map(() => 0);
+    return dates.map(d => {
+      const sum = g.bdrs.reduce((acc, b) => acc + (b[source][d] || 0), 0);
+      return sum / g.n;
+    });
+  }
 
   destroyCharts();
   const baseOpts = {
@@ -1103,27 +1327,14 @@ function renderEvolution() {
     maintainAspectRatio: false,
     interaction: { mode: 'index', intersect: false },
     plugins: {
-      legend: {
-        labels: {
-          color: '#9098a3',
-          font: { family: 'Inter Tight', size: 12 },
-          usePointStyle: true,
-          pointStyle: 'circle',
-          padding: 16,
-        }
-      },
+      legend: { labels: { color: '#9098a3', font: { family: 'Inter Tight', size: 12 }, usePointStyle: true, pointStyle: 'circle', padding: 16 } },
       tooltip: {
-        backgroundColor: '#1a1d21',
-        borderColor: '#34383f',
-        borderWidth: 1,
-        titleColor: '#e8e8ea',
-        bodyColor: '#e8e8ea',
+        backgroundColor: '#1a1d21', borderColor: '#34383f', borderWidth: 1,
+        titleColor: '#e8e8ea', bodyColor: '#e8e8ea',
         titleFont: { family: 'Inter Tight', weight: '500' },
         bodyFont: { family: 'JetBrains Mono', size: 11 },
         padding: 10,
-        callbacks: {
-          label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}/BDR`,
-        }
+        callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}/BDR` },
       }
     },
     scales: {
@@ -1131,97 +1342,65 @@ function renderEvolution() {
       y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#9098a3', font: { family: 'JetBrains Mono', size: 10 } }, beginAtZero: true },
     }
   };
+  const lp = (color) => ({ borderColor: color, backgroundColor: color + '33', borderWidth: 2, pointRadius: 4, pointHoverRadius: 6, pointBackgroundColor: color, pointBorderColor: color, tension: 0.25, fill: false });
 
-  const lineProps = (color) => ({
-    borderColor: color,
-    backgroundColor: color + '33',
-    borderWidth: 2,
-    pointRadius: 4,
-    pointHoverRadius: 6,
-    pointBackgroundColor: color,
-    pointBorderColor: color,
-    tension: 0.25,
-    fill: false,
+  state.charts.atividades = new Chart(document.getElementById('chart-atividades'), {
+    type: 'line', data: { labels, datasets: [
+      { label: 'Controle', data: perDay('Controle', 'atividadesPorDia'), ...lp('#d4a574') },
+      { label: 'Teste',    data: perDay('Teste',    'atividadesPorDia'), ...lp('#6db4a8') },
+    ]}, options: baseOpts,
   });
-
-  state.charts.conectados = new Chart(document.getElementById('chart-conectados'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Controle', data: datasetConectados.Controle, ...lineProps('#d4a574') },
-        { label: 'Teste',    data: datasetConectados.Teste,    ...lineProps('#6db4a8') },
-      ]
-    },
-    options: baseOpts,
-  });
-
-  state.charts.reunioes = new Chart(document.getElementById('chart-reunioes'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Controle', data: datasetReunioes.Controle, ...lineProps('#d4a574') },
-        { label: 'Teste',    data: datasetReunioes.Teste,    ...lineProps('#6db4a8') },
-      ]
-    },
-    options: baseOpts,
+  state.charts.conectadas = new Chart(document.getElementById('chart-conectadas'), {
+    type: 'line', data: { labels, datasets: [
+      { label: 'Controle', data: perDay('Controle', 'ligacoesConectPorDia'), ...lp('#d4a574') },
+      { label: 'Teste',    data: perDay('Teste',    'ligacoesConectPorDia'), ...lp('#6db4a8') },
+    ]}, options: baseOpts,
   });
 }
 
 function destroyCharts() {
-  for (const k of ['conectados', 'reunioes']) {
+  for (const k of Object.keys(state.charts)) {
     if (state.charts[k]) { state.charts[k].destroy(); state.charts[k] = null; }
   }
 }
 
 function renderTable() {
-  const m = state.metrics;
-  const rows = Object.values(m.byBdr).map(b => ({
+  const c = state.computed;
+  const rows = c.activeBdrs.map(b => ({
     ...b,
-    taxaConexao: b.leadsTrab ? b.leadsConect / b.leadsTrab : null,
-    taxaGlobal: b.leadsTrab ? b.oportunidades / b.leadsTrab : null,
-    cadencia: b.cadenciaPrincipal,
+    taxaConexao: b.ligacoesFeitas ? b.ligacoesConect / b.ligacoesFeitas : null,
   }));
-
-  const sortFns = {
-    bdr: (a,b) => a.bdr.localeCompare(b.bdr, 'pt-BR'),
-    grupo: (a,b) => a.grupo.localeCompare(b.grupo, 'pt-BR'),
-    atividades: (a,b) => a.atividades - b.atividades,
-    leadsTrab: (a,b) => a.leadsTrab - b.leadsTrab,
-    leadsConect: (a,b) => a.leadsConect - b.leadsConect,
-    reunioes: (a,b) => a.reunioes - b.reunioes,
-    oportunidades: (a,b) => a.oportunidades - b.oportunidades,
-    taxaConexao: (a,b) => (a.taxaConexao || 0) - (b.taxaConexao || 0),
-    taxaGlobal: (a,b) => (a.taxaGlobal || 0) - (b.taxaGlobal || 0),
-    cadencia: (a,b) => (a.cadencia || '').localeCompare(b.cadencia || '', 'pt-BR'),
+  const sf = {
+    bdr: (a, b) => a.bdr.localeCompare(b.bdr, 'pt-BR'),
+    grupo: (a, b) => a.grupo.localeCompare(b.grupo, 'pt-BR'),
+    taxaConexao: (a, b) => (a.taxaConexao || 0) - (b.taxaConexao || 0),
   };
-
-  rows.sort(sortFns[state.sortCol] || sortFns.reunioes);
+  ['atividades','ligacoesFeitas','ligacoesConect','leadsNovo','leadsConect','leadsAbordagem','reunioes','oportunidades','negocios','negociosSeg']
+    .forEach(k => sf[k] = (a, b) => a[k] - b[k]);
+  rows.sort(sf[state.sortCol] || sf.reunioes);
   if (state.sortDir === 'desc') rows.reverse();
 
-  const tbody = document.getElementById('bdr-tbody');
-  tbody.innerHTML = rows.map(r => `
+  document.getElementById('bdr-tbody').innerHTML = rows.map(r => `
     <tr class="${r.grupo === 'Controle' ? 'controle-row' : ''}">
       <td class="bdr-name">${r.bdr}</td>
       <td><span class="group-tag ${r.grupo === 'Controle' ? 'controle' : 'teste'}">${r.grupo}</span></td>
       <td class="numeric">${fmt(r.atividades)}</td>
-      <td class="numeric">${fmt(r.leadsTrab)}</td>
+      <td class="numeric">${fmt(r.ligacoesFeitas)}</td>
+      <td class="numeric">${fmt(r.ligacoesConect)}</td>
+      <td class="numeric">${fmt(r.leadsNovo)}</td>
       <td class="numeric">${fmt(r.leadsConect)}</td>
+      <td class="numeric">${fmt(r.leadsAbordagem)}</td>
       <td class="numeric">${fmt(r.reunioes)}</td>
       <td class="numeric">${fmt(r.oportunidades)}</td>
-      <td class="numeric">${fmtPct(r.leadsConect, r.leadsTrab)}</td>
-      <td class="numeric">${fmtPct(r.oportunidades, r.leadsTrab)}</td>
-      <td>${r.cadencia}</td>
+      <td class="numeric">${fmt(r.negocios)}</td>
+      <td class="numeric">${fmt(r.negociosSeg)}</td>
+      <td class="numeric">${r.taxaConexao === null ? '—' : (100*r.taxaConexao).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1}) + '%'}</td>
     </tr>
   `).join('');
 
-  // Header sort indicators
   document.querySelectorAll('#bdr-table th').forEach(th => {
     th.classList.remove('sort-asc', 'sort-desc');
-    if (th.dataset.col === state.sortCol) {
-      th.classList.add(state.sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
-    }
+    if (th.dataset.col === state.sortCol) th.classList.add(state.sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
   });
 }
 
@@ -1229,132 +1408,134 @@ function setupTableSort() {
   document.querySelectorAll('#bdr-table th').forEach(th => {
     th.addEventListener('click', () => {
       const col = th.dataset.col;
-      if (state.sortCol === col) {
-        state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
-      } else {
-        state.sortCol = col;
-        state.sortDir = ['bdr','grupo','cadencia'].includes(col) ? 'asc' : 'desc';
-      }
-      if (state.metrics) renderTable();
+      if (state.sortCol === col) state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+      else { state.sortCol = col; state.sortDir = ['bdr','grupo'].includes(col) ? 'asc' : 'desc'; }
+      if (state.computed) renderTable();
     });
   });
 }
 
 function renderCoverage() {
+  const c = state.computed;
   const sec = document.getElementById('coverage-section');
-  if (!state.mvpFabbrica || !state.bdrAe) { sec.classList.add('hidden'); return; }
+  if (!state.files.mvpFabbrica || !state.files.bdrAe) { sec.classList.add('hidden'); return; }
   sec.classList.remove('hidden');
 
-  const mvpAccounts = state.mvpFabbrica.map(r => ({
-    nome: String(r.Nome_da_conta || '').trim(),
-    bdr: String(r.BDR_da_conta || '').trim(),
+  const mvpAccounts = state.files.mvpFabbrica.records.map(r => ({
+    nome: String(r.nomeConta || '').trim(),
+    bdrRaw: String(r.bdr || '').trim(),
   })).filter(r => r.nome);
 
-  // Contas em carteira hoje (set de Nome_conta dos BDRs no arquivo 1)
-  const carteiraSet = new Set(
-    state.bdrAe
-      .map(r => String(r.Nome_conta || '').trim().toLowerCase())
-      .filter(s => s.length > 0)
-  );
+  // Conjunto union de carteiras de TODOS os BDRs
+  const carteiraGlobal = new Set();
+  for (const set of Object.values(c.carteiraByBdr)) {
+    for (const a of set) carteiraGlobal.add(a);
+  }
 
   const totalMvp = mvpAccounts.length;
-  const inCarteira = mvpAccounts.filter(a => carteiraSet.has(a.nome.toLowerCase())).length;
-  const pctCobertura = totalMvp ? (100 * inCarteira / totalMvp) : 0;
+  const inCarteira = mvpAccounts.filter(a => carteiraGlobal.has(normalizeAccount(a.nome))).length;
+  const pct = totalMvp ? (100 * inCarteira / totalMvp) : 0;
 
   document.getElementById('coverage-top').innerHTML = `
-    <div class="coverage-stat"><div class="lbl">Total contas no MVP</div><div class="val">${fmt(totalMvp)}</div></div>
-    <div class="coverage-stat"><div class="lbl">Em carteira hoje</div><div class="val">${fmt(inCarteira)}</div></div>
-    <div class="coverage-stat"><div class="lbl">% cobertura</div><div class="val">${pctCobertura.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}%</div></div>
+    <div class="coverage-stat"><div class="lbl">Total contas MVP</div><div class="val">${fmt(totalMvp)}</div></div>
+    <div class="coverage-stat"><div class="lbl">Em carteira</div><div class="val">${fmt(inCarteira)}</div></div>
+    <div class="coverage-stat"><div class="lbl">% cobertura</div><div class="val">${pct.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}%</div></div>
   `;
 
-  // Breakdown por BDR
-  const byBdr = {};
-  mvpAccounts.forEach(a => {
-    const b = a.bdr || '— sem BDR atribuído —';
-    if (!byBdr[b]) byBdr[b] = { total: 0, emCart: 0, grupo: classifyBdr(b) };
-    byBdr[b].total++;
-    if (carteiraSet.has(a.nome.toLowerCase())) byBdr[b].emCart++;
-  });
-
-  const tbody = document.getElementById('coverage-tbody');
-  const sortedBdrs = Object.keys(byBdr).sort((a,b) => byBdr[b].total - byBdr[a].total);
-  tbody.innerHTML = sortedBdrs.map(bdr => {
-    const x = byBdr[bdr];
-    const pct = x.total ? (100 * x.emCart / x.total) : 0;
+  // Breakdown por BDR (atribuído na lista MVP)
+  const byBdrMvp = {};
+  for (const a of mvpAccounts) {
+    const cls = classifyBdr(a.bdrRaw);
+    const key = cls ? cls.display : (a.bdrRaw || '— sem BDR atribuído —');
+    const grupo = cls ? cls.grupo : 'Externo';
+    if (!byBdrMvp[key]) byBdrMvp[key] = { total: 0, emCart: 0, grupo };
+    byBdrMvp[key].total++;
+    const inCart = c.carteiraByBdr[key] && c.carteiraByBdr[key].has(normalizeAccount(a.nome));
+    if (inCart) byBdrMvp[key].emCart++;
+  }
+  const sorted = Object.keys(byBdrMvp).sort((a, b) => byBdrMvp[b].total - byBdrMvp[a].total);
+  document.getElementById('coverage-tbody').innerHTML = sorted.map(bdr => {
+    const x = byBdrMvp[bdr];
+    const cov = x.total ? (100 * x.emCart / x.total) : 0;
+    const klass = x.grupo === 'Controle' ? 'controle' : (x.grupo === 'Teste' ? 'teste' : '');
     return `
       <tr class="${x.grupo === 'Controle' ? 'controle-row' : ''}">
         <td class="bdr-name">${bdr}</td>
-        <td><span class="group-tag ${x.grupo === 'Controle' ? 'controle' : 'teste'}">${x.grupo}</span></td>
+        <td>${klass ? `<span class="group-tag ${klass}">${x.grupo}</span>` : `<span class="group-tag" style="color: var(--text-faint); border-color: var(--border);">${x.grupo}</span>`}</td>
         <td class="numeric">${fmt(x.total)}</td>
         <td class="numeric">${fmt(x.emCart)}</td>
-        <td class="numeric">${pct.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}%</td>
+        <td class="numeric">${cov.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}%</td>
       </tr>
     `;
   }).join('');
+}
+
+function renderNegocios() {
+  const c = state.computed;
+  const sec = document.getElementById('negocios-section');
+  if (!state.files.negocios || c.negociosList.length === 0) { sec.classList.add('hidden'); return; }
+  sec.classList.remove('hidden');
+
+  const tbody = document.getElementById('negocios-tbody');
+  // Mostra do segmento primeiro, e top 200 totais
+  const sorted = [...c.negociosList].sort((a, b) => {
+    if (a.isSegmento !== b.isSegmento) return a.isSegmento ? -1 : 1;
+    return (b.data ? b.data.getTime() : 0) - (a.data ? a.data.getTime() : 0);
+  }).slice(0, 200);
+
+  tbody.innerHTML = sorted.map(n => `
+    <tr class="${n.grupo === 'Controle' ? 'controle-row' : ''}">
+      <td class="bdr-name">${n.bdr}</td>
+      <td><span class="group-tag ${n.grupo === 'Controle' ? 'controle' : 'teste'}">${n.grupo}</span></td>
+      <td>${n.conta || '—'}${n.isSegmento ? '<span class="seg-pill">SEG</span>' : ''}</td>
+      <td class="deal-name">${n.negocio || '—'}</td>
+      <td>${n.etapa || '—'}</td>
+      <td>${formatDate(n.data)}</td>
+    </tr>
+  `).join('');
 }
 
 // ============================================================
 // EXPORT JSON
 // ============================================================
 function exportSummary() {
-  if (!state.metrics) return;
-  const m = state.metrics;
+  if (!state.computed) return;
+  const c = state.computed;
   const summary = {
     geradoEm: new Date().toISOString(),
     periodo: {
-      inicio: m.minDate ? m.minDate.toISOString().slice(0,10) : null,
-      fim: m.maxDate ? m.maxDate.toISOString().slice(0,10) : null,
-      diasComDados: m.daysWithData,
+      inicio: c.minDate ? c.minDate.toISOString().slice(0,10) : null,
+      fim: c.maxDate ? c.maxDate.toISOString().slice(0,10) : null,
     },
+    fontes: Object.fromEntries(Object.entries(state.files).map(([k, v]) => [k, { fileName: v.fileName, registrosFiltrados: v.records.length }])),
     grupos: {
-      Controle: {
-        bdrsReportaveis: m.nControle,
-        bdrsListaOriginal: BDRS_CONTROLE,
-        bdrsAusentesNoCSV: m.missingControle,
-        volume: m.groups.Controle,
-        perCapita: m.pcControle,
-        taxas: m.rControle,
-        cadencias: m.cadenciasByGroup.Controle,
-      },
-      Teste: {
-        bdrsReportaveis: m.nTeste,
-        volume: m.groups.Teste,
-        perCapita: m.pcTeste,
-        taxas: m.rTeste,
-        cadencias: m.cadenciasByGroup.Teste,
-      }
+      Controle: { bdrs: c.groups.Controle.bdrs.map(b => b.bdr), n: c.groups.Controle.n, total: c.groups.Controle.total, perCapita: c.groups.Controle.pc, taxas: c.groups.Controle.rates },
+      Teste:    { bdrs: c.groups.Teste.bdrs.map(b => b.bdr),    n: c.groups.Teste.n,    total: c.groups.Teste.total,    perCapita: c.groups.Teste.pc,    taxas: c.groups.Teste.rates },
     },
-    deltasTesteVsControle: {
-      atividadesPorBdr: deltaPct(m.pcControle.atividades, m.pcTeste.atividades),
-      leadsTrabPorBdr: deltaPct(m.pcControle.leadsTrab, m.pcTeste.leadsTrab),
-      leadsConectPorBdr: deltaPct(m.pcControle.leadsConect, m.pcTeste.leadsConect),
-      reunioesPorBdr: deltaPct(m.pcControle.reunioes, m.pcTeste.reunioes),
-      oportunidadesPorBdr: deltaPct(m.pcControle.oportunidades, m.pcTeste.oportunidades),
-      taxaGlobal: deltaPct(m.rControle.global, m.rTeste.global),
-    },
-    bdrs: Object.values(m.byBdr).map(b => ({
-      nome: b.bdr,
-      grupo: b.grupo,
+    deltas: Object.fromEntries(['atividades','ligacoesFeitas','ligacoesConect','leadsNovo','leadsConect','leadsAbordagem','reunioes','oportunidades','negocios','negociosSeg'].map(k =>
+      [k, deltaPct(c.groups.Controle.pc[k], c.groups.Teste.pc[k])]
+    )),
+    bdrs: c.activeBdrs.map(b => ({
+      nome: b.bdr, grupo: b.grupo,
       atividades: b.atividades,
-      leadsTrabalhados: b.leadsTrab,
-      leadsConectados: b.leadsConect,
-      reunioesAgendadas: b.reunioes,
-      oportunidadesGeradas: b.oportunidades,
-      taxaConexao: b.leadsTrab ? b.leadsConect / b.leadsTrab : null,
-      taxaGlobal: b.leadsTrab ? b.oportunidades / b.leadsTrab : null,
-      cadenciaPrincipal: b.cadenciaPrincipal,
+      ligacoesFeitas: b.ligacoesFeitas,
+      ligacoesConect: b.ligacoesConect,
+      leadsNovo: b.leadsNovo,
+      leadsConect: b.leadsConect,
+      leadsAbordagem: b.leadsAbordagem,
+      reunioes: b.reunioes,
+      oportunidades: b.oportunidades,
+      negocios: b.negocios,
+      negociosSeg: b.negociosSeg,
     })),
+    bdrsAusentes: c.missingBdrs.map(b => b.bdr),
   };
-
   const blob = new Blob([JSON.stringify(summary, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const stamp = new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
   a.href = url;
-  a.download = `piloto_fabbrica_resumo_${stamp}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  a.download = `piloto_fabbrica_${new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
@@ -1362,9 +1543,9 @@ function exportSummary() {
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
+  buildUploadZones();
   setupUpload();
   setupTableSort();
-  document.getElementById('btn-export').addEventListener('click', exportSummary);
 });
 </script>
 </body>
