@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════
-// Gupy Pulse — Service Worker v3
+// Gupy Pulse — Service Worker v4
 // Suporta: Cache offline + Web Push Notifications
 // ═══════════════════════════════════════════════════
 
-const CACHE_NAME = 'gupy-pulse-v3';
+const CACHE_NAME = 'gupy-pulse-v4';
 const OFFLINE_ASSETS = ['/out-app-gupy/', '/out-app-gupy/index.html', '/out-app-gupy/manifest.json'];
 
 // ── Install: cache assets ──
