@@ -2338,9 +2338,9 @@ const ANALISE_CARTEIRA={
 const CARTEIRA_BDR={
   meta:{
     quarterMeta:600000,
-    fonte:'Salesforce · Painel Liderança + Report "Acompanhamento opps" · 28/04/2026',
+    fonte:'Salesforce · Report "Acompanhamento opps no funil de vendas" · 28/04/2026 17h',
     parcial:true,
-    nota:'ACV, deals e lead time vêm do SF (real). Score/ICP/Segmento/Reciclada/Qualidade ainda são estimativas — precisa reports adicionais com esses cortes por xDR.'
+    nota:'ACV, deals e lead time vêm do SF (real, reconciliado em 28/04 17h). Soma do Time = soma dos 8 BDRs (não bate com o "120" do header do report SF porque o report duplica deals com múltiplos members da equipe). Score/ICP/Segmento/Reciclada/Qualidade ainda são estimativas.'
   },
   // Segmentos seguem a auditoria Q1: ICP = Varejo, Tech, Alimentação, Agro · Não-ICP = Serv. Profissionais + Outros
   // segCarteira = mix da carteira atribuída ao AE · segVendas = mix das opps que ESCALARAM pra Vendas
@@ -2352,15 +2352,17 @@ const CARTEIRA_BDR={
     // leadTimeAvg = real do SF (avg ponderada de buckets · widget "LT na mesma etapa por AE")
     // leadTimeStages = derivado proporcional [0.4× · 1× · 1.6×] do avg real
     // funilEtapas = real do SF (report "Acompanhamento opps no funil de vendas")
-    MY:{ ae:'Aline Coelho',       acvFunil:1669096, acvAberto:1280410, dealsAbertos:20, carteiraTotal:580, leadTimeAvg:12, score:84, icpPct:78, recicladaPct:18, segCarteira:{Varejo:32,Tech:24,'Alimentação':14,Agro:8,'Serv. Profissionais':14,Outros:8}, segVendas:{Varejo:40,Tech:30,'Alimentação':15,Agro:8,'Serv. Profissionais':5,Outros:2}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[5,12,19]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:12,acv:736264,leadTimeAvg:11},{n:'Aprovação do projeto',deals:6,acv:544147,leadTimeAvg:14},{n:'Negociação',deals:1,acv:14000,leadTimeAvg:8},{n:'Contrato',deals:1,acv:374685,leadTimeAvg:6}] },
+    // RECONCILIAÇÃO 28/04 17h — incluídos deals diretos do BDR no report SF (Stefanini-MY,
+    //   Eletra-VE, VR Software-GF, Fricon-JR) que faltavam.
+    MY:{ ae:'Aline Coelho',       acvFunil:1819096, acvAberto:1430410, dealsAbertos:21, carteiraTotal:580, leadTimeAvg:12, score:84, icpPct:78, recicladaPct:18, segCarteira:{Varejo:32,Tech:24,'Alimentação':14,Agro:8,'Serv. Profissionais':14,Outros:8}, segVendas:{Varejo:40,Tech:30,'Alimentação':15,Agro:8,'Serv. Profissionais':5,Outros:2}, qualidadeDados:{contatos:92,decisor:78,linkedin:64}, conv:{lcRa:35,raOp:28,leadTimeStages:[5,12,19]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:12,acv:736264,leadTimeAvg:11},{n:'Aprovação do projeto',deals:6,acv:544147,leadTimeAvg:14},{n:'Negociação',deals:1,acv:14000,leadTimeAvg:8},{n:'Contrato',deals:2,acv:524685,leadTimeAvg:8}] },
     // Juliana → Evelyn Diaz (R$1,04M / 17)
     JS:{ ae:'Evelyn Diaz',        acvFunil:1038194, acvAberto:982954,  dealsAbertos:17, carteiraTotal:540, leadTimeAvg:10, score:71, icpPct:68, recicladaPct:24, segCarteira:{Varejo:24,Tech:18,'Alimentação':12,Agro:6,'Serv. Profissionais':28,Outros:12}, segVendas:{Varejo:32,Tech:24,'Alimentação':18,Agro:8,'Serv. Profissionais':12,Outros:6}, qualidadeDados:{contatos:88,decisor:71,linkedin:58}, conv:{lcRa:18,raOp:32,leadTimeStages:[4,10,16]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:12,acv:740675,leadTimeAvg:9},{n:'Aprovação do projeto',deals:3,acv:242279,leadTimeAvg:12},{n:'Negociação',deals:1,acv:23833,leadTimeAvg:7},{n:'Contrato',deals:1,acv:31407,leadTimeAvg:5}] },
-    // Victoria → Carlos Grigorio (LT real: 20 deals · 9 até 7d / 6 8-15 / 5 16-30 = 11d)
-    VE:{ ae:'Carlos Grigorio',    acvFunil:740000,  acvAberto:556000,  dealsAbertos:20, carteiraTotal:610, leadTimeAvg:11, score:76, icpPct:74, recicladaPct:21, segCarteira:{Varejo:28,Tech:22,'Alimentação':14,Agro:8,'Serv. Profissionais':20,Outros:8}, segVendas:{Varejo:36,Tech:28,'Alimentação':14,Agro:10,'Serv. Profissionais':8,Outros:4}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[4,11,18]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:20,acv:556000,leadTimeAvg:11}] },
-    // Giovana → Andrea Ferraz (LT real: 10 deals · 3 até 7 / 7 8-15 = 9d)
-    GF:{ ae:'Andrea Ferraz',      acvFunil:485000,  acvAberto:368000,  dealsAbertos:10, carteiraTotal:560, leadTimeAvg:9,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Varejo:34,Tech:28,'Alimentação':16,Agro:10,'Serv. Profissionais':8,Outros:4}, segVendas:{Varejo:42,Tech:32,'Alimentação':14,Agro:8,'Serv. Profissionais':3,Outros:1}, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[4,9,14]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:10,acv:368000,leadTimeAvg:9}] },
-    // Jeanne → Dara Santos (R$129k / 2)
-    JR:{ ae:'Dara Santos',        acvFunil:128742,  acvAberto:128742,  dealsAbertos:2,  carteiraTotal:495, leadTimeAvg:10, score:62, icpPct:62, recicladaPct:31, segCarteira:{Varejo:18,Tech:14,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:14}, segVendas:{Varejo:24,Tech:20,'Alimentação':14,Agro:6,'Serv. Profissionais':28,Outros:8}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[4,10,16]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:2,acv:128742,leadTimeAvg:10}] },
+    // Victoria → Carlos Grigorio + Eletra Energy direto (Negociação · BDR Ecossistema)
+    VE:{ ae:'Carlos Grigorio',    acvFunil:789067,  acvAberto:605067,  dealsAbertos:21, carteiraTotal:610, leadTimeAvg:11, score:76, icpPct:74, recicladaPct:21, segCarteira:{Varejo:28,Tech:22,'Alimentação':14,Agro:8,'Serv. Profissionais':20,Outros:8}, segVendas:{Varejo:36,Tech:28,'Alimentação':14,Agro:10,'Serv. Profissionais':8,Outros:4}, qualidadeDados:{contatos:90,decisor:74,linkedin:61}, conv:{lcRa:22,raOp:30,leadTimeStages:[4,11,18]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:20,acv:556000,leadTimeAvg:11},{n:'Negociação',deals:1,acv:49067,leadTimeAvg:11}] },
+    // Giovana → Andrea Ferraz + VR Software direto (Negociação · BDR Ecossistema)
+    GF:{ ae:'Andrea Ferraz',      acvFunil:530280,  acvAberto:413280,  dealsAbertos:11, carteiraTotal:560, leadTimeAvg:9,  score:88, icpPct:82, recicladaPct:14, segCarteira:{Varejo:34,Tech:28,'Alimentação':16,Agro:10,'Serv. Profissionais':8,Outros:4}, segVendas:{Varejo:42,Tech:32,'Alimentação':14,Agro:8,'Serv. Profissionais':3,Outros:1}, qualidadeDados:{contatos:94,decisor:81,linkedin:69}, conv:{lcRa:32,raOp:34,leadTimeStages:[4,9,14]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:10,acv:368000,leadTimeAvg:9},{n:'Negociação',deals:1,acv:45280,leadTimeAvg:11}] },
+    // Jeanne → Dara Santos + Fricon Brasil direto (Contrato · BDR Ecossistema)
+    JR:{ ae:'Dara Santos',        acvFunil:152794,  acvAberto:152794,  dealsAbertos:3,  carteiraTotal:495, leadTimeAvg:10, score:62, icpPct:62, recicladaPct:31, segCarteira:{Varejo:18,Tech:14,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:14}, segVendas:{Varejo:24,Tech:20,'Alimentação':14,Agro:6,'Serv. Profissionais':28,Outros:8}, qualidadeDados:{contatos:82,decisor:64,linkedin:51}, conv:{lcRa:14,raOp:24,leadTimeStages:[4,10,16]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:2,acv:128742,leadTimeAvg:10},{n:'Contrato',deals:1,acv:24052,leadTimeAvg:11}] },
     // Adhara → ela mesma (LT real: 3 deals todos em até 7d = 5d)
     AG:{ ae:'Adhara Gonçalves',   acvFunil:0,       acvAberto:0,       dealsAbertos:3,  carteiraTotal:520, leadTimeAvg:5,  score:55, icpPct:58, recicladaPct:36, segCarteira:{Varejo:14,Tech:12,'Alimentação':8,Agro:4,'Serv. Profissionais':46,Outros:16}, segVendas:{Varejo:18,Tech:16,'Alimentação':10,Agro:6,'Serv. Profissionais':38,Outros:12}, qualidadeDados:{contatos:78,decisor:58,linkedin:46}, conv:{lcRa:24,raOp:18,leadTimeStages:[2,5,8]}, funilEtapas:[{n:'Desenvolvimento de negócio',deals:3,acv:0,leadTimeAvg:5}] },
     // Ariane → ela mesma
@@ -2475,10 +2477,22 @@ var DEALS_REAIS={
     {empresa:'WN multiservicos',      acv:183022, diasEtapa:5, diasSemAtividade:11, sfId:'006bJ00000iTESr', titulo:'[NN - LM] TA + TM - WN multiservicos'},
     {empresa:'Servnac',                acv:0,      diasEtapa:5, diasSemAtividade:5,  sfId:'006bJ00000iilbR', titulo:'[NN - LM] TM - Servnac'}
   ],
+  'MY|Contrato':[
+    {empresa:'Stefanini',             acv:150000, diasEtapa:10,diasSemAtividade:5,  sfId:null, titulo:'Stefanini · Contrato (afirmado pelo gestor)'}
+  ],
   'AG|Desenvolvimento de negócio':[
     {empresa:'Supermercados Ideal',   acv:0,      diasEtapa:5, diasSemAtividade:0,  sfId:'006bJ00000cuvQu', titulo:'[NN - PBDR] TA + TM - Supermercados Ideal'},
     {empresa:'Grupo Opersan',         acv:0,      diasEtapa:5, diasSemAtividade:12, sfId:'006bJ00000iO1Hr', titulo:'[NN - PBDR] TA - Grupo Opersan - Solucoes Ambientais'},
     {empresa:'Ativa Investimentos',   acv:0,      diasEtapa:0, diasSemAtividade:0,  sfId:'006bJ00000iT2Jt', titulo:'[NN - PBDR] TA - Ativa Investimentos'}
+  ],
+  'VE|Negociação':[
+    {empresa:'Eletra Energy',         acv:49067,  diasEtapa:11,diasSemAtividade:8,  sfId:'006bJ00000hQOCU', titulo:'[NN - PBDR] TA - Eletra Energy'}
+  ],
+  'GF|Negociação':[
+    {empresa:'VR Software',           acv:45280,  diasEtapa:11,diasSemAtividade:7,  sfId:'006bJ00000gwjOR', titulo:'[NN - LS] TA + TM - VR Software'}
+  ],
+  'JR|Contrato':[
+    {empresa:'Fricon Brasil',         acv:24052,  diasEtapa:11,diasSemAtividade:6,  sfId:'006bJ00000hl2k1', titulo:'[NN - LS] TM - Fricon Brasil'}
   ]
 };
 
