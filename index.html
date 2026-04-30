@@ -9830,6 +9830,7 @@ var jdcData={};
 var jdcActive='juliana';
 var jdcView='eval';
 var jdc9boxFilter='all';
+var jdcCollapsed={};
 
 function jdcInitDefaults(){
   JDC_PEOPLE.forEach(function(p){
@@ -10030,14 +10031,28 @@ function jdcPillHtml(val,scale){
   return '<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;background:'+jdcColorBg(s.c)+';color:'+jdcColorFg(s.c)+'">'+s.l+'</span>';
 }
 
-function jdcCardHtml(icon,title,subtitle,weightLabel,weightColor,content){
+function jdcCardHtml(icon,title,subtitle,weightLabel,weightColor,content,collapseKey){
+  if(!collapseKey){
+    return '<div class="card" style="margin-bottom:12px;padding:0;overflow:hidden">'
+      +'<div style="display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--border)">'
+      +'<div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;background:'+jdcColorBg(weightColor)+';color:'+jdcColorFg(weightColor)+'">'+icon+'</div>'
+      +'<div><div style="font-size:13px;font-weight:700;color:var(--text)">'+title+'</div>'
+      +(subtitle?'<div style="font-size:11px;color:var(--text3)">'+subtitle+'</div>':'')+'</div>'
+      +(weightLabel?'<div style="margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:'+jdcColorBg(weightColor)+';color:'+jdcColorFg(weightColor)+'">'+weightLabel+'</div>':'')
+      +'</div><div style="padding:16px">'+content+'</div></div>';
+  }
+  var collapsed=jdcCollapsed[collapseKey]===true;
+  var rot=collapsed?'rotate(-90deg)':'rotate(0deg)';
   return '<div class="card" style="margin-bottom:12px;padding:0;overflow:hidden">'
-    +'<div style="display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--border)">'
-    +'<div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;background:'+jdcColorBg(weightColor)+';color:'+jdcColorFg(weightColor)+'">'+icon+'</div>'
-    +'<div><div style="font-size:13px;font-weight:700;color:var(--text)">'+title+'</div>'
+    +'<div class="jdc-card-toggle" data-ckey="'+collapseKey+'" style="display:flex;align-items:center;gap:10px;padding:16px;'+(collapsed?'':'border-bottom:1px solid var(--border);')+'cursor:pointer;user-select:none">'
+    +'<div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;background:'+jdcColorBg(weightColor)+';color:'+jdcColorFg(weightColor)+';flex-shrink:0">'+icon+'</div>'
+    +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--text)">'+title+'</div>'
     +(subtitle?'<div style="font-size:11px;color:var(--text3)">'+subtitle+'</div>':'')+'</div>'
-    +(weightLabel?'<div style="margin-left:auto;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:'+jdcColorBg(weightColor)+';color:'+jdcColorFg(weightColor)+'">'+weightLabel+'</div>':'')
-    +'</div><div style="padding:16px">'+content+'</div></div>';
+    +(weightLabel?'<div style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:'+jdcColorBg(weightColor)+';color:'+jdcColorFg(weightColor)+';flex-shrink:0">'+weightLabel+'</div>':'')
+    +'<div style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;color:var(--text3);font-size:10px;transition:transform .2s;transform:'+rot+';flex-shrink:0">▼</div>'
+    +'</div>'
+    +(collapsed?'':'<div style="padding:16px">'+content+'</div>')
+    +'</div>';
 }
 
 function jdcBuildPerson(pid){
@@ -10099,11 +10114,11 @@ function jdcBuildPerson(pid){
     +jdcToggleHtml(pid,'to_indesejavel','Se demonstrasse sinais de insatisfação, você criaria uma estratégia para retê-lo(a)?');
 
   return hero
-    +jdcCardHtml('🎯','Pilar 1 · Solidez no Nível','Aderência ao grau de exigência do nível atual','EIXO Y','purple',solContent)
-    +jdcCardHtml('📈','Pilar 2 · Performance — Resultado','"O que" entregou no último ciclo','60%','green',resContent)
-    +jdcCardHtml('💖','Pilar 2 · Performance — Cultura','"Como" entregou — Valores Gupy','40%','amber',cultContent)
-    +jdcCardHtml('🚀','Pilar 3 · Carreira & Desenvolvimento','Direcionamento para o futuro','','purple',carContent)
-    +jdcCardHtml('⚠️','Pilar 4 · Risco de Saída & TO Indesejável','Percepção de retenção','','red',riskContent)
+    +jdcCardHtml('🎯','Pilar 1 · Solidez no Nível','Aderência ao grau de exigência do nível atual','EIXO Y','purple',solContent,'sol')
+    +jdcCardHtml('📈','Pilar 2 · Performance — Resultado','"O que" entregou no último ciclo','60%','green',resContent,'res')
+    +jdcCardHtml('💖','Pilar 2 · Performance — Cultura','"Como" entregou — Valores Gupy','40%','amber',cultContent,'cult')
+    +jdcCardHtml('🚀','Pilar 3 · Carreira & Desenvolvimento','Direcionamento para o futuro','','purple',carContent,'car')
+    +jdcCardHtml('⚠️','Pilar 4 · Risco de Saída & TO Indesejável','Percepção de retenção','','red',riskContent,'risk')
     +'<div style="margin:20px 0 40px;display:flex;flex-direction:column;gap:10px">'
     +'<button onclick="jdcSave();this.textContent=\'Salvo ✓\';this.style.background=\'var(--green)\'" style="width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:\'Inter\',sans-serif;box-shadow:var(--shadow-lg);transition:all .2s">Salvar Avaliação de '+p.name.split("'").join('')+'</button>'
     +'<div style="display:flex;gap:8px">'
@@ -10388,6 +10403,8 @@ function jdcRender(pane){
     if(vtab){jdcView=vtab.dataset.view;jdcRender(pane);return;}
     var fchip=e.target.closest('.jdc-9box-fchip');
     if(fchip){jdc9boxFilter=fchip.dataset.fid;track('jdc_9box_filter',jdc9boxFilter);jdcRender(pane);return;}
+    var ctog=e.target.closest('.jdc-card-toggle');
+    if(ctog){var ckey=ctog.dataset.ckey;jdcCollapsed[ckey]=!jdcCollapsed[ckey];track('jdc_card_toggle',ckey+':'+(jdcCollapsed[ckey]?'collapsed':'expanded'));jdcRender(pane);return;}
     var act=e.target.closest('.jdc-action');
     if(act){
       if(act.dataset.act==='save'){jdcSave();alert('Rascunho salvo!');}
