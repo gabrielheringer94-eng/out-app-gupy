@@ -10343,90 +10343,107 @@ function jdcBuildSummary(){
 }
 
 function jdcBuild9box(filterId){
-  // Scatter plot 9BOX — eixos 1-4, quadrantes coloridos, pontos por BDR
+  // Matriz 9BOX Gupy — 3x3 grid, colunas coloridas por Performance, Q labels visíveis.
   var isFiltered=filterId&&filterId!=='all';
-  var W=340,H=300,pL=46,pR=16,pT=16,pB=44;
-  var pw=W-pL-pR, ph=H-pT-pB;
-  function toX(v){return pL+((v-1)/3)*pw;}
-  function toY(v){return pT+ph-((v-1)/3)*ph;}
 
-  // Quadrant backgrounds (Performance x = horizontal, Solidez y = vertical)
-  // x<2.5 & y<2.5 = red (Q1), x>=2.5 & y<2.5 = blue-ish (Q2/Q3), etc.
-  var quads='';
-  // Red zone: perf 1-2.5, solidez 1-2.5
-  quads+='<rect x="'+pL+'" y="'+toY(2.5)+'" width="'+(toX(2.5)-pL)+'" height="'+(toY(1)-toY(2.5))+'" fill="rgba(239,68,68,0.08)" rx="4"/>';
-  // Red zone top-left: perf 1-2.5, solidez 2.5-4
-  quads+='<rect x="'+pL+'" y="'+toY(4)+'" width="'+(toX(2.5)-pL)+'" height="'+(toY(2.5)-toY(4))+'" fill="rgba(245,158,11,0.06)" rx="4"/>';
-  // Blue zone: perf 2.5-3.5, solidez 1-4
-  quads+='<rect x="'+toX(2.5)+'" y="'+toY(4)+'" width="'+(toX(3.5)-toX(2.5))+'" height="'+(toY(1)-toY(4))+'" fill="rgba(99,102,241,0.06)" rx="4"/>';
-  // Green zone: perf 3.5-4, solidez 1-4
-  quads+='<rect x="'+toX(3.5)+'" y="'+toY(4)+'" width="'+(toX(4)-toX(3.5)+pR)+'" height="'+(toY(1)-toY(4))+'" fill="rgba(34,197,94,0.08)" rx="4"/>';
+  // Cell definitions: [sL, pL, Q, perfLabel, solLabel, colorKey]
+  // pL: 1=Abaixo, 2=Dentro, 3=Acima · sL: 3=Excedendo, 2=Sólido, 1=Em desenv.
+  var COLOR_BY_PERF={
+    1:{bg:'rgba(239,68,68,0.10)',border:'rgba(239,68,68,0.45)',q:'rgba(239,68,68,0.95)',head:'rgba(239,68,68,0.18)'},
+    2:{bg:'rgba(99,102,241,0.10)',border:'rgba(99,102,241,0.45)',q:'rgba(99,102,241,0.95)',head:'rgba(99,102,241,0.18)'},
+    3:{bg:'rgba(34,197,94,0.18)',border:'rgba(34,197,94,0.55)',q:'rgba(22,163,74,0.95)',head:'rgba(34,197,94,0.28)'}
+  };
+  var PERF_LABELS={1:'Performance Abaixo do Esperado',2:'Performance Dentro do Esperado',3:'Performance Acima do Esperado'};
+  var PERF_SHORT={1:'abaixo do esperado',2:'dentro do esperado',3:'acima do esperado'};
+  var SOL_LABELS={3:'Excedendo seu nível',2:'Sólido em seu nível',1:'Em desenvolvimento para seu nível'};
+  var SOL_SHORT={3:'Excedendo do seu nível',2:'Sólido em seu nível',1:'Em desenvolvimento para seu nível'};
+  var Q_BY_CELL={'3-1':'Q7','3-2':'Q8','3-3':'Q9','2-1':'Q4','2-2':'Q5','2-3':'Q6','1-1':'Q1','1-2':'Q2','1-3':'Q3'};
 
-  // Grid lines
-  var grid='';
-  for(var i=1;i<=4;i++){
-    grid+='<line x1="'+pL+'" y1="'+toY(i)+'" x2="'+(W-pR)+'" y2="'+toY(i)+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
-    grid+='<line x1="'+toX(i)+'" y1="'+pT+'" x2="'+toX(i)+'" y2="'+(H-pB)+'" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
-    // Y axis labels (Solidez)
-    grid+='<text x="'+(pL-8)+'" y="'+(toY(i)+4)+'" font-size="10" fill="var(--text3)" text-anchor="end" font-weight="600" font-family="Inter">'+i+'</text>';
-    // X axis labels (Performance)
-    grid+='<text x="'+toX(i)+'" y="'+(H-pB+18)+'" font-size="10" fill="var(--text3)" text-anchor="middle" font-weight="600" font-family="Inter">'+i+'</text>';
-  }
-
-  // Axis labels
-  var axes='<text x="'+(W/2)+'" y="'+(H-4)+'" font-size="11" fill="var(--red)" text-anchor="middle" font-weight="700" font-family="Inter">';
-  axes+='Performance (Resultado + Cultura) →</text>';
-  // Y axis label (rotated)
-  var yLblX=18, yLblY=pT+ph/2;
-  axes+='<text x="'+yLblX+'" y="'+yLblY+'" font-size="11" fill="var(--red)" text-anchor="middle" font-weight="700" font-family="Inter" transform="rotate(-90 '+yLblX+' '+yLblY+')">Solidez no Nível →</text>';
-
-  // Y axis gradient bar
-  axes+='<rect x="2" y="'+pT+'" width="4" height="'+ph+'" rx="2" fill="url(#yGrad)"/>';
-  axes+='<defs><linearGradient id="yGrad" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#ef4444"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#22c55e"/></linearGradient>';
-  axes+='<linearGradient id="xGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ef4444"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#22c55e"/></linearGradient></defs>';
-  // X axis gradient bar
-  axes+='<rect x="'+pL+'" y="'+(H-pB+24)+'" width="'+pw+'" height="4" rx="2" fill="url(#xGrad)"/>';
-
-  // Plot BDR points
-  var points='';
-  var jitter=0;
+  // Compute pL/sL per person
+  function pLevel(perf){return perf<2?1:perf<3?2:3;}
+  function sLevel(sol){return sol<=2?1:sol===3?2:3;}
+  // People grouped by cell key "sL-pL"
+  var byCell={};
   JDC_PEOPLE.forEach(function(p){
     if(isFiltered&&p.id!==filterId) return;
     var sc=jdcGetScores(p.id);
     if(!sc||!sc.performance||!sc.solidez) return;
-    var x=toX(sc.performance)+(jitter%3-1)*8;
-    var y=toY(sc.solidez)+(Math.floor(jitter/3)-1)*6;
-    jitter++;
-    var name=p.name.split(' ')[0];
-    // Dot with glow
-    points+='<circle cx="'+x+'" cy="'+y+'" r="8" fill="'+p.color+'" opacity="0.9" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>';
-    points+='<circle cx="'+x+'" cy="'+y+'" r="12" fill="'+p.color+'" opacity="0.15"/>';
-    // Name label
-    points+='<text x="'+x+'" y="'+(y-12)+'" font-size="9" fill="var(--text)" text-anchor="middle" font-weight="700" font-family="Inter">'+name+'</text>';
-    // Score badge
-    points+='<text x="'+x+'" y="'+(y+3)+'" font-size="7" fill="#fff" text-anchor="middle" font-weight="700" font-family="Inter">'+sc.performance+'</text>';
+    var key=sLevel(sc.solidez)+'-'+pLevel(sc.performance);
+    (byCell[key]=byCell[key]||[]).push({p:p,sc:sc});
   });
 
-  var svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:'+W+'px;font-family:Inter,sans-serif">'
-    +quads+grid+axes+points+'</svg>';
+  function avatarHtml(item){
+    var ini=jdcInitials(item.p.name);
+    return '<div title="'+item.p.name+' · Perf '+item.sc.performance+' · Sol '+item.sc.solidez+'" '
+      +'style="width:26px;height:26px;border-radius:50%;background:'+item.p.color+';color:#fff;'
+      +'display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;'
+      +'border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2);font-family:Inter,sans-serif">'+ini+'</div>';
+  }
 
-  // Legenda
-  var legend='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;justify-content:center">';
-  JDC_PEOPLE.forEach(function(p){
-    if(isFiltered&&p.id!==filterId) return;
+  function cellHtml(sL,pL){
+    var c=COLOR_BY_PERF[pL];
+    var q=Q_BY_CELL[sL+'-'+pL];
+    var people=byCell[sL+'-'+pL]||[];
+    var avatars=people.map(avatarHtml).join('');
+    var emptyState=people.length===0
+      ? '<div style="font-size:9px;color:var(--text3);text-align:center;font-style:italic;opacity:0.6">vazio</div>'
+      : '';
+    return '<div style="position:relative;background:'+c.bg+';border:1.5px solid '+c.border+';border-radius:12px;padding:14px 10px 10px;min-height:110px;display:flex;flex-direction:column">'
+      // Q badge top-right
+      +'<div style="position:absolute;top:6px;right:8px;font-size:11px;font-weight:800;color:'+c.q+';background:rgba(255,255,255,0.7);padding:2px 7px;border-radius:10px;font-family:Inter,sans-serif;letter-spacing:.02em">'+q+'</div>'
+      // Description
+      +'<div style="font-size:11px;font-weight:700;color:var(--text);line-height:1.35;text-align:center;margin-bottom:8px;padding-right:30px;padding-left:4px">'
+      +'Performance '+PERF_SHORT[pL]+'<br>+ '+SOL_SHORT[sL]+'</div>'
+      // People avatars
+      +'<div style="margin-top:auto;display:flex;flex-wrap:wrap;gap:4px;justify-content:center;min-height:30px;align-items:center">'+avatars+emptyState+'</div>'
+      +'</div>';
+  }
+
+  // Build 3x3 matrix
+  var matrix='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
+  [3,2,1].forEach(function(sL){
+    [1,2,3].forEach(function(pL){matrix+=cellHtml(sL,pL);});
+  });
+  matrix+='</div>';
+
+  // Top column headers (Performance)
+  var headers='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">'
+    +[1,2,3].map(function(pL){
+      var c=COLOR_BY_PERF[pL];
+      return '<div style="font-size:10px;font-weight:700;color:var(--text);text-align:center;padding:6px 4px;background:'+c.head+';border-radius:8px;line-height:1.3">'+PERF_LABELS[pL]+'</div>';
+    }).join('')
+    +'</div>';
+
+  // Right side row labels (Solidez) — overlaid via flex wrapper
+  var rowLabels=[3,2,1].map(function(sL){
+    return '<div style="font-size:10px;font-weight:700;color:var(--text2);writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;padding:8px 0;line-height:1.3">'+SOL_LABELS[sL]+'</div>';
+  }).join('');
+
+  var fullMatrix='<div style="display:grid;grid-template-columns:1fr 28px;gap:6px;align-items:stretch">'
+    +'<div>'+headers+matrix+'</div>'
+    +'<div style="display:grid;grid-template-rows:repeat(3,1fr);gap:8px;margin-top:'+(28+8)+'px">'+rowLabels+'</div>'
+    +'</div>';
+
+  // Bottom axis label
+  var bottomAxis='<div style="margin-top:10px;text-align:center;font-size:10px;font-weight:800;color:var(--text2);letter-spacing:.02em;font-family:Inter,sans-serif">PERFORMANCE (60% Resultado + 40% Cultura) →</div>'
+    +'<div style="text-align:center;font-size:9px;color:var(--text3);margin-top:2px;letter-spacing:.04em">↑ SOLIDEZ NO NÍVEL</div>';
+
+  // Legenda — só pessoas com avaliação completa
+  var legendItems=JDC_PEOPLE.filter(function(p){
+    if(isFiltered&&p.id!==filterId) return false;
+    var sc=jdcGetScores(p.id);return sc&&sc.performance&&sc.solidez;
+  }).map(function(p){
     var sc=jdcGetScores(p.id);
     var q=jdcCalc9box(p.id);
-    if(!sc||!sc.performance) return;
-    legend+='<div style="display:flex;align-items:center;gap:4px;font-size:10px">'
+    return '<div style="display:flex;align-items:center;gap:5px;font-size:10px;padding:3px 8px;background:var(--bg3);border-radius:12px">'
       +'<div style="width:8px;height:8px;border-radius:50%;background:'+p.color+'"></div>'
-      +'<span style="color:var(--text2);font-weight:500">'+p.name.split(' ')[0]+'</span>'
+      +'<span style="color:var(--text2);font-weight:600">'+p.name.split(' ')[0]+'</span>'
       +'<span style="color:var(--accent);font-weight:700;font-size:9px">'+(q||'')+'</span>'
-      +'<span style="color:var(--text3);font-size:9px">('+sc.performance+')</span>'
       +'</div>';
-  });
-  legend+='</div>';
+  }).join('');
+  var legend=legendItems?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;justify-content:center;padding-top:12px;border-top:1px dashed var(--border)">'+legendItems+'</div>':'';
 
-  return svg+legend;
+  return fullMatrix+bottomAxis+legend;
 }
 
 function jdcBuildMeritPanel(){
