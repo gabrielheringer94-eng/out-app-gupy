@@ -10145,7 +10145,7 @@ function jdcBuildSummary(){
 function jdcBuild9box(filterId){
   // Scatter plot 9BOX — eixos 1-4, quadrantes coloridos, pontos por BDR
   var isFiltered=filterId&&filterId!=='all';
-  var W=340,H=300,pL=36,pR=16,pT=16,pB=44;
+  var W=340,H=300,pL=46,pR=16,pT=16,pB=44;
   var pw=W-pL-pR, ph=H-pT-pB;
   function toX(v){return pL+((v-1)/3)*pw;}
   function toY(v){return pT+ph-((v-1)/3)*ph;}
@@ -10176,6 +10176,9 @@ function jdcBuild9box(filterId){
   // Axis labels
   var axes='<text x="'+(W/2)+'" y="'+(H-4)+'" font-size="11" fill="var(--red)" text-anchor="middle" font-weight="700" font-family="Inter">';
   axes+='Performance (Resultado + Cultura) →</text>';
+  // Y axis label (rotated)
+  var yLblX=18, yLblY=pT+ph/2;
+  axes+='<text x="'+yLblX+'" y="'+yLblY+'" font-size="11" fill="var(--red)" text-anchor="middle" font-weight="700" font-family="Inter" transform="rotate(-90 '+yLblX+' '+yLblY+')">Solidez no Nível →</text>';
 
   // Y axis gradient bar
   axes+='<rect x="2" y="'+pT+'" width="4" height="'+ph+'" rx="2" fill="url(#yGrad)"/>';
