@@ -422,6 +422,7 @@ def parse_controle_csv(path):
 # ============================================================
 def find_file(glob):
     # Substring-fragment matching (avoids regex special-char issues like [Pre-Vendas])
+    # Picks the MOST RECENTLY MODIFIED match — robust to duplicates like "file (1).csv"
     fragments = [f for f in glob.split("*") if f]
     matches = []
     for p in DATA_DIR.iterdir():
@@ -436,7 +437,9 @@ def find_file(glob):
             idx = pos + len(frag)
         if ok:
             matches.append(p)
-    return sorted(matches)[0] if matches else None
+    if not matches:
+        return None
+    return max(matches, key=lambda p: p.stat().st_mtime)
 
 def main():
     out = {}
@@ -473,9 +476,9 @@ def main():
 
     # Extrai DATA do Dashboard ICP mais recente (operação do dia)
     saidas_dir = DATA_DIR / "saidas"
-    icp_candidates = sorted(saidas_dir.glob("Dashboard_ICP_*.html"), reverse=True) if saidas_dir.exists() else []
+    icp_candidates = list(saidas_dir.glob("Dashboard_ICP_*.html")) if saidas_dir.exists() else []
     if icp_candidates:
-        icp_html_path = icp_candidates[0]
+        icp_html_path = max(icp_candidates, key=lambda p: p.stat().st_mtime)
         try:
             html = icp_html_path.read_text(encoding="utf-8")
             m = re.search(r'const DATA = (\{.*?\});\s*\n', html, re.DOTALL)
