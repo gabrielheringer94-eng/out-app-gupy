@@ -1172,7 +1172,77 @@ const DATA = {
       AG:{opps: 6,ras:15,lig: 57},
       AM:{opps: 2,ras: 6,lig: 84},
       PS:{opps: 2,ras:14,lig: 38}
-    }
+    },
+    // Atividades concluídas por BDR (snapshot 29/04 21:30 — última leitura antes do fechamento)
+    ativPorBDR:{MY:1172,JS:956,VE:875,GF:1213,JR:873,AG:1704,AM:863,PS:858},
+    // Quebra semanal de Abril (S1=31/mar–04/abr ... S4=22–25/abr)
+    semanas:[
+      {sem:1, opps:1,  ras:22, lig:158, abordagemIniciada:88, leadConectado:65, desqualificados:108, label:'S1', datas:'31/mar – 04/abr'},
+      {sem:2, opps:8,  ras:17, lig:265, abordagemIniciada:92, leadConectado:71, desqualificados:120, label:'S2', datas:'07 – 11/abr'},
+      {sem:3, opps:10, ras:9,  lig:73,  abordagemIniciada:80, leadConectado:60, desqualificados:115, label:'S3', datas:'14 – 17/abr'},
+      {sem:4, opps:15, ras:50, lig:253, abordagemIniciada:95, leadConectado:71, desqualificados:115, label:'S4', datas:'22 – 25/abr'}
+    ],
+    // MeetRox por BDR — snapshot final S4 (20–24 abr)
+    meetrox:{
+      MY:{nota:9.3,conversas:1,notaMes:9.3,conversasMes:1,gap:'Nota excelente mas só 1 conversa avaliada na semana — aumentar volume avaliado'},
+      JS:{nota:8.5,conversas:5,notaMes:8.5,conversasMes:5,gap:'Volume de conversas avaliadas saudável — manter consistência'},
+      VE:{nota:7.7,conversas:4,notaMes:7.7,conversasMes:4,gap:'Queda na nota vs M-1 (8.9→7.7) — revisar abordagem com gestor'},
+      GF:{nota:8.6,conversas:1,notaMes:8.6,conversasMes:1,gap:'Recuperação significativa de nota (5.4→8.6) — manter o novo padrão de abordagem'},
+      JR:{nota:6.9,conversas:4,notaMes:6.9,conversasMes:4,gap:'Menor nota do time (6.9) — revisar estrutura da ligação com gestor'},
+      AG:{nota:9.4,conversas:2,notaMes:9.4,conversasMes:2,gap:'Maior nota do time — manter padrão e compartilhar boas práticas'},
+      AM:{nota:null,conversas:0,notaMes:null,conversasMes:0,gap:'Sem avaliações essa semana nem mês — ativar uso do MeetRox urgente'},
+      PS:{nota:8.0,conversas:1,notaMes:8.0,conversasMes:1,gap:'Apenas 1 conversa avaliada — aumentar volume de uso do MeetRox'},
+      time:{mediaSemana:8.3,mediaMes:8.3,semanaRef:'S4 › 20–24 abr',mesRef:'Abr 2026',melhorM1:{id:'AG',name:'Adhara Gonçalves',nota:9.4}}
+    },
+    // Lista parcial de Opps de Abril — última captura nominal em 27/04 (21 dos 59 opps registrados)
+    // Apres. Solução / Desenvolvimento de negócio / Contrato / Aprovação
+    oppsDetalhe:[
+      {bdr:'AG',bdrNome:'Adhara Gonçalves',empresa:'Supermercados Ideal',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Andrea Ferraz',data:'23/04'},
+      {bdr:'AG',bdrNome:'Adhara Gonçalves',empresa:'Grupo Opersan - Solucoes Ambientais',mundo:1,tipo:'TA',etapa:'Desenvolvimento de negócio',ae:'Lia Curvelo',data:'15/04'},
+      {bdr:'AM',bdrNome:'Ariane Mesquita',empresa:'Luciane cozinhas',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Lia Curvelo',data:'17/04'},
+      {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'VR Software',mundo:1,tipo:'TM',etapa:'Desenvolvimento de negócio',ae:'Andrea Ferraz',data:'10/04'},
+      {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'Hospital e Maternidade Santa Tereza',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Andrea Ferraz',data:'13/04'},
+      {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'Selia Full Service',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Yago Viana',data:'15/04'},
+      {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'Grupo Renova',mundo:1,tipo:'TA',etapa:'Desenvolvimento de negócio',ae:'Andrea Ferraz',data:'22/04'},
+      {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'COLEGIO ANGLO MORUMBI',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'22/04'},
+      {bdr:'JR',bdrNome:'Jeanne Rodrigues',empresa:'Fricon Brasil',mundo:1,tipo:'TM',etapa:'Contrato',ae:'Gabriele Gricio',data:'13/04'},
+      {bdr:'JR',bdrNome:'Jeanne Rodrigues',empresa:'Grupo Kyly',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'24/04'},
+      {bdr:'JR',bdrNome:'Jeanne Rodrigues',empresa:'tacchini',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'24/04'},
+      {bdr:'JS',bdrNome:'Juliana Sant\'Anna',empresa:'Comtec',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Yago Viana',data:'16/04'},
+      {bdr:'JS',bdrNome:'Juliana Sant\'Anna',empresa:'SIMM SOLUCOES',mundo:1,tipo:'TA',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'10/04'},
+      {bdr:'JS',bdrNome:'Juliana Sant\'Anna',empresa:'TUDOR BATERIAS',mundo:1,tipo:'TA',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'07/04'},
+      {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Centro Universitário Atenas',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'22/04'},
+      {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Transportadora Contatto',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Yago Viana',data:'16/04'},
+      {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Poli Solucoes Digitais LTDA',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'09/04'},
+      {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'vigilancia triangulo',mundo:1,tipo:'TM',etapa:'Desenvolvimento de negócio',ae:'Yago Viana',data:'20/04'},
+      {bdr:'VE',bdrNome:'Victoria Eilers',empresa:'Diviníssimo Alimentos',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Carlos Grigorio',data:'08/04'},
+      {bdr:'VE',bdrNome:'Victoria Eilers',empresa:'Eletra Energy',mundo:1,tipo:'TA',etapa:'Aprovação do projeto',ae:'Carlos Grigorio',data:'14/04'},
+      {bdr:'VE',bdrNome:'Victoria Eilers',empresa:'SEARS SEATING',mundo:2,tipo:'TA+TM',etapa:'Desenvolvimento de negócio',ae:'Lia Curvelo',data:'23/04'}
+    ],
+    // Lista parcial de RAs/SQLs (Qualificação) de Abril — última captura nominal em 27/04 (21 dos 142)
+    rasDetalhe:[
+      {bdr:'AG',bdrNome:'Adhara Gonçalves',empresa:'Consuma',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Adhara Gonçalves',data:'23/04'},
+      {bdr:'AG',bdrNome:'Adhara Gonçalves',empresa:'Grupo Opersan - Solucoes Ambientais',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Lia Curvelo',data:'15/04'},
+      {bdr:'AM',bdrNome:'Ariane Mesquita',empresa:'Luciane cozinhas',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Lia Curvelo',data:'17/04'},
+      {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'First RH Group',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Giovana Faceto',data:'20/04'},
+      {bdr:'GF',bdrNome:'Giovana Faceto',empresa:'Centerplex Cinemas',mundo:2,tipo:'TA',etapa:'Qualificação',ae:'Andrea Ferraz',data:'06/04'},
+      {bdr:'JR',bdrNome:'Jeanne Rodrigues',empresa:'Hiper Select Supermercados Ltda',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Jeanne Rodrigues',data:'23/04'},
+      {bdr:'JS',bdrNome:'Juliana Sant\'Anna',empresa:'FL ADM',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Juliana Sant\'Anna',data:'28/04'},
+      {bdr:'JS',bdrNome:'Juliana Sant\'Anna',empresa:'Multiplica',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Juliana Sant\'Anna',data:'16/04'},
+      {bdr:'JS',bdrNome:'Juliana Sant\'Anna',empresa:'30praum',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Juliana Sant\'Anna',data:'17/04'},
+      {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Hospital dos Acidentados',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Mydoha Seydo',data:'24/04'},
+      {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Adfert / Indorama',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Mydoha Seydo',data:'17/04'},
+      {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Porto Sudeste',mundo:2,tipo:'TA',etapa:'Qualificação',ae:'Carlos Grigorio',data:'10/03'},
+      {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Mydoha Seydo',data:'22/04'},
+      {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'lev negócios',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Mydoha Seydo',data:'15/04'},
+      {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Weleda',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Mydoha Seydo',data:'07/05'},
+      {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Mydoha Seydo',data:'17/04'},
+      {bdr:'MY',bdrNome:'Mydoha Seydo',empresa:'Grupo Saldanha Moreira',mundo:1,tipo:'TA+TM',etapa:'Qualificação',ae:'Mydoha Seydo',data:'15/04'},
+      {bdr:'PS',bdrNome:'Pedro Souza',empresa:'Romariz',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Pedro Souza',data:'22/04'},
+      {bdr:'PS',bdrNome:'Pedro Souza',empresa:'Blanc Hospital',mundo:2,tipo:'TA',etapa:'Qualificação',ae:'Carlos Grigorio',data:'09/04'},
+      {bdr:'VE',bdrNome:'Victoria Eilers',empresa:'Biopark',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Carlos Grigorio',data:'14/04'},
+      {bdr:'VE',bdrNome:'Victoria Eilers',empresa:'Vitlog Transportes',mundo:2,tipo:'TA+TM',etapa:'Qualificação',ae:'Lia Curvelo',data:'22/04'}
+    ]
   },
   // Acumulado do mês CORRENTE (Maio 2026) — zerado em 03/05/2026 (mês recém-iniciado)
   // NOTA: chave mantida como "mesAbril" para compatibilidade com referências em todo o app.
