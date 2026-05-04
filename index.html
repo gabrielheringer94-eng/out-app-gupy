@@ -1161,7 +1161,7 @@ const DATA = {
     opps:59,   // mundo total (vs meta 84 = 70% atingimento)
     ras:142,   // SQLs/RAs
     lig:915,   // ligações conectadas
-    ativ:10000,// atividades concluídas (estimativa visual)
+    ativ:10027,// atividades concluídas (final — soma exata BDR)
     metaAtingimento:70,
     perBDR:{
       MY:{opps:15,ras:36,lig:155},
@@ -1173,8 +1173,20 @@ const DATA = {
       AM:{opps: 2,ras: 6,lig: 84},
       PS:{opps: 2,ras:14,lig: 38}
     },
-    // Atividades concluídas por BDR (snapshot 29/04 21:30 — última leitura antes do fechamento)
-    ativPorBDR:{MY:1172,JS:956,VE:875,GF:1213,JR:873,AG:1704,AM:863,PS:858},
+    // Atividades concluídas por BDR — FINAL Abril (capturado 04/05/2026 do dashboard, total 10.027)
+    ativPorBDR:{AG:1882,GF:1387,MY:1368,JS:1227,AM:1073,JR:1069,VE:1019,PS:1002},
+    // Funil completo Abril 2026 — fonte: dashboard SF · filtro MÊS PASSADO · captura 04/05/2026
+    funil:{
+      novoLead:613, abordagemIniciada:484, leadConectado:337,
+      reuniaoAgendada:142, oportunidades:59, desqualificados:503
+    },
+    // Conversões calculadas (stage / stage anterior)
+    conversoes:{
+      aiLc:{real:Math.round(337/484*1000)/10, label:'AI → LC'},   // 69.6%
+      lcRa:{real:Math.round(142/337*1000)/10, label:'LC → RA'},   // 42.1%
+      raOp:{real:Math.round(59/142*1000)/10,  label:'RA → OP'},   // 41.5%
+      nlOp:{real:Math.round(59/613*1000)/10,  label:'NL → OP'}    // 9.6% (geral)
+    },
     // Quebra semanal de Abril (S1=31/mar–04/abr ... S4=22–25/abr)
     semanas:[
       {sem:1, opps:1,  ras:22, lig:158, abordagemIniciada:88, leadConectado:65, desqualificados:108, label:'S1', datas:'31/mar – 04/abr'},
@@ -3460,6 +3472,56 @@ function buildMesAnterior(pane){
     }).join('')
     +(mroxTime.melhorM1?'<div style="margin-top:10px;padding:8px 10px;background:var(--green-bg);border-radius:6px;font-size:11px;color:var(--text2)">⭐ Destaque: <strong style="color:var(--text)">'+mroxTime.melhorM1.name+'</strong> — '+mroxTime.melhorM1.nota+' ('+mroxTime.melhorM1.conversas+' conversas)</div>':'')
     +'</div>'
+
+    // ── Funil completo Abr ──
+    +(function(){
+      var fn=fa.funil||{};
+      var stages=[
+        {nome:'Novo Lead',         val:fn.novoLead||0,          color:'#6366f1'},
+        {nome:'Abordagem Iniciada',val:fn.abordagemIniciada||0, color:'#8b5cf6'},
+        {nome:'Lead Conectado',    val:fn.leadConectado||0,     color:'#14b8a6'},
+        {nome:'Reunião Agendada',  val:fn.reuniaoAgendada||0,   color:'#f59e0b'},
+        {nome:'Oportunidades',     val:fn.oportunidades||0,     color:'#22c55e'},
+        {nome:'Desqualificados',   val:fn.desqualificados||0,   color:'#64748b'}
+      ];
+      var maxF=Math.max.apply(null,stages.map(function(s){return s.val;}).concat([1]));
+      return '<div class="card" style="margin-bottom:14px">'
+        +'<div class="card-title">🔽 Funil completo · Abril</div>'
+        +'<div style="font-size:11px;color:var(--text3);margin-top:-4px;margin-bottom:12px">Filtro SF: MÊS PASSADO · captura 04/05/2026</div>'
+        +stages.map(function(s){
+          var w=Math.max(2,Math.round((s.val/maxF)*100));
+          return '<div style="padding:6px 0">'
+            +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'
+            +'<div style="font-size:12px;color:var(--text);font-family:\'Inter\',sans-serif">'+s.nome+'</div>'
+            +'<div style="font-size:13px;font-weight:700;color:'+s.color+';font-family:\'Inter\',sans-serif">'+fmt(s.val)+'</div>'
+            +'</div>'
+            +'<div style="height:8px;background:var(--bg2);border-radius:4px;overflow:hidden">'
+            +'<div style="height:100%;width:'+w+'%;background:'+s.color+';border-radius:4px"></div>'
+            +'</div>'
+            +'</div>';
+        }).join('')
+        +'</div>';
+    })()
+
+    // ── Conversões Abr ──
+    +(function(){
+      var c=fa.conversoes||{};
+      var arr=[c.aiLc,c.lcRa,c.raOp,c.nlOp].filter(function(x){return x;});
+      function colByPct(p){return p>=50?'var(--green)':p>=30?'var(--amber)':'var(--red)';}
+      return '<div class="card" style="margin-bottom:14px">'
+        +'<div class="card-title">📈 Conversões de etapa · Abril</div>'
+        +'<div style="font-size:11px;color:var(--text3);margin-top:-4px;margin-bottom:12px">Calculado a partir do funil completo (stage atual / stage anterior)</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">'
+        +arr.map(function(x){
+          var col=colByPct(x.real);
+          return '<div style="background:var(--bg2);border-radius:8px;padding:12px;text-align:center">'
+            +'<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">'+x.label+'</div>'
+            +'<div style="font-size:24px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+col+';line-height:1">'+x.real+'%</div>'
+            +'</div>';
+        }).join('')
+        +'</div>'
+        +'</div>';
+    })()
 
     // ── Evolução semanal ──
     +'<div class="card" style="margin-bottom:14px">'
