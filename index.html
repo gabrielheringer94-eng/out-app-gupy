@@ -1182,17 +1182,18 @@ const DATA = {
       {sem:3, opps:10, ras:9,  lig:73,  abordagemIniciada:80, leadConectado:60, desqualificados:115, label:'S3', datas:'14 – 17/abr'},
       {sem:4, opps:15, ras:50, lig:253, abordagemIniciada:95, leadConectado:71, desqualificados:115, label:'S4', datas:'22 – 25/abr'}
     ],
-    // MeetRox por BDR — snapshot final S4 (20–24 abr)
+    // MeetRox FINAL Abril 2026 — fonte: dashboard MeetRox 04/05/2026 (mês fechado)
+    // Coluna "Nota Média por AI" + "Conversas Avaliadas" do filtro 04-2026
     meetrox:{
-      MY:{nota:9.3,conversas:1,notaMes:9.3,conversasMes:1,gap:'Nota excelente mas só 1 conversa avaliada na semana — aumentar volume avaliado'},
-      JS:{nota:8.5,conversas:5,notaMes:8.5,conversasMes:5,gap:'Volume de conversas avaliadas saudável — manter consistência'},
-      VE:{nota:7.7,conversas:4,notaMes:7.7,conversasMes:4,gap:'Queda na nota vs M-1 (8.9→7.7) — revisar abordagem com gestor'},
-      GF:{nota:8.6,conversas:1,notaMes:8.6,conversasMes:1,gap:'Recuperação significativa de nota (5.4→8.6) — manter o novo padrão de abordagem'},
-      JR:{nota:6.9,conversas:4,notaMes:6.9,conversasMes:4,gap:'Menor nota do time (6.9) — revisar estrutura da ligação com gestor'},
-      AG:{nota:9.4,conversas:2,notaMes:9.4,conversasMes:2,gap:'Maior nota do time — manter padrão e compartilhar boas práticas'},
-      AM:{nota:null,conversas:0,notaMes:null,conversasMes:0,gap:'Sem avaliações essa semana nem mês — ativar uso do MeetRox urgente'},
-      PS:{nota:8.0,conversas:1,notaMes:8.0,conversasMes:1,gap:'Apenas 1 conversa avaliada — aumentar volume de uso do MeetRox'},
-      time:{mediaSemana:8.3,mediaMes:8.3,semanaRef:'S4 › 20–24 abr',mesRef:'Abr 2026',melhorM1:{id:'AG',name:'Adhara Gonçalves',nota:9.4}}
+      JS:{nota:8.4,conversas:51,notaMes:8.4,conversasMes:51,gap:'Maior volume avaliado do time (51) e nota acima da média — manter padrão e compartilhar boas práticas'},
+      VE:{nota:8.0,conversas:22,notaMes:8.0,conversasMes:22,gap:'Volume saudável (22) e nota consistente — manter consistência'},
+      AG:{nota:8.0,conversas:22,notaMes:8.0,conversasMes:22,gap:'Volume saudável (22) e nota consistente — manter consistência'},
+      AM:{nota:8.0,conversas:2,notaMes:8.0,conversasMes:2,gap:'Nota boa mas só 2 conversas avaliadas no mês — aumentar volume avaliado urgente'},
+      JR:{nota:7.9,conversas:12,notaMes:7.9,conversasMes:12,gap:'Nota próxima da média do time — buscar ganho fino de qualidade'},
+      GF:{nota:7.6,conversas:16,notaMes:7.6,conversasMes:16,gap:'Nota abaixo da média (7.6) — revisar estrutura da ligação com gestor'},
+      MY:{nota:7.5,conversas:15,notaMes:7.5,conversasMes:15,gap:'Nota abaixo da média (7.5) — alinhar abordagem nas próximas conversas'},
+      PS:{nota:7.1,conversas:null,notaMes:7.1,conversasMes:null,gap:'Menor nota do time (7.1) — priorizar coaching 1:1 com gestor'},
+      time:{mediaSemana:7.8,mediaMes:7.8,semanaRef:'Abr 2026 (fechado)',mesRef:'Abr 2026',melhorM1:{id:'JS',name:'Juliana Sant\'Anna',nota:8.4,conversas:51}}
     },
     // Lista parcial de Opps de Abril — última captura nominal em 27/04 (21 dos 59 opps registrados)
     // Apres. Solução / Desenvolvimento de negócio / Contrato / Aprovação
@@ -2107,6 +2108,7 @@ const NAV_ICONS={
   // ── Gestor ──
   resumo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
   resultado:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>',
+  mes_anterior:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>',
   time:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   reunioes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
   jdc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
@@ -2125,7 +2127,7 @@ const NAV_ICONS={
   carteira:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2" ry="2"/><path d="M22 10H18a2 2 0 0 0 0 4h4"/><path d="M2 10V8a2 2 0 0 1 2-2h14"/></svg>'
 };
 const NAV_LABELS={
-  resumo:'Hoje',time:'Time',base:'Base',reunioes:'Agenda',weekly:'Weekly',analise:'Análise de carteira',log:'Log',
+  resumo:'Hoje',time:'Time',base:'Base',reunioes:'Agenda',weekly:'Weekly',analise:'Análise de carteira',log:'Log',mes_anterior:'Mês Anterior',
   hoje:'Início',resultado:'Meu Resultado',performance:'Performance',semana:'S-1',funil:'Funil',mrr_bdr:'MRR',time_bdr:'Time',pdi:'PDI',jdc:'Pessoas',carteira:'Carteira'
 };
 
@@ -2360,13 +2362,14 @@ function buildGestorApp(){
   var bar=document.getElementById('bottom-shortcuts');
   if(bar){ bar.classList.remove('visible'); bar.innerHTML=''; }
   buildTabs([
-    {id:'resumo',   label:'Hoje'},
-    {id:'resultado',label:'Resultado'},
-    {id:'time',     label:'Time'},
-    {id:'reunioes', label:'Agenda'},
-    {id:'jdc',      label:'Pessoas'},
-    {id:'analise',  label:'Análise de carteira'},
-  ],[buildResumo,buildResultadoGestor,buildTimeGestor,buildReunioes,buildJDC,buildAnaliseCarteira]);
+    {id:'resumo',      label:'Hoje'},
+    {id:'resultado',   label:'Resultado'},
+    {id:'mes-anterior',label:'Mês Anterior'},
+    {id:'time',        label:'Time'},
+    {id:'reunioes',    label:'Agenda'},
+    {id:'jdc',         label:'Pessoas'},
+    {id:'analise',     label:'Análise de carteira'},
+  ],[buildResumo,buildResultadoGestor,buildMesAnterior,buildTimeGestor,buildReunioes,buildJDC,buildAnaliseCarteira]);
 }
 
 // ─── ANÁLISE DE CARTEIRA (gestor) ─────────────────────────────
@@ -3321,6 +3324,211 @@ function buildResultadoGestor(pane){
 
   // Load forecast analysis async
   buildForecastAnalysis();
+}
+
+// ─── MÊS ANTERIOR (gestor) ────────────────────────────────────
+// Aba dedicada ao fechamento do mês passado (Abril 2026).
+// Lê 100% de DATA.fechamentoAbril (arquivo histórico).
+function buildMesAnterior(pane){
+  var fa=DATA.fechamentoAbril||{};
+  var bdrsMap={};
+  (DATA.bdrs||[]).forEach(function(b){bdrsMap[b.id]={name:b.name,color:b.color};});
+
+  // ── Métricas topo
+  var pctMeta=fa.metaAtingimento||0;
+  var metaAtuOpps=DATA.meta||84;
+  var topoCol=pctMeta>=90?'var(--green)':pctMeta>=70?'var(--amber)':'var(--red)';
+  var topoBg =pctMeta>=90?'var(--green-bg)':pctMeta>=70?'var(--amber-bg)':'var(--red-bg)';
+
+  // ── Ranking BDR (opps Abr) — ordenado desc
+  var perBDR=fa.perBDR||{};
+  var ativPorBDR=fa.ativPorBDR||{};
+  var ranking=Object.keys(perBDR).map(function(id){
+    var p=perBDR[id]||{};
+    var info=bdrsMap[id]||{name:id,color:'#94a3b8'};
+    return {id:id,name:info.name,color:info.color,opps:p.opps||0,ras:p.ras||0,lig:p.lig||0,ativ:ativPorBDR[id]||0};
+  }).sort(function(a,b){return b.opps-a.opps;});
+  var maxOpps=Math.max.apply(null,ranking.map(function(r){return r.opps;}).concat([1]));
+  var maxAtiv=Math.max.apply(null,ranking.map(function(r){return r.ativ;}).concat([1]));
+
+  // ── MeetRox final
+  var mrox=fa.meetrox||{};
+  var mroxTime=mrox.time||{};
+  var mroxBdrs=Object.keys(mrox).filter(function(k){return k!=='time';}).map(function(id){
+    var m=mrox[id]||{};
+    var info=bdrsMap[id]||{name:id};
+    return {id:id,name:info.name,nota:m.nota,conversas:m.conversas,gap:m.gap||''};
+  }).sort(function(a,b){return (b.nota||0)-(a.nota||0);});
+  var notasValidas=mroxBdrs.filter(function(b){return b.nota!=null;}).map(function(b){return b.nota;});
+  var mediaTime=notasValidas.length?(notasValidas.reduce(function(s,n){return s+n;},0)/notasValidas.length):0;
+  var convTotal=mroxBdrs.reduce(function(s,b){return s+(b.conversas||0);},0);
+
+  // ── Semanas
+  var sems=fa.semanas||[];
+  var maxOppsSem=Math.max.apply(null,sems.map(function(s){return s.opps||0;}).concat([1]));
+  var maxRasSem =Math.max.apply(null,sems.map(function(s){return s.ras||0;}).concat([1]));
+  var maxLigSem =Math.max.apply(null,sems.map(function(s){return s.lig||0;}).concat([1]));
+
+  // ── Helpers
+  function fmt(n){return (n||0).toLocaleString('pt-BR');}
+  function pct(v,m){return m>0?Math.round((v/m)*100):0;}
+  function notaCol(n){return n==null?'var(--text3)':n>=8?'var(--green)':n>=7?'var(--amber)':'var(--red)';}
+  function escAttr(s){return String(s||'').replace(/"/g,'&quot;');}
+
+  pane.innerHTML=''
+    // ── HERO topo: status do fechamento ──
+    +'<div class="card" style="margin-bottom:14px;background:'+topoBg+';border:1px solid '+topoCol+'33">'
+    +'<div style="font-size:11px;font-weight:700;color:'+topoCol+';text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📦 Fechamento · Abril 2026</div>'
+    +'<div style="font-size:36px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+topoCol+';line-height:1;margin-bottom:6px">'+fa.opps+' opps</div>'
+    +'<div style="font-size:14px;color:var(--text2);margin-bottom:14px"><strong style="color:var(--text)">'+pctMeta+'%</strong> da meta · meta era '+metaAtuOpps+' opps</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'
+    +'<div style="background:var(--bg2);border-radius:8px;padding:10px;text-align:center">'
+    +'<div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">'+fmt(fa.ras)+'</div>'
+    +'<div style="font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">RAs / SQLs</div>'
+    +'</div>'
+    +'<div style="background:var(--bg2);border-radius:8px;padding:10px;text-align:center">'
+    +'<div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">'+fmt(fa.lig)+'</div>'
+    +'<div style="font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Ligações</div>'
+    +'</div>'
+    +'<div style="background:var(--bg2);border-radius:8px;padding:10px;text-align:center">'
+    +'<div style="font-size:22px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text)">~'+fmt(fa.ativ)+'</div>'
+    +'<div style="font-size:10px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Atividades</div>'
+    +'</div>'
+    +'</div>'
+    +'</div>'
+
+    // ── Ranking BDR · Opps de Abril ──
+    +'<div class="card" style="margin-bottom:14px">'
+    +'<div class="card-title">🏆 Ranking BDR · Opps de Abril</div>'
+    +'<div style="margin-top:12px">'
+    +ranking.map(function(r,i){
+      var w=Math.max(2,Math.round((r.opps/maxOpps)*100));
+      var medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':String(i+1)+'º';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">'
+        +'<div style="width:24px;font-size:13px;font-weight:700;color:var(--text2);text-align:center">'+medal+'</div>'
+        +'<div style="flex:1;min-width:0">'
+        +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'
+        +'<div style="font-size:12px;font-weight:600;color:var(--text);font-family:\'Inter\',sans-serif">'+r.name.split(' ')[0]+'</div>'
+        +'<div style="font-size:11px;color:var(--text3)"><strong style="color:var(--text);font-family:\'Inter\',sans-serif">'+r.opps+'</strong> opps · '+r.ras+' RAs · '+r.lig+' lig</div>'
+        +'</div>'
+        +'<div style="height:6px;background:var(--bg2);border-radius:3px;overflow:hidden">'
+        +'<div style="height:100%;width:'+w+'%;background:'+(r.color||'var(--accent)')+';border-radius:3px"></div>'
+        +'</div>'
+        +'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+    +'</div>'
+
+    // ── Atividades por BDR ──
+    +'<div class="card" style="margin-bottom:14px">'
+    +'<div class="card-title">⚡ Atividades concluídas por BDR</div>'
+    +'<div style="font-size:11px;color:var(--text3);margin-top:-4px;margin-bottom:10px">Snapshot 29/04 21:30 — última leitura antes do fechamento</div>'
+    +ranking.slice().sort(function(a,b){return b.ativ-a.ativ;}).map(function(r){
+      var w=Math.max(2,Math.round((r.ativ/maxAtiv)*100));
+      return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0">'
+        +'<div style="flex:0 0 90px;font-size:12px;color:var(--text2);font-family:\'Inter\',sans-serif">'+r.name.split(' ')[0]+'</div>'
+        +'<div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden">'
+        +'<div style="height:100%;width:'+w+'%;background:'+(r.color||'var(--accent)')+';border-radius:4px"></div>'
+        +'</div>'
+        +'<div style="flex:0 0 56px;text-align:right;font-size:12px;font-weight:700;color:var(--text);font-family:\'Inter\',sans-serif">'+fmt(r.ativ)+'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+
+    // ── MeetRox final Abril ──
+    +'<div class="card" style="margin-bottom:14px">'
+    +'<div class="card-title">🎙 MeetRox · fechamento Abril</div>'
+    +'<div style="display:flex;align-items:center;justify-content:space-around;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:10px">'
+    +'<div style="text-align:center"><div style="font-size:28px;font-weight:700;font-family:\'Inter\',sans-serif;color:'+notaCol(mediaTime)+';line-height:1">'+(mediaTime?mediaTime.toFixed(1):'—')+'</div><div style="font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.06em">Nota média</div></div>'
+    +'<div style="text-align:center"><div style="font-size:28px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text);line-height:1">'+fmt(convTotal)+'</div><div style="font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.06em">Conversas avaliadas</div></div>'
+    +'<div style="text-align:center"><div style="font-size:28px;font-weight:700;font-family:\'Inter\',sans-serif;color:var(--text);line-height:1">'+notasValidas.length+'/'+mroxBdrs.length+'</div><div style="font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.06em">BDRs avaliados</div></div>'
+    +'</div>'
+    +mroxBdrs.map(function(b){
+      var w=Math.max(2,Math.round(((b.nota||0)/10)*100));
+      var col=notaCol(b.nota);
+      return '<div style="padding:8px 0;border-bottom:1px solid var(--border)">'
+        +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'
+        +'<div style="font-size:12px;font-weight:600;color:var(--text);font-family:\'Inter\',sans-serif">'+b.name.split(' ')[0]+'</div>'
+        +'<div style="font-size:11px;color:var(--text3)"><strong style="font-family:\'Inter\',sans-serif;color:'+col+'">'+(b.nota!=null?b.nota:'—')+'</strong>'+(b.conversas!=null?(' · '+b.conversas+' conv'):' · — conv')+'</div>'
+        +'</div>'
+        +'<div style="height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:'+(b.gap?'6px':'0')+'">'
+        +'<div style="height:100%;width:'+w+'%;background:'+col+';border-radius:3px"></div>'
+        +'</div>'
+        +(b.gap?'<div style="font-size:10px;color:var(--text3);line-height:1.4">'+b.gap+'</div>':'')
+        +'</div>';
+    }).join('')
+    +(mroxTime.melhorM1?'<div style="margin-top:10px;padding:8px 10px;background:var(--green-bg);border-radius:6px;font-size:11px;color:var(--text2)">⭐ Destaque: <strong style="color:var(--text)">'+mroxTime.melhorM1.name+'</strong> — '+mroxTime.melhorM1.nota+' ('+mroxTime.melhorM1.conversas+' conversas)</div>':'')
+    +'</div>'
+
+    // ── Evolução semanal ──
+    +'<div class="card" style="margin-bottom:14px">'
+    +'<div class="card-title">📅 Evolução semanal · S1 → S4</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px">'
+    +sems.map(function(s){
+      var hOpps=Math.max(4,Math.round((s.opps/maxOppsSem)*60));
+      var hRas =Math.max(4,Math.round((s.ras /maxRasSem )*60));
+      var hLig =Math.max(4,Math.round((s.lig /maxLigSem )*60));
+      return '<div style="background:var(--bg2);border-radius:8px;padding:10px 8px">'
+        +'<div style="font-size:11px;font-weight:700;color:var(--text);text-align:center;font-family:\'Inter\',sans-serif">'+s.label+'</div>'
+        +'<div style="font-size:9px;color:var(--text3);text-align:center;margin-bottom:8px">'+s.datas+'</div>'
+        +'<div style="display:flex;align-items:flex-end;justify-content:space-around;height:64px;margin-bottom:6px">'
+        +'<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:14px;height:'+hOpps+'px;background:#22c55e;border-radius:2px"></div><div style="font-size:10px;font-weight:700;color:#22c55e;font-family:\'Inter\',sans-serif">'+s.opps+'</div></div>'
+        +'<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:14px;height:'+hRas+'px;background:#f59e0b;border-radius:2px"></div><div style="font-size:10px;font-weight:700;color:#f59e0b;font-family:\'Inter\',sans-serif">'+s.ras+'</div></div>'
+        +'<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:14px;height:'+hLig+'px;background:#6366f1;border-radius:2px"></div><div style="font-size:10px;font-weight:700;color:#6366f1;font-family:\'Inter\',sans-serif">'+s.lig+'</div></div>'
+        +'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+    +'<div style="display:flex;gap:14px;justify-content:center;margin-top:10px;font-size:10px;color:var(--text3)">'
+    +'<div><span style="display:inline-block;width:10px;height:10px;background:#22c55e;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Opps</div>'
+    +'<div><span style="display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:2px;vertical-align:middle;margin-right:4px"></span>RAs</div>'
+    +'<div><span style="display:inline-block;width:10px;height:10px;background:#6366f1;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Ligações</div>'
+    +'</div>'
+    +'</div>'
+
+    // ── Opps nominais ──
+    +'<div class="card" style="margin-bottom:14px">'
+    +'<div class="collapsible-header" onclick="toggleCard(\'mes-ant-opps\',this)" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;cursor:pointer">'
+    +'<div class="card-title" style="margin-bottom:0">📋 Opps nominais — '+(fa.oppsDetalhe||[]).length+' de '+fa.opps+'</div>'
+    +'<span class="collapse-icon" style="font-size:16px;color:var(--text3)">▾</span>'
+    +'</div>'
+    +'<div id="mes-ant-opps" style="display:none;margin-top:12px">'
+    +'<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Última captura nominal: 27/04 (parcial — nem todas foram registradas)</div>'
+    +(fa.oppsDetalhe||[]).map(function(o){
+      return '<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:baseline">'
+        +'<div style="font-weight:600;color:var(--text)">'+escAttr(o.empresa||'(sem nome)')+'</div>'
+        +'<div style="font-size:10px;color:var(--text3)">'+escAttr(o.data)+'</div>'
+        +'</div>'
+        +'<div style="font-size:10px;color:var(--text3);margin-top:2px">'+escAttr(o.bdrNome)+' · '+escAttr(o.etapa)+' · AE: '+escAttr(o.ae)+'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+    +'</div>'
+
+    // ── RAs nominais ──
+    +'<div class="card" style="margin-bottom:14px">'
+    +'<div class="collapsible-header" onclick="toggleCard(\'mes-ant-ras\',this)" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0;cursor:pointer">'
+    +'<div class="card-title" style="margin-bottom:0">📞 RAs nominais — '+(fa.rasDetalhe||[]).length+' de '+fa.ras+'</div>'
+    +'<span class="collapse-icon" style="font-size:16px;color:var(--text3)">▾</span>'
+    +'</div>'
+    +'<div id="mes-ant-ras" style="display:none;margin-top:12px">'
+    +'<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Última captura nominal: 27/04 (parcial)</div>'
+    +(fa.rasDetalhe||[]).map(function(o){
+      return '<div style="padding:7px 0;border-bottom:1px solid var(--border);font-size:12px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:baseline">'
+        +'<div style="font-weight:600;color:var(--text)">'+escAttr(o.empresa||'(sem nome)')+'</div>'
+        +'<div style="font-size:10px;color:var(--text3)">'+escAttr(o.data)+'</div>'
+        +'</div>'
+        +'<div style="font-size:10px;color:var(--text3);margin-top:2px">'+escAttr(o.bdrNome)+' · '+escAttr(o.etapa)+' · AE: '+escAttr(o.ae)+'</div>'
+        +'</div>';
+    }).join('')
+    +'</div>'
+    +'</div>'
+
+    // ── Footer fonte ──
+    +'<div style="font-size:10px;color:var(--text3);text-align:center;padding:8px 0">Fonte: SF dashboard [OFICIAL] Painel de Resultados Plataforma · filtro MÊS PASSADO + MeetRox 04/05/2026</div>';
 }
 
 // RESUMO = Nova Home — Diagnóstico Estratégico
@@ -7424,35 +7632,58 @@ function buildHoje(pane, bdr){
       </div>
     </div>
 
-    <!-- HERO: ATINGIMENTO — PR2 #3 — hierarquia invertida (GAP em destaque) -->
-    <div style="margin-bottom:10px;background:${paceGrad};border-radius:var(--radius);padding:20px 18px;box-shadow:0 4px 20px rgba(0,0,0,0.12)">
-      <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Atingimento da meta · Maio 2026</div>
-      <div style="font-size:48px;font-weight:700;font-family:\'Inter\',sans-serif;color:${paceAccent};line-height:1.05;letter-spacing:-.02em;margin-bottom:6px">${gapBig}</div>
-      <div style="font-size:20px;font-weight:600;font-family:\'Inter\',sans-serif;color:#fff;line-height:1.2;margin-bottom:12px">${oppsMesVal} de ${DATA.metaBDR} opps · ${pctMetaBDR}%</div>
-      <div style="height:10px;background:rgba(0,0,0,0.28);border-radius:5px;overflow:hidden;position:relative;margin-bottom:5px">
-        <div style="position:absolute;left:0;top:0;height:100%;width:${pctPaceIdeal}%;background:rgba(255,255,255,0.22);border-radius:5px"></div>
-        <div style="position:absolute;left:0;top:0;height:100%;width:${pctMetaBDR}%;background:${paceAccent};border-radius:5px;transition:width .3s"></div>
+    <!-- HERO: ATINGIMENTO — PR2 #3 — modo soft (azul/roxo) por padrão; modo alerta (vermelho) só quando atingimento está entre 40–60% do pace ideal -->
+    ${(()=>{
+      const paceRatio = (pc.paceEsperado>0) ? (oppsMesVal/pc.paceEsperado) : (oppsMesVal>=DATA.metaBDR ? 1 : 0);
+      const isAlertZone = pc.state==='below' && paceRatio>=0.4 && paceRatio<0.6;
+      const isSoft = pc.state==='below' && !isAlertZone; // soft = abaixo do pace fora da zona vermelha
+      const heroBg     = isSoft ? 'var(--bg2)'           : paceGrad;
+      const heroBorder = isSoft ? '1.5px solid var(--accent)' : 'none';
+      const labelCol   = isSoft ? 'var(--text3)'         : 'rgba(255,255,255,.7)';
+      const bigCol     = isSoft ? 'var(--accent)'        : paceAccent;
+      const subCol     = isSoft ? 'var(--text)'          : '#fff';
+      const progressTrackBg = isSoft ? 'var(--accent-light)' : 'rgba(0,0,0,0.28)';
+      const progressIdealBg = isSoft ? 'var(--accent-mid)'   : 'rgba(255,255,255,0.22)';
+      const progressFillBg  = isSoft ? 'var(--accent)'       : paceAccent;
+      const paceTextCol = isSoft ? 'var(--text2)' : 'rgba(255,255,255,.7)';
+      const btnBg       = isSoft ? 'var(--accent-light)' : 'rgba(0,0,0,0.2)';
+      const btnBgHover  = isSoft ? 'var(--accent-mid)'   : 'rgba(0,0,0,0.3)';
+      const btnNumCol   = isSoft ? 'var(--text)'         : '#fff';
+      const btnLblCol   = isSoft ? 'var(--text3)'        : 'rgba(255,255,255,.65)';
+      const dividerCol  = isSoft ? 'var(--border)'       : 'rgba(255,255,255,0.1)';
+      const footerCol   = isSoft ? 'var(--text2)'        : 'rgba(255,255,255,.6)';
+      const footerStrong= isSoft ? 'var(--text)'         : 'rgba(255,255,255,.85)';
+      const subFooterCol= isSoft ? 'var(--text3)'        : 'rgba(255,255,255,.55)';
+      return `
+    <div style="margin-bottom:10px;background:${heroBg};border:${heroBorder};border-radius:var(--radius);padding:20px 18px;box-shadow:${isSoft?'none':'0 4px 20px rgba(0,0,0,0.12)'}">
+      <div style="font-size:11px;font-weight:600;color:${labelCol};text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Atingimento da meta · Maio 2026</div>
+      <div style="font-size:48px;font-weight:700;font-family:'Inter',sans-serif;color:${bigCol};line-height:1.05;letter-spacing:-.02em;margin-bottom:6px">${gapBig}</div>
+      <div style="font-size:20px;font-weight:600;font-family:'Inter',sans-serif;color:${subCol};line-height:1.2;margin-bottom:12px">${oppsMesVal} de ${DATA.metaBDR} opps · ${pctMetaBDR}%</div>
+      <div style="height:10px;background:${progressTrackBg};border-radius:5px;overflow:hidden;position:relative;margin-bottom:5px">
+        <div style="position:absolute;left:0;top:0;height:100%;width:${pctPaceIdeal}%;background:${progressIdealBg};border-radius:5px"></div>
+        <div style="position:absolute;left:0;top:0;height:100%;width:${pctMetaBDR}%;background:${progressFillBg};border-radius:5px;transition:width .3s"></div>
       </div>
-      <div style="font-size:10px;color:rgba(255,255,255,.7);margin-bottom:14px;letter-spacing:.02em">Pace ideal: ${pctPaceIdeal}% · Atual: ${pctMetaBDR}%</div>
+      <div style="font-size:10px;color:${paceTextCol};margin-bottom:14px;letter-spacing:.02em">Pace ideal: ${pctPaceIdeal}% · Atual: ${pctMetaBDR}%</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <button onclick="showOppsModal('${bdr.id}')"
-          style="background:rgba(0,0,0,0.2);border:none;border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:background .15s;font-family:inherit"
-          onmouseenter="this.style.background='rgba(0,0,0,0.3)'" onmouseleave="this.style.background='rgba(0,0,0,0.2)'">
-          <div style="font-size:26px;font-weight:700;font-family:\'Inter\',sans-serif;color:#fff;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">${oppsMesVal||'0'}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Opps ↗</div>
+          style="background:${btnBg};border:none;border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:background .15s;font-family:inherit"
+          onmouseenter="this.style.background='${btnBgHover}'" onmouseleave="this.style.background='${btnBg}'">
+          <div style="font-size:26px;font-weight:700;font-family:'Inter',sans-serif;color:${btnNumCol};text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px">${oppsMesVal||'0'}</div>
+          <div style="font-size:9px;color:${btnLblCol};margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Opps ↗</div>
         </button>
         <button onclick="(function(){var el=document.getElementById('agenda-mes-${bdr.id}');if(el){el.scrollIntoView({behavior:'smooth',block:'start'});}})();track('bdr_hero_reunioes','${bdr.id}')"
-          style="background:rgba(0,0,0,0.2);border:none;border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:background .15s;font-family:inherit"
-          onmouseenter="this.style.background='rgba(0,0,0,0.3)'" onmouseleave="this.style.background='rgba(0,0,0,0.2)'">
-          <div style="font-size:26px;font-weight:700;font-family:\'Inter\',sans-serif;color:#fff">${bdr.ras}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Reuniões ↗</div>
+          style="background:${btnBg};border:none;border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:background .15s;font-family:inherit"
+          onmouseenter="this.style.background='${btnBgHover}'" onmouseleave="this.style.background='${btnBg}'">
+          <div style="font-size:26px;font-weight:700;font-family:'Inter',sans-serif;color:${btnNumCol}">${bdr.ras}</div>
+          <div style="font-size:9px;color:${btnLblCol};margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Reuniões ↗</div>
         </button>
       </div>
-      <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);font-size:11px;color:rgba(255,255,255,.6)">
-        Time: ${totalRAsTime} RAs · ${totalOppsTime} opps · <span style="color:rgba(255,255,255,.85);font-weight:600">${pctMetaTime}% da meta</span>
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid ${dividerCol};font-size:11px;color:${footerCol}">
+        Time: ${totalRAsTime} RAs · ${totalOppsTime} opps · <span style="color:${footerStrong};font-weight:600">${pctMetaTime}% da meta</span>
       </div>
-      <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:6px">${gapSub}</div>
-    </div>
+      <div style="font-size:10px;color:${subFooterCol};margin-top:6px">${gapSub}</div>
+    </div>`;
+    })()}
 
     <!-- PRIORIDADES -->
     <div class="card" style="margin-bottom:10px">
