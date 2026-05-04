@@ -5838,9 +5838,10 @@ function buildReunioes(pane){
             const key='TA|'+a.empresa+'|'+a.data;
             const band=atrAgeBand(dias);
             const payload=JSON.stringify({key:key,empresa:a.empresa,ae:a.ae,aeFirst:(a.ae||'').split(' ')[0],dias:dias,data:a.data}).replace(/"/g,'&quot;');
+            const sfHref=sfDealHref(a.empresa);
             return `<tr class="atr-row atr-ageband age-${band}" data-key="${key}" data-status="${getAtrasadaStatus(key)}" data-dias="${dias}" onclick="atrShowPopover(this,JSON.parse(this.dataset.payload))" data-payload="${payload}" style="border-bottom:1px solid var(--border)">
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
-              <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
+              <td style="padding:8px 8px;font-size:11px;color:var(--text)"><a href="${sfHref}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Abrir no Salesforce" style="color:var(--text);text-decoration:none;border-bottom:1px dashed var(--text3)">${a.empresa}</a> <span style="font-size:9px;color:var(--text3);margin-left:2px">↗</span></td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
               <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'Inter\',sans-serif;color:var(--text3)">${a.data}</td>
               <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${dc}">${dias}d</span></td>
@@ -5878,9 +5879,10 @@ function buildReunioes(pane){
             const key='TM|'+a.empresa+'|'+a.data;
             const band=atrAgeBand(dias);
             const payload=JSON.stringify({key:key,empresa:a.empresa,ae:a.ae,aeFirst:(a.ae||'').split(' ')[0],dias:dias,data:a.data}).replace(/"/g,'&quot;');
+            const sfHref=sfDealHref(a.empresa);
             return `<tr class="atr-row atr-ageband age-${band}" data-key="${key}" data-status="${getAtrasadaStatus(key)}" data-dias="${dias}" onclick="atrShowPopover(this,JSON.parse(this.dataset.payload))" data-payload="${payload}" style="border-bottom:1px solid var(--border)">
               <td style="padding:8px 8px"><div style="display:flex;align-items:center;gap:6px"><div class="bdr-av" style="background:${a.bg};color:${a.color};width:22px;height:22px;font-size:9px">${a.id}</div><span style="font-size:11px;font-weight:600">${a.name.split(' ')[0]}</span></div></td>
-              <td style="padding:8px 8px;font-size:11px;color:var(--text)">${a.empresa}</td>
+              <td style="padding:8px 8px;font-size:11px;color:var(--text)"><a href="${sfHref}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Abrir no Salesforce" style="color:var(--text);text-decoration:none;border-bottom:1px dashed var(--text3)">${a.empresa}</a> <span style="font-size:9px;color:var(--text3);margin-left:2px">↗</span></td>
               <td style="padding:8px 8px;font-size:10px;color:var(--text2)">${a.ae.split(' ')[0]}</td>
               <td style="padding:8px 8px;text-align:center;font-size:10px;font-family:\'Inter\',sans-serif;color:var(--text3)">${a.data}</td>
               <td style="padding:8px 8px;text-align:center"><span style="font-size:13px;font-weight:700;font-family:\'Inter\',sans-serif;color:${dc}">${dias}d</span></td>
@@ -6159,6 +6161,15 @@ function getReunioesDoMes(){
   (DATA.reunioes.atrasadasTM||[]).forEach(function(a){ out.push({tipo:'TM',bdrNome:a.name,empresa:a.empresa,ae:a.ae,data:a.data,source:'atrasada',bg:a.bg,color:a.color,id:a.id}); });
   // Dedup por (tipo|empresa|data)
   var seen={}; return out.filter(function(m){var k=m.tipo+'|'+m.empresa+'|'+m.data; if(seen[k]) return false; seen[k]=true; return true;});
+}
+// Gera URL do Salesforce para um deal/reunião — prioriza sfId em oppsDetalhe,
+// senão cai pra busca global por nome da empresa.
+function sfDealHref(empresa){
+  if(!empresa) return 'https://gupy.lightning.force.com/';
+  var e=(empresa||'').toLowerCase().trim();
+  var match=(DATA.oppsDetalhe||[]).find(function(o){return (o.empresa||'').toLowerCase().trim()===e && o.sfId;});
+  if(match) return 'https://gupy.lightning.force.com/lightning/r/Opportunity/'+match.sfId+'/view';
+  return 'https://gupy.lightning.force.com/_ui/search/ui/UnifiedSearchResults?searchType=2&str='+encodeURIComponent(empresa);
 }
 function getReuniaoDateOverride(key){
   try{var map=JSON.parse(localStorage.getItem('reuniao_date_overrides')||'{}');return map[key]||null;}catch(e){return null;}
