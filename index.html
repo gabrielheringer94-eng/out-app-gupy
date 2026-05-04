@@ -1192,6 +1192,12 @@ const DATA = {
       novoLead:613, abordagemIniciada:484, leadConectado:337,
       reuniaoAgendada:142, oportunidades:59, desqualificados:503
     },
+    // ACV Incremental gerado em Abril (fonte: SF · widget ACV Incremental, captura 04/05/2026 14:23)
+    acvIncremental:{total:23052, porBDR:{JR:23052}, gerador:'Jeanne Rodrigues'},
+    // Opps por fonte de qualificação — Abril 2026 (total 59, bate com fechamentoAbril.opps)
+    fonteOpps:{
+      bdrHunter:47, leadScoring:9, parcerias:2, eventos:1
+    },
     // Conversões calculadas (stage / stage anterior)
     conversoes:{
       aiLc:{real:Math.round(337/484*1000)/10, label:'AI → LC'},   // 69.6%
@@ -3399,24 +3405,61 @@ function buildMesAnterior(pane){
   function notaCol(n){return n==null?'var(--text3)':n>=8?'var(--green)':n>=7?'var(--amber)':'var(--red)';}
   function escAttr(s){return String(s||'').replace(/"/g,'&quot;');}
 
+  // ── Donut helper (Fase 2) ──
+  function donut(opts){
+    var size=opts.size||64, r=(size/2)-6, cx=size/2, cy=size/2;
+    var circ=2*Math.PI*r;
+    var pctV=Math.max(0,Math.min(100,opts.pct||0));
+    var off=circ-(circ*pctV/100);
+    var gid='gd-'+opts.id;
+    var c1=opts.c1, c2=opts.c2;
+    var trackOp=opts.trackOp!=null?opts.trackOp:0.10;
+    var bigTxt=opts.bigTxt||'';
+    var bigSize=opts.bigSize||16;
+    return '<svg viewBox="0 0 '+size+' '+size+'" width="'+size+'" height="'+size+'" style="display:block;margin:0 auto" aria-hidden="true">'
+      +'<defs><linearGradient id="'+gid+'" x1="0%" y1="0%" x2="100%" y2="100%">'
+      +'<stop offset="0%" stop-color="'+c1+'"/><stop offset="100%" stop-color="'+c2+'"/></linearGradient></defs>'
+      +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+c1+'" stroke-opacity="'+trackOp+'" stroke-width="5"/>'
+      +'<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="url(#'+gid+')" stroke-width="5" stroke-linecap="round" stroke-dasharray="'+circ.toFixed(2)+'" stroke-dashoffset="'+off.toFixed(2)+'" transform="rotate(-90 '+cx+' '+cy+')"/>'
+      +(bigTxt?'<text x="'+cx+'" y="'+cy+'" text-anchor="middle" dominant-baseline="central" font-family="Inter" font-size="'+bigSize+'" font-weight="700" fill="url(#'+gid+')">'+bigTxt+'</text>':'')
+      +'</svg>';
+  }
+  function ativShort(n){return n>=1000?(Math.round(n/100)/10).toFixed(1).replace(/\.0$/,'')+'k':String(n);}
+  // ── Gradient bar helper (Fase 3) — recebe hex do BDR, devolve gradient + sombra colorida sutil
+  function gradBar(hex){
+    var c=hex||'#6366f1';
+    return {bg:'linear-gradient(90deg, '+c+'cc 0%, '+c+' 100%)', shadow:'0 1px 3px '+c+'40'};
+  }
+
   pane.innerHTML=''
-    // ── HERO topo: status do fechamento ── (Fase 1 refator visual: gradients nos 4 números)
+    // ── HERO FECHAMENTO — grid 4-col com donut em opps (Fase 2 refator visual) ──
     +'<div class="card" style="margin-bottom:14px">'
-    +'<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📦 Fechamento · Abril 2026</div>'
-    +'<div class="num-grad num-grad-opps" style="font-size:48px;line-height:1;margin-bottom:6px">'+fa.opps+'<span style="font-size:22px;margin-left:6px">opps</span></div>'
-    +'<div style="font-size:13px;color:var(--text2);margin-bottom:16px"><strong style="color:'+topoCol+'">'+pctMeta+'%</strong> da meta · meta era '+metaAtuOpps+' opps</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'
-    +'<div style="background:var(--bg2);border-radius:12px;padding:12px 8px;text-align:center">'
-    +'<div class="num-grad num-grad-ras" style="font-size:26px;line-height:1">'+fmt(fa.ras)+'</div>'
-    +'<div style="font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.04em">RAs / SQLs</div>'
+    +'<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">📦 Fechamento · Abril 2026</div>'
+    +'<style>.fech-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}@media(min-width:520px){.fech-grid{grid-template-columns:repeat(4,1fr)}}</style>'
+    +'<div class="fech-grid">'
+    // OPPS — donut com 70% real + número grande embaixo
+    +'<div style="text-align:center;padding:8px 4px">'
+    +donut({id:'opps',pct:pctMeta,c1:'#f97316',c2:'#f59e0b',size:80,bigTxt:pctMeta+'%',bigSize:20,trackOp:0.14})
+    +'<div class="num-grad num-grad-opps" style="font-size:32px;line-height:1;margin-top:10px">'+fa.opps+'</div>'
+    +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;font-weight:600">opps · meta '+metaAtuOpps+'</div>'
     +'</div>'
-    +'<div style="background:var(--bg2);border-radius:12px;padding:12px 8px;text-align:center">'
-    +'<div class="num-grad num-grad-lig" style="font-size:26px;line-height:1">'+fmt(fa.lig)+'</div>'
-    +'<div style="font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.04em">Ligações</div>'
+    // RAs — donut decorativo (track sutil + ring full) + número centrado embaixo
+    +'<div style="text-align:center;padding:8px 4px">'
+    +donut({id:'ras',pct:100,c1:'#3b82f6',c2:'#06b6d4',size:80,trackOp:0.10})
+    +'<div class="num-grad num-grad-ras" style="font-size:32px;line-height:1;margin-top:10px">'+fmt(fa.ras)+'</div>'
+    +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;font-weight:600">RAs / SQLs</div>'
     +'</div>'
-    +'<div style="background:var(--bg2);border-radius:12px;padding:12px 8px;text-align:center">'
-    +'<div class="num-grad num-grad-ativ" style="font-size:26px;line-height:1">'+fmt(fa.ativ)+'</div>'
-    +'<div style="font-size:10px;color:var(--text3);margin-top:4px;text-transform:uppercase;letter-spacing:.04em">Atividades</div>'
+    // Lig
+    +'<div style="text-align:center;padding:8px 4px">'
+    +donut({id:'lig',pct:100,c1:'#10b981',c2:'#22c55e',size:80,trackOp:0.10})
+    +'<div class="num-grad num-grad-lig" style="font-size:32px;line-height:1;margin-top:10px">'+fmt(fa.lig)+'</div>'
+    +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;font-weight:600">Ligações</div>'
+    +'</div>'
+    // Ativ
+    +'<div style="text-align:center;padding:8px 4px">'
+    +donut({id:'ativ',pct:100,c1:'#8b5cf6',c2:'#a855f7',size:80,trackOp:0.10})
+    +'<div class="num-grad num-grad-ativ" style="font-size:32px;line-height:1;margin-top:10px">'+ativShort(fa.ativ)+'</div>'
+    +'<div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;font-weight:600">Atividades</div>'
     +'</div>'
     +'</div>'
     +'</div>'
@@ -3435,9 +3478,9 @@ function buildMesAnterior(pane){
         +'<div style="font-size:12px;font-weight:600;color:var(--text);font-family:\'Inter\',sans-serif">'+r.name.split(' ')[0]+'</div>'
         +'<div style="font-size:11px;color:var(--text3)"><strong style="color:var(--text);font-family:\'Inter\',sans-serif">'+r.opps+'</strong> opps · '+r.ras+' RAs · '+r.lig+' lig</div>'
         +'</div>'
-        +'<div style="height:6px;background:var(--bg2);border-radius:3px;overflow:hidden">'
-        +'<div style="height:100%;width:'+w+'%;background:'+(r.color||'var(--accent)')+';border-radius:3px"></div>'
-        +'</div>'
+        +(function(){var gb=gradBar(r.color);return '<div style="height:6px;background:var(--bg2);border-radius:3px;overflow:hidden">'
+          +'<div style="height:100%;width:'+w+'%;background:'+gb.bg+';border-radius:3px;box-shadow:'+gb.shadow+'"></div>'
+          +'</div>';})()
         +'</div>'
         +'</div>';
     }).join('')
@@ -3452,9 +3495,9 @@ function buildMesAnterior(pane){
       var w=Math.max(2,Math.round((r.ativ/maxAtiv)*100));
       return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0">'
         +'<div style="flex:0 0 90px;font-size:12px;color:var(--text2);font-family:\'Inter\',sans-serif">'+r.name.split(' ')[0]+'</div>'
-        +'<div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden">'
-        +'<div style="height:100%;width:'+w+'%;background:'+(r.color||'var(--accent)')+';border-radius:4px"></div>'
-        +'</div>'
+        +(function(){var gb=gradBar(r.color);return '<div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden">'
+          +'<div style="height:100%;width:'+w+'%;background:'+gb.bg+';border-radius:4px;box-shadow:'+gb.shadow+'"></div>'
+          +'</div>';})()
         +'<div style="flex:0 0 56px;text-align:right;font-size:12px;font-weight:700;color:var(--text);font-family:\'Inter\',sans-serif">'+fmt(r.ativ)+'</div>'
         +'</div>';
     }).join('')
