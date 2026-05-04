@@ -3671,39 +3671,60 @@ function buildResumo(pane){
       <div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em">${sauda}, líder.</div>
     </div>
 
-    <!-- HERO: ATINGIMENTO DA OPERAÇÃO (espelha o hero do BDR) -->
-    <div style="margin-bottom:12px;background:${paceGradOp};border-radius:var(--radius);padding:20px 18px;box-shadow:0 4px 20px rgba(0,0,0,0.12)">
-      <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Atingimento da operação · Maio 2026</div>
-      <div style="font-size:48px;font-weight:700;font-family:'Inter',sans-serif;color:${paceAccentOp};line-height:1.05;letter-spacing:-.02em;margin-bottom:6px">${gapBigOp}</div>
-      <div style="font-size:20px;font-weight:600;font-family:'Inter',sans-serif;color:#fff;line-height:1.2;margin-bottom:12px">${teamOppsMes} de ${META_OP} opps · ${pctMetaOp}%</div>
-      <div style="height:10px;background:rgba(0,0,0,0.28);border-radius:5px;overflow:hidden;position:relative;margin-bottom:5px">
-        <div style="position:absolute;left:0;top:0;height:100%;width:${pctPaceIdealOp}%;background:rgba(255,255,255,0.22);border-radius:5px"></div>
-        <div style="position:absolute;left:0;top:0;height:100%;width:${pctMetaOp}%;background:${paceAccentOp};border-radius:5px;transition:width .3s"></div>
+    <!-- HERO: ATINGIMENTO DA OPERAÇÃO — modo soft (azul/roxo) por padrão; vermelho só quando atingimento está entre 40–60% do pace ideal -->
+    ${(()=>{
+      const paceRatio = (pcOp.paceEsperado>0) ? (teamOppsMes/pcOp.paceEsperado) : (teamOppsMes>=META_OP ? 1 : 0);
+      const isAlertZone = pcOp.state==='below' && paceRatio>=0.4 && paceRatio<0.6;
+      const isSoft = pcOp.state==='below' && !isAlertZone;
+      const heroBg     = isSoft ? 'var(--bg2)'           : paceGradOp;
+      const heroBorder = isSoft ? '1.5px solid var(--accent)' : 'none';
+      const labelCol   = isSoft ? 'var(--text3)'         : 'rgba(255,255,255,.7)';
+      const bigCol     = isSoft ? 'var(--accent)'        : paceAccentOp;
+      const subCol     = isSoft ? 'var(--text)'          : '#fff';
+      const progressTrackBg = isSoft ? 'var(--accent-light)' : 'rgba(0,0,0,0.28)';
+      const progressIdealBg = isSoft ? 'var(--accent-mid)'   : 'rgba(255,255,255,0.22)';
+      const progressFillBg  = isSoft ? 'var(--accent)'       : paceAccentOp;
+      const paceTextCol = isSoft ? 'var(--text2)' : 'rgba(255,255,255,.7)';
+      const tileBg      = isSoft ? 'var(--accent-light)' : 'rgba(0,0,0,0.2)';
+      const tileNumCol  = isSoft ? 'var(--text)'         : '#fff';
+      const tileLblCol  = isSoft ? 'var(--text3)'        : 'rgba(255,255,255,.65)';
+      const dividerCol  = isSoft ? 'var(--border)'       : 'rgba(255,255,255,0.1)';
+      const footerCol   = isSoft ? 'var(--text2)'        : 'rgba(255,255,255,.6)';
+      const subFooterCol= isSoft ? 'var(--text3)'        : 'rgba(255,255,255,.55)';
+      return `
+    <div style="margin-bottom:12px;background:${heroBg};border:${heroBorder};border-radius:var(--radius);padding:20px 18px;box-shadow:${isSoft?'none':'0 4px 20px rgba(0,0,0,0.12)'}">
+      <div style="font-size:11px;font-weight:600;color:${labelCol};text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">Atingimento da operação · Maio 2026</div>
+      <div style="font-size:48px;font-weight:700;font-family:'Inter',sans-serif;color:${bigCol};line-height:1.05;letter-spacing:-.02em;margin-bottom:6px">${gapBigOp}</div>
+      <div style="font-size:20px;font-weight:600;font-family:'Inter',sans-serif;color:${subCol};line-height:1.2;margin-bottom:12px">${teamOppsMes} de ${META_OP} opps · ${pctMetaOp}%</div>
+      <div style="height:10px;background:${progressTrackBg};border-radius:5px;overflow:hidden;position:relative;margin-bottom:5px">
+        <div style="position:absolute;left:0;top:0;height:100%;width:${pctPaceIdealOp}%;background:${progressIdealBg};border-radius:5px"></div>
+        <div style="position:absolute;left:0;top:0;height:100%;width:${pctMetaOp}%;background:${progressFillBg};border-radius:5px;transition:width .3s"></div>
       </div>
-      <div style="font-size:10px;color:rgba(255,255,255,.7);margin-bottom:14px;letter-spacing:.02em">Pace ideal: ${pctPaceIdealOp}% · Atual: ${pctMetaOp}%</div>
+      <div style="font-size:10px;color:${paceTextCol};margin-bottom:14px;letter-spacing:.02em">Pace ideal: ${pctPaceIdealOp}% · Atual: ${pctMetaOp}%</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
-        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:10px 6px;text-align:center">
-          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:#fff">${teamOppsMes}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Opps</div>
+        <div style="background:${tileBg};border-radius:10px;padding:10px 6px;text-align:center">
+          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:${tileNumCol}">${teamOppsMes}</div>
+          <div style="font-size:9px;color:${tileLblCol};margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Opps</div>
         </div>
-        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:10px 6px;text-align:center">
-          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:#fff">${teamRAsMes}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">RAs</div>
+        <div style="background:${tileBg};border-radius:10px;padding:10px 6px;text-align:center">
+          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:${tileNumCol}">${teamRAsMes}</div>
+          <div style="font-size:9px;color:${tileLblCol};margin-top:2px;text-transform:uppercase;letter-spacing:.04em">RAs</div>
         </div>
-        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:10px 6px;text-align:center">
-          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:#fff">${teamLigMes}</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Lig.</div>
+        <div style="background:${tileBg};border-radius:10px;padding:10px 6px;text-align:center">
+          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:${tileNumCol}">${teamLigMes}</div>
+          <div style="font-size:9px;color:${tileLblCol};margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Lig.</div>
         </div>
-        <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:10px 6px;text-align:center">
-          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:#fff">${(teamAtivMes/1000).toFixed(1)}k</div>
-          <div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Ativ.</div>
+        <div style="background:${tileBg};border-radius:10px;padding:10px 6px;text-align:center">
+          <div style="font-size:22px;font-weight:700;font-family:'Inter',sans-serif;color:${tileNumCol}">${(teamAtivMes/1000).toFixed(1)}k</div>
+          <div style="font-size:9px;color:${tileLblCol};margin-top:2px;text-transform:uppercase;letter-spacing:.04em">Ativ.</div>
         </div>
       </div>
-      <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);font-size:11px;color:rgba(255,255,255,.6)">
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid ${dividerCol};font-size:11px;color:${footerCol}">
         ${(d.bdrs||[]).length} BDRs · ${totalAt} reuniões venceram · ${foraPace.length} fora do pace
       </div>
-      <div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:6px">${gapSubOp}</div>
-    </div>
+      <div style="font-size:10px;color:${subFooterCol};margin-top:6px">${gapSubOp}</div>
+    </div>`;
+    })()}
 
     <!-- DIAGNÓSTICO DA SEMANA (logo abaixo do hero, expandido) -->
     <div id="resumo-diag-body" style="margin-bottom:12px"></div>
