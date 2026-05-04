@@ -6162,12 +6162,30 @@ function getReunioesDoMes(){
   // Dedup por (tipo|empresa|data)
   var seen={}; return out.filter(function(m){var k=m.tipo+'|'+m.empresa+'|'+m.data; if(seen[k]) return false; seen[k]=true; return true;});
 }
-// Gera URL do Salesforce para um deal/reunião — prioriza sfId em oppsDetalhe,
-// senão cai pra busca global por nome da empresa.
+// Links diretos pro Salesforce — match por substring (case/acento-insensível) no nome da empresa.
+// Cada entrada: {match: 'substring normalizada', url: 'link SF completo'}
+var SF_DEAL_LINKS=[
+  {match:'hospital vida',          url:'https://gupy.lightning.force.com/lightning/r/Opportunity/006bJ00000j9wsXQAQ/view'},
+  {match:'sitio recanto do queijo',url:'https://gupy.lightning.force.com/lightning/r/Account/001bJ000003M8P8QAK/view'},
+  {match:'eletropar',              url:'https://gupy.lightning.force.com/lightning/r/Account/001bJ000003M7DSQA0/view'},
+  {match:'biopark',                url:'https://gupy.lightning.force.com/lightning/r/Account/001bJ000003LxslQAC/view'},
+  {match:'autotrac',               url:'https://gupy.lightning.force.com/lightning/r/Account/001bJ000003M72AQAS/view'},
+  {match:'centerplex',             url:'https://gupy.lightning.force.com/lightning/r/Account/001bJ00000AHEEwQAP/view'}
+];
+function _sfNorm(s){
+  return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+}
+// Gera URL do Salesforce para um deal/reunião:
+// 1) link manual em SF_DEAL_LINKS (substring match);
+// 2) sfId em oppsDetalhe;
+// 3) busca global do SF pelo nome da empresa.
 function sfDealHref(empresa){
   if(!empresa) return 'https://gupy.lightning.force.com/';
-  var e=(empresa||'').toLowerCase().trim();
-  var match=(DATA.oppsDetalhe||[]).find(function(o){return (o.empresa||'').toLowerCase().trim()===e && o.sfId;});
+  var n=_sfNorm(empresa);
+  for(var i=0;i<SF_DEAL_LINKS.length;i++){
+    if(n.indexOf(SF_DEAL_LINKS[i].match)>-1) return SF_DEAL_LINKS[i].url;
+  }
+  var match=(DATA.oppsDetalhe||[]).find(function(o){return _sfNorm(o.empresa)===n && o.sfId;});
   if(match) return 'https://gupy.lightning.force.com/lightning/r/Opportunity/'+match.sfId+'/view';
   return 'https://gupy.lightning.force.com/_ui/search/ui/UnifiedSearchResults?searchType=2&str='+encodeURIComponent(empresa);
 }
